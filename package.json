@@ -1,23 +1,23 @@
 {
-    "name": "crankscript-template",
-    "version": "0.0.1",
-    "author": "Alberto Piu",
-    "license": "MIT",
-    "description": "A crankscript template",
-    "scripts": {
-        "transpile": "crankscript transpile",
-        "compile": "crankscript compile",
-        "simulator": "crankscript simulator"
-    },
-    "dependencies": {
-        "@crankscript/core": "0.3.1",
-        "@crankscript/types": "2.1.0",
-        "crankscript": "0.19.1"
-    },
-    "devDependencies": {
-        "prettier": "3.3.3"
-    },
-    "peerDependencies": {
-        "lua-types": "*"
-    }
+  "name": "name-sorter",
+  "version": "0.0.1",
+  "author": "Cormac White",
+  "license": "MIT",
+  "description": "1GAM PlayDate Game: Name Sorter",
+  "scripts": {
+    "transpile": "crankscript transpile",
+    "compile": "crankscript compile",
+    "simulator": "crankscript simulator"
+  },
+  "dependencies": {
+    "@crankscript/core": "0.3.1",
+    "@crankscript/types": "2.1.0",
+    "crankscript": "0.19.1"
+  },
+  "devDependencies": {
+    "prettier": "3.3.3"
+  },
+  "peerDependencies": {
+    "lua-types": "*"
+  }
 }
