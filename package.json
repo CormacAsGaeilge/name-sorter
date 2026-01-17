@@ -4,11 +4,6 @@
   "author": "Cormac White",
   "license": "MIT",
   "description": "1GAM PlayDate Game: Name Sorter",
-  "playdate": {
-    "bundleID": "com.cormacasgaeilge.namesorter",
-    "name": "Name Sorter",
-    "version": "0.0.1"
-  },
   "scripts": {
     "transpile": "crankscript transpile",
     "compile": "crankscript compile",
