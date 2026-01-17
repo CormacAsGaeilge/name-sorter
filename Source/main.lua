@@ -29,8 +29,24 @@ local ____core = require("lua_modules.@crankscript.core.src.index")
 local PlaydateColor = ____core.PlaydateColor
 local PlaydateDrawMode = ____core.PlaydateDrawMode
 local PlaydateFontVariant = ____core.PlaydateFontVariant
-local helloString = "Hello from crankscript"
+local helloString = "Hello from CORMAC WHITE"
 local width, height = playdate.graphics.getTextSize(helloString)
+local ROWS = 5
+local COLS = 10
+local NAMES_TO_FIND = {
+    "ALICE",
+    "BOB",
+    "PLAY",
+    "DATE",
+    "GAME"
+}
+local CELL_WIDTH = 30
+local CELL_HEIGHT = 30
+local GRID_OFFSET_X = 50
+local GRID_OFFSET_Y = 60
+local grid = {}
+local mode = "column"
+local score = 0
 playdate.update = function()
     playdate.graphics.clear(PlaydateColor.Black)
     playdate.graphics.setFont(playdate.graphics.getSystemFont(PlaydateFontVariant.Bold))
@@ -277,6 +293,11 @@ ____exports.withReload = function(____, update, options)
         update(nil)
     end
 end
+return ____exports
+ end,
+["src.test"] = function(...) 
+--[[ Generated with https://github.com/TypeScriptToLua/TypeScriptToLua ]]
+local ____exports = {}
 return ____exports
  end,
 }

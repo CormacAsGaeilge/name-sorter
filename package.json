@@ -15,6 +15,7 @@
     "crankscript": "0.19.1"
   },
   "devDependencies": {
+    "@types/react": "^19.2.8",
     "prettier": "3.3.3"
   },
   "peerDependencies": {
