@@ -43,11 +43,7 @@ const drawCapsule = (name: NameInstance) => {
   // 2. Draw Capsule
   playdate.graphics.setColor(PlaydateColor.Black);
   playdate.graphics.setLineWidth(2);
-
-  // Note: We removed the dotted line logic here to prevent the 'nil value' crash.
-  // This will draw a solid rounded rectangle instead.
   playdate.graphics.drawRoundRect(drawX, drawY, width, height, 10);
-
   playdate.graphics.setLineWidth(1);
 };
 
@@ -110,8 +106,9 @@ export const drawGame = () => {
   playdate.graphics.drawText(`Mode: ${gameState.mode.toUpperCase()}`, 10, 30);
 
   // --- PROGRESS BAR ---
+  // Moved down to +25 to avoid overlapping with the bottom caret
   const barX = GRID_OFFSET_X;
-  const barY = GRID_OFFSET_Y + ROWS * CELL_HEIGHT + 15;
+  const barY = GRID_OFFSET_Y + ROWS * CELL_HEIGHT + 25;
   const barWidth = COLS * CELL_WIDTH;
   const barHeight = 4;
   playdate.graphics.drawRect(barX, barY, barWidth, barHeight);
@@ -131,14 +128,19 @@ export const drawGame = () => {
   if (gameState.mode === "row" || gameState.mode === "name") {
     const cy =
       GRID_OFFSET_Y + gameState.cursor.y * CELL_HEIGHT + CELL_HEIGHT / 2;
+    // Side Carets (kept at 15px distance, looks good)
     drawAnimatedCaret(GRID_OFFSET_X - 15, cy, "right");
     drawAnimatedCaret(GRID_OFFSET_X + COLS * CELL_WIDTH + 15, cy, "left");
   }
 
   if (gameState.mode === "column" || gameState.mode === "name") {
     const cx = GRID_OFFSET_X + gameState.cursor.x * CELL_WIDTH + CELL_WIDTH / 2;
-    drawAnimatedCaret(cx, GRID_OFFSET_Y - 15, "down");
-    drawAnimatedCaret(cx, GRID_OFFSET_Y + ROWS * CELL_HEIGHT + 15, "up");
+
+    // Top Caret: Moved from -15 to -8 to avoid "Mode" text
+    drawAnimatedCaret(cx, GRID_OFFSET_Y - 8, "down");
+
+    // Bottom Caret: Moved from +15 to +8 to stay tight to grid (Bar is now at +25)
+    drawAnimatedCaret(cx, GRID_OFFSET_Y + ROWS * CELL_HEIGHT + 8, "up");
   }
 
   // --- LAYER 3: GRID CONTENT ---

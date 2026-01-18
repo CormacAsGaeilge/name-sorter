@@ -24759,14 +24759,21 @@ return ____exports
 ["src.constants"] = function(...) 
 local ____lualib = require("lualib_bundle")
 local __TS__ArrayMap = ____lualib.__TS__ArrayMap
+local __TS__ArrayFilter = ____lualib.__TS__ArrayFilter
 local ____exports = {}
 local ____names = require("src.names")
 local names = ____names.names
 ____exports.ROWS = 5
 ____exports.COLS = 10
-____exports.NAMES_TO_FIND = __TS__ArrayMap(
-    names,
-    function(____, name) return string.upper(name) end
+____exports.NAMES_TO_FIND = __TS__ArrayFilter(
+    __TS__ArrayFilter(
+        __TS__ArrayMap(
+            names,
+            function(____, name) return string.upper(name) end
+        ),
+        function(____, name) return #name <= math.max(____exports.ROWS, ____exports.COLS) end
+    ),
+    function(____, name) return #name >= 3 end
 )
 ____exports.CELL_WIDTH = 30
 ____exports.CELL_HEIGHT = 30
@@ -25429,7 +25436,7 @@ ____exports.drawGame = function()
         30
     )
     local barX = GRID_OFFSET_X
-    local barY = GRID_OFFSET_Y + ROWS * CELL_HEIGHT + 15
+    local barY = GRID_OFFSET_Y + ROWS * CELL_HEIGHT + 25
     local barWidth = COLS * CELL_WIDTH
     local barHeight = 4
     playdate.graphics.drawRect(barX, barY, barWidth, barHeight)
@@ -25451,8 +25458,8 @@ ____exports.drawGame = function()
     end
     if gameState.mode == "column" or gameState.mode == "name" then
         local cx = GRID_OFFSET_X + gameState.cursor.x * CELL_WIDTH + CELL_WIDTH / 2
-        drawAnimatedCaret(nil, cx, GRID_OFFSET_Y - 15, "down")
-        drawAnimatedCaret(nil, cx, GRID_OFFSET_Y + ROWS * CELL_HEIGHT + 15, "up")
+        drawAnimatedCaret(nil, cx, GRID_OFFSET_Y - 8, "down")
+        drawAnimatedCaret(nil, cx, GRID_OFFSET_Y + ROWS * CELL_HEIGHT + 8, "up")
     end
     do
         local r = 0
