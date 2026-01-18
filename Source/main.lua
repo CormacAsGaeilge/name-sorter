@@ -24756,10 +24756,28 @@ ____exports.names = {
 }
 return ____exports
  end,
-["src.index"] = function(...) 
+["src.constants"] = function(...) 
 local ____lualib = require("lualib_bundle")
 local __TS__ArrayMap = ____lualib.__TS__ArrayMap
+local ____exports = {}
+local ____names = require("src.names")
+local names = ____names.names
+____exports.ROWS = 5
+____exports.COLS = 10
+____exports.NAMES_TO_FIND = __TS__ArrayMap(
+    names,
+    function(____, name) return string.upper(name) end
+)
+____exports.CELL_WIDTH = 30
+____exports.CELL_HEIGHT = 30
+____exports.GRID_OFFSET_X = 50
+____exports.GRID_OFFSET_Y = 60
+return ____exports
+ end,
+["src.index"] = function(...) 
+local ____lualib = require("lualib_bundle")
 local __TS__ArrayFrom = ____lualib.__TS__ArrayFrom
+local __TS__ArrayMap = ____lualib.__TS__ArrayMap
 local __TS__StringIncludes = ____lualib.__TS__StringIncludes
 local __TS__ArrayForEach = ____lualib.__TS__ArrayForEach
 local __TS__ArrayUnshift = ____lualib.__TS__ArrayUnshift
@@ -24767,18 +24785,14 @@ local ____exports = {}
 local ____core = require("lua_modules.@crankscript.core.src.index")
 local PlaydateColor = ____core.PlaydateColor
 local PlaydateDrawMode = ____core.PlaydateDrawMode
-local ____names = require("src.names")
-local names = ____names.names
-local ROWS = 5
-local COLS = 10
-local NAMES_TO_FIND = __TS__ArrayMap(
-    names,
-    function(____, name) return string.upper(name) end
-)
-local CELL_WIDTH = 30
-local CELL_HEIGHT = 30
-local GRID_OFFSET_X = 50
-local GRID_OFFSET_Y = 60
+local ____constants = require("src.constants")
+local ROWS = ____constants.ROWS
+local COLS = ____constants.COLS
+local NAMES_TO_FIND = ____constants.NAMES_TO_FIND
+local CELL_WIDTH = ____constants.CELL_WIDTH
+local CELL_HEIGHT = ____constants.CELL_HEIGHT
+local GRID_OFFSET_X = ____constants.GRID_OFFSET_X
+local GRID_OFFSET_Y = ____constants.GRID_OFFSET_Y
 local grid = {}
 local mode = "column"
 local cursor = {x = 0, y = 0}

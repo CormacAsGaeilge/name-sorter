@@ -3,18 +3,15 @@ import {
   PlaydateDrawMode,
   PlaydateFontVariant,
 } from "@crankscript/core";
-
-// Import from the names.ts file you created
-import { names } from "./names";
-
-// --- Constants ---
-const ROWS = 5;
-const COLS = 10;
-const NAMES_TO_FIND = names.map((name) => name.toUpperCase());
-const CELL_WIDTH = 30;
-const CELL_HEIGHT = 30;
-const GRID_OFFSET_X = 50;
-const GRID_OFFSET_Y = 60;
+import {
+  ROWS,
+  COLS,
+  NAMES_TO_FIND,
+  CELL_WIDTH,
+  CELL_HEIGHT,
+  GRID_OFFSET_X,
+  GRID_OFFSET_Y,
+} from "./constants";
 
 // --- State Definitions ---
 type Mode = "column" | "row" | "name";
