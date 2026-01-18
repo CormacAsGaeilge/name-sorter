@@ -24772,6 +24772,10 @@ ____exports.CELL_WIDTH = 30
 ____exports.CELL_HEIGHT = 30
 ____exports.GRID_OFFSET_X = 50
 ____exports.GRID_OFFSET_Y = 60
+____exports.FROZEN_CELL = "#"
+____exports.INITIAL_FREEZE_THRESHOLD = 30 * 30
+____exports.MIN_FREEZE_THRESHOLD = 30 * 5
+____exports.FREEZE_DECREMENT = 30 * 2
 return ____exports
  end,
 ["src.grid"] = function(...) 
@@ -24815,13 +24819,17 @@ return ____exports
 ["src.state"] = function(...) 
 --[[ Generated with https://github.com/TypeScriptToLua/TypeScriptToLua ]]
 local ____exports = {}
+local ____constants = require("src.constants")
+local INITIAL_FREEZE_THRESHOLD = ____constants.INITIAL_FREEZE_THRESHOLD
 ____exports.gameState = {
     grid = {},
     mode = "column",
     cursor = {x = 0, y = 0},
     score = 0,
     crankAccumulator = 0,
-    chaosCounter = 0
+    freezeTimer = 0,
+    freezeThreshold = INITIAL_FREEZE_THRESHOLD,
+    gameOver = false
 }
 return ____exports
  end,
@@ -24839,9 +24847,14 @@ local ____constants = require("src.constants")
 local ROWS = ____constants.ROWS
 local COLS = ____constants.COLS
 local NAMES_TO_FIND = ____constants.NAMES_TO_FIND
+local FROZEN_CELL = ____constants.FROZEN_CELL
+local INITIAL_FREEZE_THRESHOLD = ____constants.INITIAL_FREEZE_THRESHOLD
+local MIN_FREEZE_THRESHOLD = ____constants.MIN_FREEZE_THRESHOLD
+local FREEZE_DECREMENT = ____constants.FREEZE_DECREMENT
 local ____grid = require("src.grid")
 local randomChar = ____grid.randomChar
 local shuffleArray = ____grid.shuffleArray
+local createInitialGrid = ____grid.createInitialGrid
 ____exports.GameLogic = {
     toggleMode = function()
         if gameState.mode == "column" then
@@ -24934,17 +24947,47 @@ ____exports.GameLogic = {
             end
         end
     end,
-    updateChaos = function()
-        gameState.chaosCounter = gameState.chaosCounter + 1
-        if gameState.chaosCounter > 300 then
+    resetGame = function()
+        gameState.grid = createInitialGrid(nil)
+        gameState.score = 0
+        gameState.gameOver = false
+        gameState.freezeTimer = 0
+        gameState.freezeThreshold = INITIAL_FREEZE_THRESHOLD
+        gameState.cursor = {x = 0, y = 0}
+    end,
+    updateFreeze = function()
+        if gameState.gameOver then
+            return
+        end
+        gameState.freezeTimer = gameState.freezeTimer + 1
+        if gameState.freezeTimer >= gameState.freezeThreshold then
+            gameState.freezeTimer = 0
+            gameState.freezeThreshold = math.max(MIN_FREEZE_THRESHOLD, gameState.freezeThreshold - FREEZE_DECREMENT)
+            local validSpots = {}
             do
-                local c = 0
-                while c < COLS do
-                    gameState.grid[ROWS][c + 1] = randomChar(nil)
-                    c = c + 1
+                local r = 0
+                while r < ROWS do
+                    do
+                        local c = 0
+                        while c < COLS do
+                            if gameState.grid[r + 1][c + 1] ~= FROZEN_CELL then
+                                validSpots[#validSpots + 1] = {r = r, c = c}
+                            end
+                            c = c + 1
+                        end
+                    end
+                    r = r + 1
                 end
             end
-            gameState.chaosCounter = 0
+            if #validSpots > 0 then
+                local randomSpot = validSpots[math.floor(math.random() * #validSpots) + 1]
+                gameState.grid[randomSpot.r + 1][randomSpot.c + 1] = FROZEN_CELL
+                if #validSpots == 1 then
+                    gameState.gameOver = true
+                end
+            else
+                gameState.gameOver = true
+            end
         end
     end,
     handleLeft = function()
@@ -25010,15 +25053,46 @@ return ____exports
 local ____exports = {}
 local ____logic = require("src.logic")
 local GameLogic = ____logic.GameLogic
+local ____state = require("src.state")
+local gameState = ____state.gameState
 ____exports.inputHandler = {
-    BButtonDown = function() return GameLogic:toggleMode() end,
-    AButtonDown = function() return GameLogic:checkNameMatch() end,
-    leftButtonDown = function() return GameLogic:handleLeft() end,
-    rightButtonDown = function() return GameLogic:handleRight() end,
-    upButtonDown = function() return GameLogic:handleUp() end,
-    downButtonDown = function() return GameLogic:handleDown() end,
-    cranked = function(____, change, acceleratedChange)
-        GameLogic:processCrank(change)
+    BButtonDown = function()
+        if gameState.gameOver then
+            return
+        end
+        GameLogic:toggleMode()
+    end,
+    AButtonDown = function()
+        if gameState.gameOver then
+            GameLogic:resetGame()
+        else
+            GameLogic:checkNameMatch()
+        end
+    end,
+    leftButtonDown = function()
+        if not gameState.gameOver then
+            GameLogic:handleLeft()
+        end
+    end,
+    rightButtonDown = function()
+        if not gameState.gameOver then
+            GameLogic:handleRight()
+        end
+    end,
+    upButtonDown = function()
+        if not gameState.gameOver then
+            GameLogic:handleUp()
+        end
+    end,
+    downButtonDown = function()
+        if not gameState.gameOver then
+            GameLogic:handleDown()
+        end
+    end,
+    cranked = function(____, change)
+        if not gameState.gameOver then
+            GameLogic:processCrank(change)
+        end
     end
 }
 return ____exports
@@ -25043,8 +25117,39 @@ local CELL_HEIGHT = ____constants.CELL_HEIGHT
 local GRID_OFFSET_X = ____constants.GRID_OFFSET_X
 local GRID_OFFSET_Y = ____constants.GRID_OFFSET_Y
 local NAMES_TO_FIND = ____constants.NAMES_TO_FIND
+local FROZEN_CELL = ____constants.FROZEN_CELL
 ____exports.drawGame = function()
     playdate.graphics.clear(PlaydateColor.White)
+    if gameState.gameOver then
+        playdate.graphics.drawText("GAME OVER", 150, 100)
+        playdate.graphics.drawText(
+            "Final Score: " .. tostring(gameState.score),
+            140,
+            130
+        )
+        playdate.graphics.drawText("Press A to Restart", 130, 160)
+        return
+    end
+    playdate.graphics.drawText(
+        "Score: " .. tostring(gameState.score),
+        10,
+        10
+    )
+    playdate.graphics.drawText(
+        "Mode: " .. string.upper(gameState.mode),
+        10,
+        30
+    )
+    local barX = GRID_OFFSET_X
+    local barY = GRID_OFFSET_Y + ROWS * CELL_HEIGHT + 10
+    local barWidth = COLS * CELL_WIDTH
+    local barHeight = 5
+    playdate.graphics.drawRect(barX, barY, barWidth, barHeight)
+    local fillPercent = gameState.freezeTimer / gameState.freezeThreshold
+    local fillWidth = math.floor(barWidth * fillPercent)
+    if fillWidth > 0 then
+        playdate.graphics.fillRect(barX, barY, fillWidth, barHeight)
+    end
     local boldMask = __TS__ArrayFrom(
         {length = ROWS},
         function() return __TS__ArrayFrom(
@@ -25122,23 +25227,6 @@ ____exports.drawGame = function()
             c = c + 1
         end
     end
-    playdate.graphics.drawText(
-        "Score: " .. tostring(gameState.score),
-        10,
-        10
-    )
-    playdate.graphics.drawText(
-        "Mode: " .. string.upper(gameState.mode),
-        10,
-        30
-    )
-    if math.abs(gameState.crankAccumulator) > 10 then
-        playdate.graphics.drawText(
-            "Crank: " .. tostring(math.floor(math.abs(gameState.crankAccumulator))),
-            200,
-            10
-        )
-    end
     do
         local r = 0
         while r < ROWS do
@@ -25158,19 +25246,28 @@ ____exports.drawGame = function()
                     if gameState.mode == "name" and r == gameState.cursor.y and c == gameState.cursor.x then
                         isHighlighted = true
                     end
-                    if isHighlighted then
+                    if char == FROZEN_CELL then
                         playdate.graphics.setColor(PlaydateColor.Black)
-                        playdate.graphics.fillRect(x - 2, y - 2, 20, 20)
-                        playdate.graphics.setImageDrawMode(PlaydateDrawMode.FillWhite)
+                        playdate.graphics.fillRect(x + 2, y + 2, CELL_WIDTH - 4, CELL_HEIGHT - 4)
+                        if isHighlighted then
+                            playdate.graphics.setColor(PlaydateColor.White)
+                            playdate.graphics.drawRect(x, y, CELL_WIDTH, CELL_HEIGHT)
+                        end
                     else
-                        playdate.graphics.setImageDrawMode(PlaydateDrawMode.FillBlack)
+                        if isHighlighted then
+                            playdate.graphics.setColor(PlaydateColor.Black)
+                            playdate.graphics.fillRect(x - 2, y - 2, 20, 20)
+                            playdate.graphics.setImageDrawMode(PlaydateDrawMode.FillWhite)
+                        else
+                            playdate.graphics.setImageDrawMode(PlaydateDrawMode.FillBlack)
+                        end
+                        if boldMask[r + 1][c + 1] then
+                            playdate.graphics.setFont(playdate.graphics.getSystemFont(PlaydateFontVariant.Bold))
+                        else
+                            playdate.graphics.setFont(playdate.graphics.getSystemFont(PlaydateFontVariant.Normal))
+                        end
+                        playdate.graphics.drawText(char, x, y)
                     end
-                    if boldMask[r + 1][c + 1] then
-                        playdate.graphics.setFont(playdate.graphics.getSystemFont(PlaydateFontVariant.Bold))
-                    else
-                        playdate.graphics.setFont(playdate.graphics.getSystemFont(PlaydateFontVariant.Normal))
-                    end
-                    playdate.graphics.drawText(char, x, y)
                     c = c + 1
                 end
             end
@@ -25436,7 +25533,7 @@ local drawGame = ____renderer.drawGame
 gameState.grid = createInitialGrid(nil)
 playdate.inputHandlers.push(inputHandler)
 playdate.update = function()
-    GameLogic:updateChaos()
+    GameLogic:updateFreeze()
     drawGame(nil)
 end
 return ____exports

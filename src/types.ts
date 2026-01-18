@@ -11,5 +11,7 @@ export interface GameState {
   cursor: Point;
   score: number;
   crankAccumulator: number;
-  chaosCounter: number;
+  freezeTimer: number;
+  freezeThreshold: number; // How long until the next freeze?
+  gameOver: boolean;
 }

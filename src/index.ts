@@ -14,7 +14,7 @@ playdate.inputHandlers.push(inputHandler as any);
 // 3. Main Game Loop
 playdate.update = () => {
   // Update Logic (Time-based events)
-  GameLogic.updateChaos();
+  GameLogic.updateFreeze();
 
   // Render the Frame
   drawGame();

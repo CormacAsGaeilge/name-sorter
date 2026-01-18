@@ -1,17 +1,33 @@
 import { GameLogic } from "./logic";
+import { gameState } from "./state";
 
 export const inputHandler = {
-  BButtonDown: () => GameLogic.toggleMode(),
-  AButtonDown: () => GameLogic.checkNameMatch(),
+  BButtonDown: () => {
+    if (gameState.gameOver) return;
+    GameLogic.toggleMode();
+  },
+  AButtonDown: () => {
+    if (gameState.gameOver) {
+      GameLogic.resetGame();
+    } else {
+      GameLogic.checkNameMatch();
+    }
+  },
 
-  // Directional Inputs
-  leftButtonDown: () => GameLogic.handleLeft(),
-  rightButtonDown: () => GameLogic.handleRight(),
-  upButtonDown: () => GameLogic.handleUp(),
-  downButtonDown: () => GameLogic.handleDown(),
+  leftButtonDown: () => {
+    if (!gameState.gameOver) GameLogic.handleLeft();
+  },
+  rightButtonDown: () => {
+    if (!gameState.gameOver) GameLogic.handleRight();
+  },
+  upButtonDown: () => {
+    if (!gameState.gameOver) GameLogic.handleUp();
+  },
+  downButtonDown: () => {
+    if (!gameState.gameOver) GameLogic.handleDown();
+  },
 
-  // Crank
-  cranked: (change: number, acceleratedChange: number) => {
-    GameLogic.processCrank(change);
+  cranked: (change: number) => {
+    if (!gameState.gameOver) GameLogic.processCrank(change);
   },
 };

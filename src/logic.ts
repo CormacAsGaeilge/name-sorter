@@ -1,6 +1,14 @@
 import { gameState } from "./state";
-import { ROWS, COLS, NAMES_TO_FIND } from "./constants"; //
-import { randomChar, shuffleArray } from "./grid";
+import {
+  ROWS,
+  COLS,
+  NAMES_TO_FIND,
+  FROZEN_CELL,
+  INITIAL_FREEZE_THRESHOLD,
+  MIN_FREEZE_THRESHOLD,
+  FREEZE_DECREMENT,
+} from "./constants";
+import { randomChar, shuffleArray, createInitialGrid } from "./grid";
 
 export const GameLogic = {
   toggleMode: () => {
@@ -64,13 +72,54 @@ export const GameLogic = {
     }
   },
 
-  updateChaos: () => {
-    gameState.chaosCounter++;
-    if (gameState.chaosCounter > 300) {
-      for (let c = 0; c < COLS; c++) {
-        gameState.grid[ROWS - 1][c] = randomChar();
+  resetGame: () => {
+    gameState.grid = createInitialGrid();
+    gameState.score = 0;
+    gameState.gameOver = false;
+    gameState.freezeTimer = 0;
+    gameState.freezeThreshold = INITIAL_FREEZE_THRESHOLD;
+    gameState.cursor = { x: 0, y: 0 };
+  },
+
+  updateFreeze: () => {
+    if (gameState.gameOver) return;
+
+    gameState.freezeTimer++;
+
+    // Timer Filled?
+    if (gameState.freezeTimer >= gameState.freezeThreshold) {
+      gameState.freezeTimer = 0;
+
+      // Make it harder (shorter time), but don't go below the minimum
+      gameState.freezeThreshold = Math.max(
+        MIN_FREEZE_THRESHOLD,
+        gameState.freezeThreshold - FREEZE_DECREMENT,
+      );
+
+      // Find all valid (non-frozen) spots
+      const validSpots: { r: number; c: number }[] = [];
+      for (let r = 0; r < ROWS; r++) {
+        for (let c = 0; c < COLS; c++) {
+          if (gameState.grid[r][c] !== FROZEN_CELL) {
+            validSpots.push({ r, c });
+          }
+        }
       }
-      gameState.chaosCounter = 0;
+
+      if (validSpots.length > 0) {
+        // Freeze a random cell
+        const randomSpot =
+          validSpots[Math.floor(Math.random() * validSpots.length)];
+        gameState.grid[randomSpot.r][randomSpot.c] = FROZEN_CELL;
+
+        // Check if that was the last spot (Game Over)
+        if (validSpots.length === 1) {
+          gameState.gameOver = true;
+        }
+      } else {
+        // Should be covered above, but just in case
+        gameState.gameOver = true;
+      }
     }
   },
 
