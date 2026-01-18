@@ -6,6 +6,7 @@ export const gameState: GameState = {
   boldMask: Array.from({ length: ROWS }, () =>
     Array.from({ length: COLS }, () => false),
   ),
+  detectedNames: [],
   mode: "column",
   cursor: { x: 0, y: 0 },
   score: 0,

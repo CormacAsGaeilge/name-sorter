@@ -5,14 +5,21 @@ export interface Point {
   y: number;
 }
 
+export interface NameInstance {
+  text: string;
+  cells: Point[];
+  id: string;
+}
+
 export interface GameState {
   grid: string[][];
   boldMask: boolean[][];
+  detectedNames: NameInstance[];
   mode: Mode;
   cursor: Point;
   score: number;
   crankAccumulator: number;
   freezeTimer: number;
-  freezeThreshold: number; // How long until the next freeze?
+  freezeThreshold: number;
   gameOver: boolean;
 }

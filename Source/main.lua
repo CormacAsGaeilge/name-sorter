@@ -24833,6 +24833,7 @@ ____exports.gameState = {
             function() return false end
         ) end
     ),
+    detectedNames = {},
     mode = "column",
     cursor = {x = 0, y = 0},
     score = 0,
@@ -24847,8 +24848,12 @@ return ____exports
 local ____lualib = require("lualib_bundle")
 local __TS__ArrayForEach = ____lualib.__TS__ArrayForEach
 local __TS__ArrayMap = ____lualib.__TS__ArrayMap
-local __TS__StringIncludes = ____lualib.__TS__StringIncludes
-local __TS__ArrayFrom = ____lualib.__TS__ArrayFrom
+local __TS__ArraySome = ____lualib.__TS__ArraySome
+local __TS__ArrayFilter = ____lualib.__TS__ArrayFilter
+local Set = ____lualib.Set
+local __TS__New = ____lualib.__TS__New
+local __TS__StringSplit = ____lualib.__TS__StringSplit
+local __TS__ParseInt = ____lualib.__TS__ParseInt
 local __TS__ArrayUnshift = ____lualib.__TS__ArrayUnshift
 local ____exports = {}
 local ____state = require("src.state")
@@ -24865,8 +24870,19 @@ local ____grid = require("src.grid")
 local randomChar = ____grid.randomChar
 local shuffleArray = ____grid.shuffleArray
 local createInitialGrid = ____grid.createInitialGrid
+local function doNamesIntersect(____, a, b)
+    for ____, cellA in ipairs(a.cells) do
+        for ____, cellB in ipairs(b.cells) do
+            if cellA.x == cellB.x and cellA.y == cellB.y then
+                return true
+            end
+        end
+    end
+    return false
+end
 ____exports.GameLogic = {
     recalculateBoldMask = function()
+        gameState.detectedNames = {}
         do
             local r = 0
             while r < ROWS do
@@ -24898,13 +24914,23 @@ ____exports.GameLogic = {
                             if not (startIndex > -1) then
                                 break
                             end
+                            local instance = {
+                                text = name,
+                                cells = {},
+                                id = (((("R-" .. tostring(r)) .. "-") .. tostring(startIndex)) .. "-") .. name
+                            }
                             do
                                 local i = 0
                                 while i < #name do
-                                    gameState.boldMask[r + 1][startIndex + i + 1] = true
+                                    local c = startIndex + i
+                                    local ____instance_cells_0 = instance.cells
+                                    ____instance_cells_0[#____instance_cells_0 + 1] = {x = c, y = r}
+                                    gameState.boldMask[r + 1][c + 1] = true
                                     i = i + 1
                                 end
                             end
+                            local ____gameState_detectedNames_1 = gameState.detectedNames
+                            ____gameState_detectedNames_1[#____gameState_detectedNames_1 + 1] = instance
                             startIndex = startIndex + 1
                         end
                     end
@@ -24936,13 +24962,23 @@ ____exports.GameLogic = {
                             if not (startIndex > -1) then
                                 break
                             end
+                            local instance = {
+                                text = name,
+                                cells = {},
+                                id = (((("C-" .. tostring(c)) .. "-") .. tostring(startIndex)) .. "-") .. name
+                            }
                             do
                                 local i = 0
                                 while i < #name do
-                                    gameState.boldMask[startIndex + i + 1][c + 1] = true
+                                    local r = startIndex + i
+                                    local ____instance_cells_2 = instance.cells
+                                    ____instance_cells_2[#____instance_cells_2 + 1] = {x = c, y = r}
+                                    gameState.boldMask[r + 1][c + 1] = true
                                     i = i + 1
                                 end
                             end
+                            local ____gameState_detectedNames_3 = gameState.detectedNames
+                            ____gameState_detectedNames_3[#____gameState_detectedNames_3 + 1] = instance
                             startIndex = startIndex + 1
                         end
                     end
@@ -24950,6 +24986,64 @@ ____exports.GameLogic = {
                 c = c + 1
             end
         end
+    end,
+    checkNameMatch = function()
+        local ____gameState_4 = gameState
+        local mode = ____gameState_4.mode
+        local cursor = ____gameState_4.cursor
+        if mode ~= "name" then
+            gameState.mode = "name"
+            return
+        end
+        local directMatches = __TS__ArrayFilter(
+            gameState.detectedNames,
+            function(____, n) return __TS__ArraySome(
+                n.cells,
+                function(____, c) return c.x == cursor.x and c.y == cursor.y end
+            ) end
+        )
+        if #directMatches == 0 then
+            return
+        end
+        local chain = __TS__New(Set, directMatches)
+        local queue = {table.unpack(directMatches)}
+        while #queue > 0 do
+            local current = table.remove(queue)
+            for ____, candidate in ipairs(gameState.detectedNames) do
+                if not chain:has(candidate) then
+                    if doNamesIntersect(nil, current, candidate) then
+                        chain:add(candidate)
+                        queue[#queue + 1] = candidate
+                    end
+                end
+            end
+        end
+        local cellsToScramble = __TS__New(Set)
+        local chainScore = 0
+        chain:forEach(function(____, name)
+            chainScore = chainScore + #name.text * 100
+            __TS__ArrayForEach(
+                name.cells,
+                function(____, c) return cellsToScramble:add((tostring(c.x) .. ",") .. tostring(c.y)) end
+            )
+        end)
+        if chain.size > 1 then
+            chainScore = chainScore + (chain.size - 1) * 50
+        end
+        gameState.score = gameState.score + chainScore
+        cellsToScramble:forEach(function(____, key)
+            local xStr, yStr = table.unpack(
+                __TS__StringSplit(key, ","),
+                1,
+                2
+            )
+            local x = __TS__ParseInt(xStr)
+            local y = __TS__ParseInt(yStr)
+            if gameState.grid[y + 1][x + 1] ~= FROZEN_CELL then
+                gameState.grid[y + 1][x + 1] = randomChar(nil)
+            end
+        end)
+        ____exports.GameLogic:recalculateBoldMask()
     end,
     resetGame = function()
         gameState.grid = createInitialGrid(nil)
@@ -24996,58 +25090,6 @@ ____exports.GameLogic = {
             end
         end
     end,
-    checkNameMatch = function()
-        local ____gameState_0 = gameState
-        local mode = ____gameState_0.mode
-        local grid = ____gameState_0.grid
-        local cursor = ____gameState_0.cursor
-        if mode == "column" or mode == "row" then
-            gameState.mode = "name"
-            return
-        end
-        if mode == "name" then
-            local rowStr = table.concat(grid[cursor.y + 1], "")
-            local colStr = table.concat(
-                __TS__ArrayMap(
-                    grid,
-                    function(____, row) return row[cursor.x + 1] end
-                ),
-                ""
-            )
-            local foundRow = false
-            local foundCol = false
-            __TS__ArrayForEach(
-                NAMES_TO_FIND,
-                function(____, name)
-                    if __TS__StringIncludes(rowStr, name) then
-                        foundRow = true
-                    end
-                    if __TS__StringIncludes(colStr, name) then
-                        foundCol = true
-                    end
-                end
-            )
-            if foundRow or foundCol then
-                gameState.score = gameState.score + 100
-                if foundRow then
-                    grid[cursor.y + 1] = __TS__ArrayFrom(
-                        {length = COLS},
-                        function() return randomChar(nil) end
-                    )
-                end
-                if foundCol then
-                    do
-                        local r = 0
-                        while r < ROWS do
-                            grid[r + 1][cursor.x + 1] = randomChar(nil)
-                            r = r + 1
-                        end
-                    end
-                end
-                ____exports.GameLogic:recalculateBoldMask()
-            end
-        end
-    end,
     processCrank = function(____, change)
         gameState.crankAccumulator = gameState.crankAccumulator + change
         if math.abs(gameState.crankAccumulator) >= 360 then
@@ -25056,10 +25098,10 @@ ____exports.GameLogic = {
             else
                 gameState.crankAccumulator = gameState.crankAccumulator + 360
             end
-            local ____gameState_1 = gameState
-            local mode = ____gameState_1.mode
-            local cursor = ____gameState_1.cursor
-            local grid = ____gameState_1.grid
+            local ____gameState_5 = gameState
+            local mode = ____gameState_5.mode
+            local cursor = ____gameState_5.cursor
+            local grid = ____gameState_5.grid
             if mode == "row" then
                 grid[cursor.y + 1] = shuffleArray(nil, grid[cursor.y + 1])
             elseif mode == "column" then
@@ -25085,8 +25127,8 @@ ____exports.GameLogic = {
         elseif gameState.mode == "row" then
             local first = table.remove(gameState.grid[gameState.cursor.y + 1], 1)
             if first then
-                local ____gameState_grid_index_2 = gameState.grid[gameState.cursor.y + 1]
-                ____gameState_grid_index_2[#____gameState_grid_index_2 + 1] = first
+                local ____gameState_grid_index_6 = gameState.grid[gameState.cursor.y + 1]
+                ____gameState_grid_index_6[#____gameState_grid_index_6 + 1] = first
             end
             ____exports.GameLogic:recalculateBoldMask()
         else

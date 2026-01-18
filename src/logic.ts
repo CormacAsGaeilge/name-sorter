@@ -9,43 +9,143 @@ import {
   FREEZE_DECREMENT,
 } from "./constants";
 import { randomChar, shuffleArray, createInitialGrid } from "./grid";
+import { NameInstance, Point } from "./types";
+
+// Helper: Check if two names intersect (share any cell)
+const doNamesIntersect = (a: NameInstance, b: NameInstance) => {
+  for (const cellA of a.cells) {
+    for (const cellB of b.cells) {
+      if (cellA.x === cellB.x && cellA.y === cellB.y) return true;
+    }
+  }
+  return false;
+};
 
 export const GameLogic = {
   recalculateBoldMask: () => {
-    // Reset mask
+    // 1. Reset State
+    gameState.detectedNames = [];
     for (let r = 0; r < ROWS; r++) {
       for (let c = 0; c < COLS; c++) {
         gameState.boldMask[r][c] = false;
       }
     }
 
-    // Check Rows
+    // 2. Scan Rows for Names
     for (let r = 0; r < ROWS; r++) {
       const rowStr = gameState.grid[r].join("");
       NAMES_TO_FIND.forEach((name) => {
         let startIndex = 0;
         while ((startIndex = rowStr.indexOf(name, startIndex)) > -1) {
+          // Create Name Instance
+          const instance: NameInstance = {
+            text: name,
+            cells: [],
+            id: `R-${r}-${startIndex}-${name}`,
+          };
+
+          // Mark cells
           for (let i = 0; i < name.length; i++) {
-            gameState.boldMask[r][startIndex + i] = true;
+            const c = startIndex + i;
+            instance.cells.push({ x: c, y: r });
+            gameState.boldMask[r][c] = true; // Update visual mask
           }
+          gameState.detectedNames.push(instance);
           startIndex += 1;
         }
       });
     }
 
-    // Check Columns
+    // 3. Scan Columns for Names
     for (let c = 0; c < COLS; c++) {
       const colStr = gameState.grid.map((row) => row[c]).join("");
       NAMES_TO_FIND.forEach((name) => {
         let startIndex = 0;
         while ((startIndex = colStr.indexOf(name, startIndex)) > -1) {
+          const instance: NameInstance = {
+            text: name,
+            cells: [],
+            id: `C-${c}-${startIndex}-${name}`,
+          };
+
           for (let i = 0; i < name.length; i++) {
-            gameState.boldMask[startIndex + i][c] = true;
+            const r = startIndex + i;
+            instance.cells.push({ x: c, y: r });
+            gameState.boldMask[r][c] = true;
           }
+          gameState.detectedNames.push(instance);
           startIndex += 1;
         }
       });
     }
+  },
+
+  checkNameMatch: () => {
+    const { mode, cursor } = gameState;
+
+    // Auto-switch mode
+    if (mode !== "name") {
+      gameState.mode = "name";
+      return;
+    }
+
+    // 1. Find names directly under the cursor
+    const directMatches = gameState.detectedNames.filter((n) =>
+      n.cells.some((c) => c.x === cursor.x && c.y === cursor.y),
+    );
+
+    if (directMatches.length === 0) return; // No name here
+
+    // 2. Chain Reaction: Find all connected names
+    const chain = new Set<NameInstance>(directMatches);
+    const queue = [...directMatches];
+
+    while (queue.length > 0) {
+      const current = queue.pop()!;
+
+      // Check all other names to see if they touch 'current'
+      for (const candidate of gameState.detectedNames) {
+        if (!chain.has(candidate)) {
+          if (doNamesIntersect(current, candidate)) {
+            chain.add(candidate);
+            queue.push(candidate); // Add to queue to find its neighbors too
+          }
+        }
+      }
+    }
+
+    // 3. Apply Scoring and Scrambling
+    const cellsToScramble = new Set<string>(); // Use string "x,y" to deduplicate
+    let chainScore = 0;
+
+    chain.forEach((name) => {
+      // Score Formula: Length * 100
+      chainScore += name.text.length * 100;
+
+      // Mark cells for scrambling
+      name.cells.forEach((c) => cellsToScramble.add(`${c.x},${c.y}`));
+    });
+
+    // Add bonus for chain length (e.g. 50pts per extra name)
+    if (chain.size > 1) {
+      chainScore += (chain.size - 1) * 50;
+    }
+
+    gameState.score += chainScore;
+
+    // 4. Scramble the specific cells
+    cellsToScramble.forEach((key) => {
+      const [xStr, yStr] = key.split(",");
+      const x = parseInt(xStr);
+      const y = parseInt(yStr);
+      // Don't overwrite frozen cells
+      if (gameState.grid[y][x] !== FROZEN_CELL) {
+        gameState.grid[y][x] = randomChar();
+      }
+    });
+
+    // 5. Refresh
+    GameLogic.recalculateBoldMask();
   },
 
   resetGame: () => {
@@ -87,46 +187,6 @@ export const GameLogic = {
         if (validSpots.length === 1) gameState.gameOver = true;
       } else {
         gameState.gameOver = true;
-      }
-    }
-  },
-
-  checkNameMatch: () => {
-    const { mode, grid, cursor } = gameState;
-
-    // If not in Name mode, switch to it
-    if (mode === "column" || mode === "row") {
-      gameState.mode = "name";
-      return;
-    }
-
-    // Execute Match Logic
-    if (mode === "name") {
-      const rowStr = grid[cursor.y].join("");
-      const colStr = grid.map((row) => row[cursor.x]).join("");
-
-      let foundRow = false;
-      let foundCol = false;
-
-      NAMES_TO_FIND.forEach((name) => {
-        if (rowStr.includes(name)) foundRow = true;
-        if (colStr.includes(name)) foundCol = true;
-      });
-
-      if (foundRow || foundCol) {
-        gameState.score += 100;
-        if (foundRow) {
-          grid[cursor.y] = Array.from({ length: COLS }, () => randomChar());
-        }
-        if (foundCol) {
-          for (let r = 0; r < ROWS; r++) {
-            grid[r][cursor.x] = randomChar();
-          }
-        }
-        // FIX: Do NOT switch back to 'column'. Stay in 'name'.
-        // gameState.mode = 'column';  <-- REMOVED THIS LINE
-
-        GameLogic.recalculateBoldMask();
       }
     }
   },
