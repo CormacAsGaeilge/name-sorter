@@ -24775,8 +24775,36 @@ ____exports.GRID_OFFSET_Y = 60
 return ____exports
  end,
 ["src.grid"] = function(...) 
---[[ Generated with https://github.com/TypeScriptToLua/TypeScriptToLua ]]
+local ____lualib = require("lualib_bundle")
+local __TS__ArrayFrom = ____lualib.__TS__ArrayFrom
 local ____exports = {}
+local ____constants = require("src.constants")
+local ROWS = ____constants.ROWS
+local COLS = ____constants.COLS
+____exports.randomChar = function() return string.char(65 + math.floor(math.random() * 26)) end
+____exports.createInitialGrid = function()
+    return __TS__ArrayFrom(
+        {length = ROWS},
+        function() return __TS__ArrayFrom(
+            {length = COLS},
+            function() return ____exports.randomChar(nil) end
+        ) end
+    )
+end
+____exports.shuffleArray = function(____, array)
+    local newArr = {table.unpack(array)}
+    do
+        local i = #newArr - 1
+        while i > 0 do
+            local j = math.floor(math.random() * (i + 1))
+            local ____temp_0 = {newArr[j + 1], newArr[i + 1]}
+            newArr[i + 1] = ____temp_0[1]
+            newArr[j + 1] = ____temp_0[2]
+            i = i - 1
+        end
+    end
+    return newArr
+end
 return ____exports
  end,
 ["src.types"] = function(...) 
@@ -24797,56 +24825,25 @@ ____exports.gameState = {
 }
 return ____exports
  end,
-["src.index"] = function(...) 
+["src.logic"] = function(...) 
 local ____lualib = require("lualib_bundle")
-local __TS__ArrayFrom = ____lualib.__TS__ArrayFrom
 local __TS__ArrayMap = ____lualib.__TS__ArrayMap
 local __TS__StringIncludes = ____lualib.__TS__StringIncludes
 local __TS__ArrayForEach = ____lualib.__TS__ArrayForEach
+local __TS__ArrayFrom = ____lualib.__TS__ArrayFrom
 local __TS__ArrayUnshift = ____lualib.__TS__ArrayUnshift
 local ____exports = {}
-local ____core = require("lua_modules.@crankscript.core.src.index")
-local PlaydateColor = ____core.PlaydateColor
-local PlaydateDrawMode = ____core.PlaydateDrawMode
+local ____state = require("src.state")
+local gameState = ____state.gameState
 local ____constants = require("src.constants")
 local ROWS = ____constants.ROWS
 local COLS = ____constants.COLS
 local NAMES_TO_FIND = ____constants.NAMES_TO_FIND
-local CELL_WIDTH = ____constants.CELL_WIDTH
-local CELL_HEIGHT = ____constants.CELL_HEIGHT
-local GRID_OFFSET_X = ____constants.GRID_OFFSET_X
-local GRID_OFFSET_Y = ____constants.GRID_OFFSET_Y
-local ____state = require("src.state")
-local gameState = ____state.gameState
-local function randomChar()
-    return string.char(65 + math.floor(math.random() * 26))
-end
-local function initGrid()
-    gameState.grid = __TS__ArrayFrom(
-        {length = ROWS},
-        function() return __TS__ArrayFrom(
-            {length = COLS},
-            function() return randomChar(nil) end
-        ) end
-    )
-end
-local function shuffleArray(____, array)
-    local newArr = {table.unpack(array)}
-    do
-        local i = #newArr - 1
-        while i > 0 do
-            local j = math.floor(math.random() * (i + 1))
-            local ____temp_0 = {newArr[j + 1], newArr[i + 1]}
-            newArr[i + 1] = ____temp_0[1]
-            newArr[j + 1] = ____temp_0[2]
-            i = i - 1
-        end
-    end
-    return newArr
-end
-initGrid(nil)
-local inputHandler = {
-    BButtonDown = function()
+local ____grid = require("src.grid")
+local randomChar = ____grid.randomChar
+local shuffleArray = ____grid.shuffleArray
+____exports.GameLogic = {
+    toggleMode = function()
         if gameState.mode == "column" then
             gameState.mode = "row"
         elseif gameState.mode == "row" then
@@ -24855,14 +24852,16 @@ local inputHandler = {
             gameState.mode = "column"
         end
     end,
-    AButtonDown = function()
-        local ____gameState_1 = gameState
-        local mode = ____gameState_1.mode
-        local grid = ____gameState_1.grid
-        local cursor = ____gameState_1.cursor
+    checkNameMatch = function()
+        local ____gameState_0 = gameState
+        local mode = ____gameState_0.mode
+        local grid = ____gameState_0.grid
+        local cursor = ____gameState_0.cursor
         if mode == "column" or mode == "row" then
             gameState.mode = "name"
-        elseif mode == "name" then
+            return
+        end
+        if mode == "name" then
             local rowStr = table.concat(grid[cursor.y + 1], "")
             local colStr = table.concat(
                 __TS__ArrayMap(
@@ -24905,7 +24904,7 @@ local inputHandler = {
             end
         end
     end,
-    cranked = function(____, change, acceleratedChange)
+    processCrank = function(____, change)
         gameState.crankAccumulator = gameState.crankAccumulator + change
         if math.abs(gameState.crankAccumulator) >= 360 then
             if gameState.crankAccumulator > 0 then
@@ -24913,10 +24912,10 @@ local inputHandler = {
             else
                 gameState.crankAccumulator = gameState.crankAccumulator + 360
             end
-            local ____gameState_2 = gameState
-            local mode = ____gameState_2.mode
-            local cursor = ____gameState_2.cursor
-            local grid = ____gameState_2.grid
+            local ____gameState_1 = gameState
+            local mode = ____gameState_1.mode
+            local cursor = ____gameState_1.cursor
+            local grid = ____gameState_1.grid
             if mode == "row" then
                 grid[cursor.y + 1] = shuffleArray(nil, grid[cursor.y + 1])
             elseif mode == "column" then
@@ -24935,20 +24934,33 @@ local inputHandler = {
             end
         end
     end,
-    leftButtonDown = function()
+    updateChaos = function()
+        gameState.chaosCounter = gameState.chaosCounter + 1
+        if gameState.chaosCounter > 300 then
+            do
+                local c = 0
+                while c < COLS do
+                    gameState.grid[ROWS][c + 1] = randomChar(nil)
+                    c = c + 1
+                end
+            end
+            gameState.chaosCounter = 0
+        end
+    end,
+    handleLeft = function()
         if gameState.mode == "column" then
             gameState.cursor.x = (gameState.cursor.x - 1 + COLS) % COLS
         elseif gameState.mode == "row" then
             local first = table.remove(gameState.grid[gameState.cursor.y + 1], 1)
             if first then
-                local ____gameState_grid_index_3 = gameState.grid[gameState.cursor.y + 1]
-                ____gameState_grid_index_3[#____gameState_grid_index_3 + 1] = first
+                local ____gameState_grid_index_2 = gameState.grid[gameState.cursor.y + 1]
+                ____gameState_grid_index_2[#____gameState_grid_index_2 + 1] = first
             end
         else
             gameState.cursor.x = (gameState.cursor.x - 1 + COLS) % COLS
         end
     end,
-    rightButtonDown = function()
+    handleRight = function()
         if gameState.mode == "column" then
             gameState.cursor.x = (gameState.cursor.x + 1) % COLS
         elseif gameState.mode == "row" then
@@ -24960,7 +24972,7 @@ local inputHandler = {
             gameState.cursor.x = (gameState.cursor.x + 1) % COLS
         end
     end,
-    upButtonDown = function()
+    handleUp = function()
         if gameState.mode == "column" then
             local topChar = gameState.grid[1][gameState.cursor.x + 1]
             do
@@ -24975,7 +24987,7 @@ local inputHandler = {
             gameState.cursor.y = (gameState.cursor.y - 1 + ROWS) % ROWS
         end
     end,
-    downButtonDown = function()
+    handleDown = function()
         if gameState.mode == "column" then
             local bottomChar = gameState.grid[ROWS][gameState.cursor.x + 1]
             do
@@ -24991,19 +25003,124 @@ local inputHandler = {
         end
     end
 }
-playdate.inputHandlers.push(inputHandler)
-playdate.update = function()
+return ____exports
+ end,
+["src.input"] = function(...) 
+--[[ Generated with https://github.com/TypeScriptToLua/TypeScriptToLua ]]
+local ____exports = {}
+local ____logic = require("src.logic")
+local GameLogic = ____logic.GameLogic
+____exports.inputHandler = {
+    BButtonDown = function() return GameLogic:toggleMode() end,
+    AButtonDown = function() return GameLogic:checkNameMatch() end,
+    leftButtonDown = function() return GameLogic:handleLeft() end,
+    rightButtonDown = function() return GameLogic:handleRight() end,
+    upButtonDown = function() return GameLogic:handleUp() end,
+    downButtonDown = function() return GameLogic:handleDown() end,
+    cranked = function(____, change, acceleratedChange)
+        GameLogic:processCrank(change)
+    end
+}
+return ____exports
+ end,
+["src.renderer"] = function(...) 
+local ____lualib = require("lualib_bundle")
+local __TS__ArrayFrom = ____lualib.__TS__ArrayFrom
+local __TS__ArrayForEach = ____lualib.__TS__ArrayForEach
+local __TS__ArrayMap = ____lualib.__TS__ArrayMap
+local ____exports = {}
+local ____core = require("lua_modules.@crankscript.core.src.index")
+local PlaydateColor = ____core.PlaydateColor
+local PlaydateDrawMode = ____core.PlaydateDrawMode
+local PlaydateFontVariant = ____core.PlaydateFontVariant
+local ____state = require("src.state")
+local gameState = ____state.gameState
+local ____constants = require("src.constants")
+local ROWS = ____constants.ROWS
+local COLS = ____constants.COLS
+local CELL_WIDTH = ____constants.CELL_WIDTH
+local CELL_HEIGHT = ____constants.CELL_HEIGHT
+local GRID_OFFSET_X = ____constants.GRID_OFFSET_X
+local GRID_OFFSET_Y = ____constants.GRID_OFFSET_Y
+local NAMES_TO_FIND = ____constants.NAMES_TO_FIND
+____exports.drawGame = function()
     playdate.graphics.clear(PlaydateColor.White)
-    gameState.chaosCounter = gameState.chaosCounter + 1
-    if gameState.chaosCounter > 300 then
-        do
-            local c = 0
-            while c < COLS do
-                gameState.grid[ROWS][c + 1] = randomChar(nil)
-                c = c + 1
-            end
+    local boldMask = __TS__ArrayFrom(
+        {length = ROWS},
+        function() return __TS__ArrayFrom(
+            {length = COLS},
+            function() return false end
+        ) end
+    )
+    do
+        local r = 0
+        while r < ROWS do
+            local rowStr = table.concat(gameState.grid[r + 1], "")
+            __TS__ArrayForEach(
+                NAMES_TO_FIND,
+                function(____, name)
+                    local startIndex = 0
+                    while true do
+                        startIndex = (string.find(
+                            rowStr,
+                            name,
+                            math.max(startIndex + 1, 1),
+                            true
+                        ) or 0) - 1
+                        if not (startIndex > -1) then
+                            break
+                        end
+                        do
+                            local i = 0
+                            while i < #name do
+                                boldMask[r + 1][startIndex + i + 1] = true
+                                i = i + 1
+                            end
+                        end
+                        startIndex = startIndex + 1
+                    end
+                end
+            )
+            r = r + 1
         end
-        gameState.chaosCounter = 0
+    end
+    do
+        local c = 0
+        while c < COLS do
+            local colStr = table.concat(
+                __TS__ArrayMap(
+                    gameState.grid,
+                    function(____, row) return row[c + 1] end
+                ),
+                ""
+            )
+            __TS__ArrayForEach(
+                NAMES_TO_FIND,
+                function(____, name)
+                    local startIndex = 0
+                    while true do
+                        startIndex = (string.find(
+                            colStr,
+                            name,
+                            math.max(startIndex + 1, 1),
+                            true
+                        ) or 0) - 1
+                        if not (startIndex > -1) then
+                            break
+                        end
+                        do
+                            local i = 0
+                            while i < #name do
+                                boldMask[startIndex + i + 1][c + 1] = true
+                                i = i + 1
+                            end
+                        end
+                        startIndex = startIndex + 1
+                    end
+                end
+            )
+            c = c + 1
+        end
     end
     playdate.graphics.drawText(
         "Score: " .. tostring(gameState.score),
@@ -25047,6 +25164,11 @@ playdate.update = function()
                         playdate.graphics.setImageDrawMode(PlaydateDrawMode.FillWhite)
                     else
                         playdate.graphics.setImageDrawMode(PlaydateDrawMode.FillBlack)
+                    end
+                    if boldMask[r + 1][c + 1] then
+                        playdate.graphics.setFont(playdate.graphics.getSystemFont(PlaydateFontVariant.Bold))
+                    else
+                        playdate.graphics.setFont(playdate.graphics.getSystemFont(PlaydateFontVariant.Normal))
                     end
                     playdate.graphics.drawText(char, x, y)
                     c = c + 1
@@ -25295,6 +25417,27 @@ ____exports.withReload = function(____, update, options)
         end
         update(nil)
     end
+end
+return ____exports
+ end,
+["src.index"] = function(...) 
+--[[ Generated with https://github.com/TypeScriptToLua/TypeScriptToLua ]]
+local ____exports = {}
+local ____state = require("src.state")
+local gameState = ____state.gameState
+local ____grid = require("src.grid")
+local createInitialGrid = ____grid.createInitialGrid
+local ____input = require("src.input")
+local inputHandler = ____input.inputHandler
+local ____logic = require("src.logic")
+local GameLogic = ____logic.GameLogic
+local ____renderer = require("src.renderer")
+local drawGame = ____renderer.drawGame
+gameState.grid = createInitialGrid(nil)
+playdate.inputHandlers.push(inputHandler)
+playdate.update = function()
+    GameLogic:updateChaos()
+    drawGame(nil)
 end
 return ____exports
  end,
