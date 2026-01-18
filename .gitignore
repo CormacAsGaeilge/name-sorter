@@ -39,4 +39,5 @@ Icon?
 *.zip
 *.js
 
+!dist-web/**/*.js
 
