@@ -24817,12 +24817,22 @@ local ____exports = {}
 return ____exports
  end,
 ["src.state"] = function(...) 
---[[ Generated with https://github.com/TypeScriptToLua/TypeScriptToLua ]]
+local ____lualib = require("lualib_bundle")
+local __TS__ArrayFrom = ____lualib.__TS__ArrayFrom
 local ____exports = {}
 local ____constants = require("src.constants")
 local INITIAL_FREEZE_THRESHOLD = ____constants.INITIAL_FREEZE_THRESHOLD
+local ROWS = ____constants.ROWS
+local COLS = ____constants.COLS
 ____exports.gameState = {
     grid = {},
+    boldMask = __TS__ArrayFrom(
+        {length = ROWS},
+        function() return __TS__ArrayFrom(
+            {length = COLS},
+            function() return false end
+        ) end
+    ),
     mode = "column",
     cursor = {x = 0, y = 0},
     score = 0,
@@ -24944,6 +24954,91 @@ ____exports.GameLogic = {
                         r = r + 1
                     end
                 end
+            end
+        end
+    end,
+    recalculateBoldMask = function()
+        do
+            local r = 0
+            while r < ROWS do
+                do
+                    local c = 0
+                    while c < COLS do
+                        gameState.boldMask[r + 1][c + 1] = false
+                        c = c + 1
+                    end
+                end
+                r = r + 1
+            end
+        end
+        do
+            local r = 0
+            while r < ROWS do
+                local rowStr = table.concat(gameState.grid[r + 1], "")
+                __TS__ArrayForEach(
+                    NAMES_TO_FIND,
+                    function(____, name)
+                        local startIndex = 0
+                        while true do
+                            startIndex = (string.find(
+                                rowStr,
+                                name,
+                                math.max(startIndex + 1, 1),
+                                true
+                            ) or 0) - 1
+                            if not (startIndex > -1) then
+                                break
+                            end
+                            do
+                                local i = 0
+                                while i < #name do
+                                    gameState.boldMask[r + 1][startIndex + i + 1] = true
+                                    i = i + 1
+                                end
+                            end
+                            startIndex = startIndex + 1
+                        end
+                    end
+                )
+                r = r + 1
+            end
+        end
+        do
+            local c = 0
+            while c < COLS do
+                local colStr = table.concat(
+                    __TS__ArrayMap(
+                        gameState.grid,
+                        function(____, row) return row[c + 1] end
+                    ),
+                    ""
+                )
+                __TS__ArrayForEach(
+                    NAMES_TO_FIND,
+                    function(____, name)
+                        local startIndex = 0
+                        while true do
+                            startIndex = (string.find(
+                                colStr,
+                                name,
+                                math.max(startIndex + 1, 1),
+                                true
+                            ) or 0) - 1
+                            if not (startIndex > -1) then
+                                break
+                            end
+                            do
+                                local i = 0
+                                while i < #name do
+                                    gameState.boldMask[startIndex + i + 1][c + 1] = true
+                                    i = i + 1
+                                end
+                            end
+                            startIndex = startIndex + 1
+                        end
+                    end
+                )
+                c = c + 1
             end
         end
     end,
@@ -25098,10 +25193,7 @@ ____exports.inputHandler = {
 return ____exports
  end,
 ["src.renderer"] = function(...) 
-local ____lualib = require("lualib_bundle")
-local __TS__ArrayFrom = ____lualib.__TS__ArrayFrom
-local __TS__ArrayForEach = ____lualib.__TS__ArrayForEach
-local __TS__ArrayMap = ____lualib.__TS__ArrayMap
+--[[ Generated with https://github.com/TypeScriptToLua/TypeScriptToLua ]]
 local ____exports = {}
 local ____core = require("lua_modules.@crankscript.core.src.index")
 local PlaydateColor = ____core.PlaydateColor
@@ -25116,7 +25208,6 @@ local CELL_WIDTH = ____constants.CELL_WIDTH
 local CELL_HEIGHT = ____constants.CELL_HEIGHT
 local GRID_OFFSET_X = ____constants.GRID_OFFSET_X
 local GRID_OFFSET_Y = ____constants.GRID_OFFSET_Y
-local NAMES_TO_FIND = ____constants.NAMES_TO_FIND
 local FROZEN_CELL = ____constants.FROZEN_CELL
 ____exports.drawGame = function()
     playdate.graphics.clear(PlaydateColor.White)
@@ -25149,83 +25240,6 @@ ____exports.drawGame = function()
     local fillWidth = math.floor(barWidth * fillPercent)
     if fillWidth > 0 then
         playdate.graphics.fillRect(barX, barY, fillWidth, barHeight)
-    end
-    local boldMask = __TS__ArrayFrom(
-        {length = ROWS},
-        function() return __TS__ArrayFrom(
-            {length = COLS},
-            function() return false end
-        ) end
-    )
-    do
-        local r = 0
-        while r < ROWS do
-            local rowStr = table.concat(gameState.grid[r + 1], "")
-            __TS__ArrayForEach(
-                NAMES_TO_FIND,
-                function(____, name)
-                    local startIndex = 0
-                    while true do
-                        startIndex = (string.find(
-                            rowStr,
-                            name,
-                            math.max(startIndex + 1, 1),
-                            true
-                        ) or 0) - 1
-                        if not (startIndex > -1) then
-                            break
-                        end
-                        do
-                            local i = 0
-                            while i < #name do
-                                boldMask[r + 1][startIndex + i + 1] = true
-                                i = i + 1
-                            end
-                        end
-                        startIndex = startIndex + 1
-                    end
-                end
-            )
-            r = r + 1
-        end
-    end
-    do
-        local c = 0
-        while c < COLS do
-            local colStr = table.concat(
-                __TS__ArrayMap(
-                    gameState.grid,
-                    function(____, row) return row[c + 1] end
-                ),
-                ""
-            )
-            __TS__ArrayForEach(
-                NAMES_TO_FIND,
-                function(____, name)
-                    local startIndex = 0
-                    while true do
-                        startIndex = (string.find(
-                            colStr,
-                            name,
-                            math.max(startIndex + 1, 1),
-                            true
-                        ) or 0) - 1
-                        if not (startIndex > -1) then
-                            break
-                        end
-                        do
-                            local i = 0
-                            while i < #name do
-                                boldMask[startIndex + i + 1][c + 1] = true
-                                i = i + 1
-                            end
-                        end
-                        startIndex = startIndex + 1
-                    end
-                end
-            )
-            c = c + 1
-        end
     end
     do
         local r = 0
@@ -25261,7 +25275,7 @@ ____exports.drawGame = function()
                         else
                             playdate.graphics.setImageDrawMode(PlaydateDrawMode.FillBlack)
                         end
-                        if boldMask[r + 1][c + 1] then
+                        if gameState.boldMask[r + 1][c + 1] then
                             playdate.graphics.setFont(playdate.graphics.getSystemFont(PlaydateFontVariant.Bold))
                         else
                             playdate.graphics.setFont(playdate.graphics.getSystemFont(PlaydateFontVariant.Normal))
@@ -25531,6 +25545,7 @@ local GameLogic = ____logic.GameLogic
 local ____renderer = require("src.renderer")
 local drawGame = ____renderer.drawGame
 gameState.grid = createInitialGrid(nil)
+GameLogic:recalculateBoldMask()
 playdate.inputHandlers.push(inputHandler)
 playdate.update = function()
     GameLogic:updateFreeze()

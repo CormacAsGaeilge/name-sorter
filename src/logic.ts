@@ -72,6 +72,43 @@ export const GameLogic = {
     }
   },
 
+  recalculateBoldMask: () => {
+    // Reset mask
+    for (let r = 0; r < ROWS; r++) {
+      for (let c = 0; c < COLS; c++) {
+        gameState.boldMask[r][c] = false;
+      }
+    }
+
+    // Check Rows
+    for (let r = 0; r < ROWS; r++) {
+      const rowStr = gameState.grid[r].join("");
+      NAMES_TO_FIND.forEach((name) => {
+        let startIndex = 0;
+        while ((startIndex = rowStr.indexOf(name, startIndex)) > -1) {
+          for (let i = 0; i < name.length; i++) {
+            gameState.boldMask[r][startIndex + i] = true;
+          }
+          startIndex += 1;
+        }
+      });
+    }
+
+    // Check Columns
+    for (let c = 0; c < COLS; c++) {
+      const colStr = gameState.grid.map((row) => row[c]).join("");
+      NAMES_TO_FIND.forEach((name) => {
+        let startIndex = 0;
+        while ((startIndex = colStr.indexOf(name, startIndex)) > -1) {
+          for (let i = 0; i < name.length; i++) {
+            gameState.boldMask[startIndex + i][c] = true;
+          }
+          startIndex += 1;
+        }
+      });
+    }
+  },
+
   resetGame: () => {
     gameState.grid = createInitialGrid();
     gameState.score = 0;

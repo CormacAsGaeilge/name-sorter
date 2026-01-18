@@ -47,39 +47,6 @@ export const drawGame = () => {
     playdate.graphics.fillRect(barX, barY, fillWidth, barHeight);
   }
 
-  // ... (Keep Bold Mask Logic Calculation from previous code) ...
-  // Note: FROZEN_CELL ('#') will naturally not match any names, so no bold mask change needed.
-  const boldMask = Array.from({ length: ROWS }, () =>
-    Array.from({ length: COLS }, () => false),
-  );
-  // ... (Run your name check loops here as before) ...
-  // Check Rows
-  for (let r = 0; r < ROWS; r++) {
-    const rowStr = gameState.grid[r].join("");
-    NAMES_TO_FIND.forEach((name) => {
-      let startIndex = 0;
-      while ((startIndex = rowStr.indexOf(name, startIndex)) > -1) {
-        for (let i = 0; i < name.length; i++) {
-          boldMask[r][startIndex + i] = true;
-        }
-        startIndex += 1;
-      }
-    });
-  }
-  // Check Columns
-  for (let c = 0; c < COLS; c++) {
-    const colStr = gameState.grid.map((row) => row[c]).join("");
-    NAMES_TO_FIND.forEach((name) => {
-      let startIndex = 0;
-      while ((startIndex = colStr.indexOf(name, startIndex)) > -1) {
-        for (let i = 0; i < name.length; i++) {
-          boldMask[startIndex + i][c] = true;
-        }
-        startIndex += 1;
-      }
-    });
-  }
-
   // --- GRID DRAWING ---
   for (let r = 0; r < ROWS; r++) {
     for (let c = 0; c < COLS; c++) {
@@ -127,7 +94,7 @@ export const drawGame = () => {
           playdate.graphics.setImageDrawMode(PlaydateDrawMode.FillBlack);
         }
 
-        if (boldMask[r][c]) {
+        if (gameState.boldMask[r][c]) {
           playdate.graphics.setFont(
             playdate.graphics.getSystemFont(PlaydateFontVariant.Bold),
           );

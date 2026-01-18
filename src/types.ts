@@ -7,6 +7,7 @@ export interface Point {
 
 export interface GameState {
   grid: string[][];
+  boldMask: boolean[][];
   mode: Mode;
   cursor: Point;
   score: number;

@@ -6,6 +6,7 @@ import { drawGame } from "./renderer";
 
 // 1. Initialize Game State
 gameState.grid = createInitialGrid();
+GameLogic.recalculateBoldMask();
 
 // 2. Register Input Handler
 // Cast to any to bypass strict checks if needed, or PlaydateInputHandler if types allow
