@@ -21,7 +21,7 @@ const doNamesIntersect = (a: NameInstance, b: NameInstance) => {
   return false;
 };
 
-// Helper: Calculate overlap count between two instances (assumed same row/col)
+// Helper: Calculate overlap count between two instances
 const calculateOverlap = (a: NameInstance, b: NameInstance) => {
   let overlap = 0;
   for (const cellA of a.cells) {
@@ -34,7 +34,6 @@ const calculateOverlap = (a: NameInstance, b: NameInstance) => {
 
 // Helper: Filter matches based on the "Max 1 Char Overlap" Rule
 const filterMatches = (matches: NameInstance[]) => {
-  // Sort by length DESC (Longer words take priority)
   matches.sort((a, b) => b.text.length - a.text.length);
 
   const accepted: NameInstance[] = [];
@@ -43,7 +42,6 @@ const filterMatches = (matches: NameInstance[]) => {
     let rejected = false;
     for (const existing of accepted) {
       const overlap = calculateOverlap(candidate, existing);
-      // RULE: If overlap > 1, reject the shorter one (candidate)
       if (overlap > 1) {
         rejected = true;
         break;
@@ -60,6 +58,7 @@ export const GameLogic = {
   recalculateBoldMask: () => {
     // 1. Reset State
     gameState.detectedNames = [];
+    // FIX: Use Array.from instead of Array() constructor
     const cellCounts = Array.from({ length: ROWS }, () =>
       Array.from({ length: COLS }, () => 0),
     );
@@ -94,7 +93,6 @@ export const GameLogic = {
         }
       });
 
-      // Apply Filter Rule per row
       allMatches.push(...filterMatches(rowMatches));
     }
 
@@ -119,7 +117,6 @@ export const GameLogic = {
         }
       });
 
-      // Apply Filter Rule per column
       allMatches.push(...filterMatches(colMatches));
     }
 
@@ -133,7 +130,7 @@ export const GameLogic = {
       });
     });
 
-    // 5. Identify Intersections (Cells used by > 1 valid name)
+    // 5. Identify Intersections
     for (let r = 0; r < ROWS; r++) {
       for (let c = 0; c < COLS; c++) {
         if (cellCounts[r][c] > 1) {
@@ -151,14 +148,12 @@ export const GameLogic = {
       return;
     }
 
-    // Find names directly under the cursor
     const directMatches = gameState.detectedNames.filter((n) =>
       n.cells.some((c) => c.x === cursor.x && c.y === cursor.y),
     );
 
     if (directMatches.length === 0) return;
 
-    // Chain Reaction Logic
     const chain = new Set<NameInstance>(directMatches);
     const queue = [...directMatches];
 
@@ -186,6 +181,9 @@ export const GameLogic = {
     if (chain.size > 1) chainScore += (chain.size - 1) * 50;
 
     gameState.score += chainScore;
+
+    // --- NEW: Rewind Freeze Timer by 50% ---
+    gameState.freezeTimer = Math.floor(gameState.freezeTimer * 0.5);
 
     cellsToScramble.forEach((key) => {
       const [xStr, yStr] = key.split(",");

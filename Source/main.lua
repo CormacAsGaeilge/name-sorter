@@ -25122,6 +25122,7 @@ ____exports.GameLogic = {
             chainScore = chainScore + (chain.size - 1) * 50
         end
         gameState.score = gameState.score + chainScore
+        gameState.freezeTimer = math.floor(gameState.freezeTimer * 0.5)
         cellsToScramble:forEach(function(____, key)
             local xStr, yStr = table.unpack(
                 __TS__StringSplit(key, ","),
