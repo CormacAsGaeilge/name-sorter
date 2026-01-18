@@ -11,12 +11,11 @@ import {
   CELL_HEIGHT,
   GRID_OFFSET_X,
   GRID_OFFSET_Y,
-  NAMES_TO_FIND,
   FROZEN_CELL,
 } from "./constants";
 
 export const drawGame = () => {
-  // 1. RESET GRAPHICS STATE (Fixes Bug #1: UI Disappearing)
+  // 1. RESET GRAPHICS STATE
   playdate.graphics.clear(PlaydateColor.White);
   playdate.graphics.setColor(PlaydateColor.Black);
   playdate.graphics.setImageDrawMode(PlaydateDrawMode.FillBlack);
@@ -70,7 +69,6 @@ export const drawGame = () => {
       if (char === FROZEN_CELL) {
         // --- FROZEN BLOCK RENDER ---
         playdate.graphics.setColor(PlaydateColor.Black);
-        // Draw a box padded by 2px on all sides (Centered)
         playdate.graphics.fillRect(
           cellX + 2,
           cellY + 2,
@@ -78,7 +76,6 @@ export const drawGame = () => {
           CELL_HEIGHT - 4,
         );
 
-        // If cursor is here, draw a white border so we can see selection
         if (isHighlighted) {
           playdate.graphics.setColor(PlaydateColor.White);
           playdate.graphics.drawRect(
@@ -91,10 +88,9 @@ export const drawGame = () => {
       } else {
         // --- TEXT RENDER ---
 
-        // Draw Highlight Background (Centered)
+        // Draw Highlight Background
         if (isHighlighted) {
           playdate.graphics.setColor(PlaydateColor.Black);
-          // Draw box with 2px padding inside the cell
           playdate.graphics.fillRect(
             cellX + 2,
             cellY + 2,
@@ -107,7 +103,12 @@ export const drawGame = () => {
         }
 
         // Set Font
-        if (gameState.boldMask[r][c]) {
+        // Use normal font for intersections to fit the wider text
+        if (gameState.intersections[r][c]) {
+          playdate.graphics.setFont(
+            playdate.graphics.getSystemFont(PlaydateFontVariant.Normal),
+          );
+        } else if (gameState.boldMask[r][c]) {
           playdate.graphics.setFont(
             playdate.graphics.getSystemFont(PlaydateFontVariant.Bold),
           );
@@ -117,12 +118,18 @@ export const drawGame = () => {
           );
         }
 
-        // CENTERING LOGIC (Fixes Bug #2: Off-center text)
-        const [textW, textH] = playdate.graphics.getTextSize(char);
+        // TEXT CONTENT LOGIC
+        // If intersection, render "S|S"
+        const textToDraw = gameState.intersections[r][c]
+          ? `${char}|${char}`
+          : char;
+
+        // CENTERING LOGIC
+        const [textW, textH] = playdate.graphics.getTextSize(textToDraw);
         const textX = cellX + (CELL_WIDTH - textW) / 2;
         const textY = cellY + (CELL_HEIGHT - textH) / 2;
 
-        playdate.graphics.drawText(char, textX, textY);
+        playdate.graphics.drawText(textToDraw, textX, textY);
       }
     }
   }

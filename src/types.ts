@@ -14,6 +14,7 @@ export interface NameInstance {
 export interface GameState {
   grid: string[][];
   boldMask: boolean[][];
+  intersections: boolean[][];
   detectedNames: NameInstance[];
   mode: Mode;
   cursor: Point;

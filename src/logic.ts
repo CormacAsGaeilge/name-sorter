@@ -21,44 +21,88 @@ const doNamesIntersect = (a: NameInstance, b: NameInstance) => {
   return false;
 };
 
+// Helper: Calculate overlap count between two instances (assumed same row/col)
+const calculateOverlap = (a: NameInstance, b: NameInstance) => {
+  let overlap = 0;
+  for (const cellA of a.cells) {
+    for (const cellB of b.cells) {
+      if (cellA.x === cellB.x && cellA.y === cellB.y) overlap++;
+    }
+  }
+  return overlap;
+};
+
+// Helper: Filter matches based on the "Max 1 Char Overlap" Rule
+const filterMatches = (matches: NameInstance[]) => {
+  // Sort by length DESC (Longer words take priority)
+  matches.sort((a, b) => b.text.length - a.text.length);
+
+  const accepted: NameInstance[] = [];
+
+  for (const candidate of matches) {
+    let rejected = false;
+    for (const existing of accepted) {
+      const overlap = calculateOverlap(candidate, existing);
+      // RULE: If overlap > 1, reject the shorter one (candidate)
+      if (overlap > 1) {
+        rejected = true;
+        break;
+      }
+    }
+    if (!rejected) {
+      accepted.push(candidate);
+    }
+  }
+  return accepted;
+};
+
 export const GameLogic = {
   recalculateBoldMask: () => {
     // 1. Reset State
     gameState.detectedNames = [];
+    const cellCounts = Array.from({ length: ROWS }, () =>
+      Array.from({ length: COLS }, () => 0),
+    );
+
     for (let r = 0; r < ROWS; r++) {
       for (let c = 0; c < COLS; c++) {
         gameState.boldMask[r][c] = false;
+        gameState.intersections[r][c] = false;
       }
     }
 
-    // 2. Scan Rows for Names
+    const allMatches: NameInstance[] = [];
+
+    // 2. Scan Rows
     for (let r = 0; r < ROWS; r++) {
       const rowStr = gameState.grid[r].join("");
+      const rowMatches: NameInstance[] = [];
+
       NAMES_TO_FIND.forEach((name) => {
         let startIndex = 0;
         while ((startIndex = rowStr.indexOf(name, startIndex)) > -1) {
-          // Create Name Instance
           const instance: NameInstance = {
             text: name,
             cells: [],
             id: `R-${r}-${startIndex}-${name}`,
           };
-
-          // Mark cells
           for (let i = 0; i < name.length; i++) {
-            const c = startIndex + i;
-            instance.cells.push({ x: c, y: r });
-            gameState.boldMask[r][c] = true; // Update visual mask
+            instance.cells.push({ x: startIndex + i, y: r });
           }
-          gameState.detectedNames.push(instance);
+          rowMatches.push(instance);
           startIndex += 1;
         }
       });
+
+      // Apply Filter Rule per row
+      allMatches.push(...filterMatches(rowMatches));
     }
 
-    // 3. Scan Columns for Names
+    // 3. Scan Columns
     for (let c = 0; c < COLS; c++) {
       const colStr = gameState.grid.map((row) => row[c]).join("");
+      const colMatches: NameInstance[] = [];
+
       NAMES_TO_FIND.forEach((name) => {
         let startIndex = 0;
         while ((startIndex = colStr.indexOf(name, startIndex)) > -1) {
@@ -67,84 +111,91 @@ export const GameLogic = {
             cells: [],
             id: `C-${c}-${startIndex}-${name}`,
           };
-
           for (let i = 0; i < name.length; i++) {
-            const r = startIndex + i;
-            instance.cells.push({ x: c, y: r });
-            gameState.boldMask[r][c] = true;
+            instance.cells.push({ x: c, y: startIndex + i });
           }
-          gameState.detectedNames.push(instance);
+          colMatches.push(instance);
           startIndex += 1;
         }
       });
+
+      // Apply Filter Rule per column
+      allMatches.push(...filterMatches(colMatches));
+    }
+
+    // 4. Update State based on filtered matches
+    gameState.detectedNames = allMatches;
+
+    allMatches.forEach((name) => {
+      name.cells.forEach((cell) => {
+        gameState.boldMask[cell.y][cell.x] = true;
+        cellCounts[cell.y][cell.x]++;
+      });
+    });
+
+    // 5. Identify Intersections (Cells used by > 1 valid name)
+    for (let r = 0; r < ROWS; r++) {
+      for (let c = 0; c < COLS; c++) {
+        if (cellCounts[r][c] > 1) {
+          gameState.intersections[r][c] = true;
+        }
+      }
     }
   },
 
   checkNameMatch: () => {
     const { mode, cursor } = gameState;
 
-    // Auto-switch mode
     if (mode !== "name") {
       gameState.mode = "name";
       return;
     }
 
-    // 1. Find names directly under the cursor
+    // Find names directly under the cursor
     const directMatches = gameState.detectedNames.filter((n) =>
       n.cells.some((c) => c.x === cursor.x && c.y === cursor.y),
     );
 
-    if (directMatches.length === 0) return; // No name here
+    if (directMatches.length === 0) return;
 
-    // 2. Chain Reaction: Find all connected names
+    // Chain Reaction Logic
     const chain = new Set<NameInstance>(directMatches);
     const queue = [...directMatches];
 
     while (queue.length > 0) {
       const current = queue.pop()!;
-
-      // Check all other names to see if they touch 'current'
       for (const candidate of gameState.detectedNames) {
         if (!chain.has(candidate)) {
           if (doNamesIntersect(current, candidate)) {
             chain.add(candidate);
-            queue.push(candidate); // Add to queue to find its neighbors too
+            queue.push(candidate);
           }
         }
       }
     }
 
-    // 3. Apply Scoring and Scrambling
-    const cellsToScramble = new Set<string>(); // Use string "x,y" to deduplicate
+    // Scoring
+    const cellsToScramble = new Set<string>();
     let chainScore = 0;
 
     chain.forEach((name) => {
-      // Score Formula: Length * 100
       chainScore += name.text.length * 100;
-
-      // Mark cells for scrambling
       name.cells.forEach((c) => cellsToScramble.add(`${c.x},${c.y}`));
     });
 
-    // Add bonus for chain length (e.g. 50pts per extra name)
-    if (chain.size > 1) {
-      chainScore += (chain.size - 1) * 50;
-    }
+    if (chain.size > 1) chainScore += (chain.size - 1) * 50;
 
     gameState.score += chainScore;
 
-    // 4. Scramble the specific cells
     cellsToScramble.forEach((key) => {
       const [xStr, yStr] = key.split(",");
       const x = parseInt(xStr);
       const y = parseInt(yStr);
-      // Don't overwrite frozen cells
       if (gameState.grid[y][x] !== FROZEN_CELL) {
         gameState.grid[y][x] = randomChar();
       }
     });
 
-    // 5. Refresh
     GameLogic.recalculateBoldMask();
   },
 
@@ -160,7 +211,6 @@ export const GameLogic = {
 
   updateFreeze: () => {
     if (gameState.gameOver) return;
-
     gameState.freezeTimer++;
     if (gameState.freezeTimer >= gameState.freezeThreshold) {
       gameState.freezeTimer = 0;
@@ -172,9 +222,7 @@ export const GameLogic = {
       const validSpots: { r: number; c: number }[] = [];
       for (let r = 0; r < ROWS; r++) {
         for (let c = 0; c < COLS; c++) {
-          if (gameState.grid[r][c] !== FROZEN_CELL) {
-            validSpots.push({ r, c });
-          }
+          if (gameState.grid[r][c] !== FROZEN_CELL) validSpots.push({ r, c });
         }
       }
 
@@ -183,7 +231,6 @@ export const GameLogic = {
           validSpots[Math.floor(Math.random() * validSpots.length)];
         gameState.grid[randomSpot.r][randomSpot.c] = FROZEN_CELL;
         GameLogic.recalculateBoldMask();
-
         if (validSpots.length === 1) gameState.gameOver = true;
       } else {
         gameState.gameOver = true;

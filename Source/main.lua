@@ -24833,6 +24833,13 @@ ____exports.gameState = {
             function() return false end
         ) end
     ),
+    intersections = __TS__ArrayFrom(
+        {length = ROWS},
+        function() return __TS__ArrayFrom(
+            {length = COLS},
+            function() return false end
+        ) end
+    ),
     detectedNames = {},
     mode = "column",
     cursor = {x = 0, y = 0},
@@ -24846,7 +24853,10 @@ return ____exports
  end,
 ["src.logic"] = function(...) 
 local ____lualib = require("lualib_bundle")
+local __TS__ArraySort = ____lualib.__TS__ArraySort
+local __TS__ArrayFrom = ____lualib.__TS__ArrayFrom
 local __TS__ArrayForEach = ____lualib.__TS__ArrayForEach
+local __TS__ArrayPushArray = ____lualib.__TS__ArrayPushArray
 local __TS__ArrayMap = ____lualib.__TS__ArrayMap
 local __TS__ArraySome = ____lualib.__TS__ArraySome
 local __TS__ArrayFilter = ____lualib.__TS__ArrayFilter
@@ -24880,9 +24890,48 @@ local function doNamesIntersect(____, a, b)
     end
     return false
 end
+local function calculateOverlap(____, a, b)
+    local overlap = 0
+    for ____, cellA in ipairs(a.cells) do
+        for ____, cellB in ipairs(b.cells) do
+            if cellA.x == cellB.x and cellA.y == cellB.y then
+                overlap = overlap + 1
+            end
+        end
+    end
+    return overlap
+end
+local function filterMatches(____, matches)
+    __TS__ArraySort(
+        matches,
+        function(____, a, b) return #b.text - #a.text end
+    )
+    local accepted = {}
+    for ____, candidate in ipairs(matches) do
+        local rejected = false
+        for ____, existing in ipairs(accepted) do
+            local overlap = calculateOverlap(nil, candidate, existing)
+            if overlap > 1 then
+                rejected = true
+                break
+            end
+        end
+        if not rejected then
+            accepted[#accepted + 1] = candidate
+        end
+    end
+    return accepted
+end
 ____exports.GameLogic = {
     recalculateBoldMask = function()
         gameState.detectedNames = {}
+        local cellCounts = __TS__ArrayFrom(
+            {length = ROWS},
+            function() return __TS__ArrayFrom(
+                {length = COLS},
+                function() return 0 end
+            ) end
+        )
         do
             local r = 0
             while r < ROWS do
@@ -24890,16 +24939,19 @@ ____exports.GameLogic = {
                     local c = 0
                     while c < COLS do
                         gameState.boldMask[r + 1][c + 1] = false
+                        gameState.intersections[r + 1][c + 1] = false
                         c = c + 1
                     end
                 end
                 r = r + 1
             end
         end
+        local allMatches = {}
         do
             local r = 0
             while r < ROWS do
                 local rowStr = table.concat(gameState.grid[r + 1], "")
+                local rowMatches = {}
                 __TS__ArrayForEach(
                     NAMES_TO_FIND,
                     function(____, name)
@@ -24922,18 +24974,19 @@ ____exports.GameLogic = {
                             do
                                 local i = 0
                                 while i < #name do
-                                    local c = startIndex + i
                                     local ____instance_cells_0 = instance.cells
-                                    ____instance_cells_0[#____instance_cells_0 + 1] = {x = c, y = r}
-                                    gameState.boldMask[r + 1][c + 1] = true
+                                    ____instance_cells_0[#____instance_cells_0 + 1] = {x = startIndex + i, y = r}
                                     i = i + 1
                                 end
                             end
-                            local ____gameState_detectedNames_1 = gameState.detectedNames
-                            ____gameState_detectedNames_1[#____gameState_detectedNames_1 + 1] = instance
+                            rowMatches[#rowMatches + 1] = instance
                             startIndex = startIndex + 1
                         end
                     end
+                )
+                __TS__ArrayPushArray(
+                    allMatches,
+                    filterMatches(nil, rowMatches)
                 )
                 r = r + 1
             end
@@ -24948,6 +25001,7 @@ ____exports.GameLogic = {
                     ),
                     ""
                 )
+                local colMatches = {}
                 __TS__ArrayForEach(
                     NAMES_TO_FIND,
                     function(____, name)
@@ -24970,20 +25024,50 @@ ____exports.GameLogic = {
                             do
                                 local i = 0
                                 while i < #name do
-                                    local r = startIndex + i
-                                    local ____instance_cells_2 = instance.cells
-                                    ____instance_cells_2[#____instance_cells_2 + 1] = {x = c, y = r}
-                                    gameState.boldMask[r + 1][c + 1] = true
+                                    local ____instance_cells_1 = instance.cells
+                                    ____instance_cells_1[#____instance_cells_1 + 1] = {x = c, y = startIndex + i}
                                     i = i + 1
                                 end
                             end
-                            local ____gameState_detectedNames_3 = gameState.detectedNames
-                            ____gameState_detectedNames_3[#____gameState_detectedNames_3 + 1] = instance
+                            colMatches[#colMatches + 1] = instance
                             startIndex = startIndex + 1
                         end
                     end
                 )
+                __TS__ArrayPushArray(
+                    allMatches,
+                    filterMatches(nil, colMatches)
+                )
                 c = c + 1
+            end
+        end
+        gameState.detectedNames = allMatches
+        __TS__ArrayForEach(
+            allMatches,
+            function(____, name)
+                __TS__ArrayForEach(
+                    name.cells,
+                    function(____, cell)
+                        gameState.boldMask[cell.y + 1][cell.x + 1] = true
+                        local ____cellCounts_index_2, ____temp_3 = cellCounts[cell.y + 1], cell.x + 1
+                        ____cellCounts_index_2[____temp_3] = ____cellCounts_index_2[____temp_3] + 1
+                    end
+                )
+            end
+        )
+        do
+            local r = 0
+            while r < ROWS do
+                do
+                    local c = 0
+                    while c < COLS do
+                        if cellCounts[r + 1][c + 1] > 1 then
+                            gameState.intersections[r + 1][c + 1] = true
+                        end
+                        c = c + 1
+                    end
+                end
+                r = r + 1
             end
         end
     end,
@@ -25326,15 +25410,18 @@ ____exports.drawGame = function()
                         else
                             playdate.graphics.setImageDrawMode(PlaydateDrawMode.FillBlack)
                         end
-                        if gameState.boldMask[r + 1][c + 1] then
+                        if gameState.intersections[r + 1][c + 1] then
+                            playdate.graphics.setFont(playdate.graphics.getSystemFont(PlaydateFontVariant.Normal))
+                        elseif gameState.boldMask[r + 1][c + 1] then
                             playdate.graphics.setFont(playdate.graphics.getSystemFont(PlaydateFontVariant.Bold))
                         else
                             playdate.graphics.setFont(playdate.graphics.getSystemFont(PlaydateFontVariant.Normal))
                         end
-                        local textW, textH = playdate.graphics.getTextSize(char)
+                        local textToDraw = gameState.intersections[r + 1][c + 1] and (char .. "|") .. char or char
+                        local textW, textH = playdate.graphics.getTextSize(textToDraw)
                         local textX = cellX + (CELL_WIDTH - textW) / 2
                         local textY = cellY + (CELL_HEIGHT - textH) / 2
-                        playdate.graphics.drawText(char, textX, textY)
+                        playdate.graphics.drawText(textToDraw, textX, textY)
                     end
                     c = c + 1
                 end
