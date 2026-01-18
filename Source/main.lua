@@ -25326,7 +25326,9 @@ ____exports.inputHandler = {
 return ____exports
  end,
 ["src.renderer"] = function(...) 
---[[ Generated with https://github.com/TypeScriptToLua/TypeScriptToLua ]]
+local ____lualib = require("lualib_bundle")
+local __TS__ArrayMap = ____lualib.__TS__ArrayMap
+local __TS__ArrayForEach = ____lualib.__TS__ArrayForEach
 local ____exports = {}
 local ____core = require("lua_modules.@crankscript.core.src.index")
 local PlaydateColor = ____core.PlaydateColor
@@ -25342,7 +25344,67 @@ local CELL_HEIGHT = ____constants.CELL_HEIGHT
 local GRID_OFFSET_X = ____constants.GRID_OFFSET_X
 local GRID_OFFSET_Y = ____constants.GRID_OFFSET_Y
 local FROZEN_CELL = ____constants.FROZEN_CELL
+local animationTick = 0
+local function drawCapsule(____, name)
+    local xs = __TS__ArrayMap(
+        name.cells,
+        function(____, c) return c.x end
+    )
+    local ys = __TS__ArrayMap(
+        name.cells,
+        function(____, c) return c.y end
+    )
+    local minCol = math.min(table.unpack(xs))
+    local maxCol = math.max(table.unpack(xs))
+    local minRow = math.min(table.unpack(ys))
+    local maxRow = math.max(table.unpack(ys))
+    local x = GRID_OFFSET_X + minCol * CELL_WIDTH
+    local y = GRID_OFFSET_Y + minRow * CELL_HEIGHT
+    local padding = 2
+    local width = (maxCol - minCol + 1) * CELL_WIDTH - padding * 2
+    local height = (maxRow - minRow + 1) * CELL_HEIGHT - padding * 2
+    local drawX = x + padding
+    local drawY = y + padding
+    playdate.graphics.setColor(PlaydateColor.Black)
+    playdate.graphics.setLineWidth(2)
+    playdate.graphics.drawRoundRect(
+        drawX,
+        drawY,
+        width,
+        height,
+        10
+    )
+    playdate.graphics.setLineWidth(1)
+end
+local function drawAnimatedCaret(____, cx, cy, direction)
+    local size = 6
+    local bounce = math.sin(animationTick * 0.15) * 3
+    playdate.graphics.setColor(PlaydateColor.Black)
+    playdate.graphics.setLineWidth(2)
+    local bx = cx
+    local by = cy
+    if direction == "left" or direction == "right" then
+        bx = bx + bounce
+    else
+        by = by + bounce
+    end
+    if direction == "right" then
+        playdate.graphics.drawLine(bx, by - size, bx + size, by)
+        playdate.graphics.drawLine(bx + size, by, bx, by + size)
+    elseif direction == "left" then
+        playdate.graphics.drawLine(bx, by - size, bx - size, by)
+        playdate.graphics.drawLine(bx - size, by, bx, by + size)
+    elseif direction == "down" then
+        playdate.graphics.drawLine(bx - size, by, bx, by + size)
+        playdate.graphics.drawLine(bx, by + size, bx + size, by)
+    elseif direction == "up" then
+        playdate.graphics.drawLine(bx - size, by, bx, by - size)
+        playdate.graphics.drawLine(bx, by - size, bx + size, by)
+    end
+    playdate.graphics.setLineWidth(1)
+end
 ____exports.drawGame = function()
+    animationTick = animationTick + 1
     playdate.graphics.clear(PlaydateColor.White)
     playdate.graphics.setColor(PlaydateColor.Black)
     playdate.graphics.setImageDrawMode(PlaydateDrawMode.FillBlack)
@@ -25367,14 +25429,30 @@ ____exports.drawGame = function()
         30
     )
     local barX = GRID_OFFSET_X
-    local barY = GRID_OFFSET_Y + ROWS * CELL_HEIGHT + 10
+    local barY = GRID_OFFSET_Y + ROWS * CELL_HEIGHT + 15
     local barWidth = COLS * CELL_WIDTH
-    local barHeight = 5
+    local barHeight = 4
     playdate.graphics.drawRect(barX, barY, barWidth, barHeight)
     local fillPercent = gameState.freezeTimer / gameState.freezeThreshold
     local fillWidth = math.floor(barWidth * fillPercent)
     if fillWidth > 0 then
         playdate.graphics.fillRect(barX, barY, fillWidth, barHeight)
+    end
+    __TS__ArrayForEach(
+        gameState.detectedNames,
+        function(____, name)
+            drawCapsule(nil, name)
+        end
+    )
+    if gameState.mode == "row" or gameState.mode == "name" then
+        local cy = GRID_OFFSET_Y + gameState.cursor.y * CELL_HEIGHT + CELL_HEIGHT / 2
+        drawAnimatedCaret(nil, GRID_OFFSET_X - 15, cy, "right")
+        drawAnimatedCaret(nil, GRID_OFFSET_X + COLS * CELL_WIDTH + 15, cy, "left")
+    end
+    if gameState.mode == "column" or gameState.mode == "name" then
+        local cx = GRID_OFFSET_X + gameState.cursor.x * CELL_WIDTH + CELL_WIDTH / 2
+        drawAnimatedCaret(nil, cx, GRID_OFFSET_Y - 15, "down")
+        drawAnimatedCaret(nil, cx, GRID_OFFSET_Y + ROWS * CELL_HEIGHT + 15, "up")
     end
     do
         local r = 0
@@ -25385,43 +25463,29 @@ ____exports.drawGame = function()
                     local char = gameState.grid[r + 1][c + 1]
                     local cellX = GRID_OFFSET_X + c * CELL_WIDTH
                     local cellY = GRID_OFFSET_Y + r * CELL_HEIGHT
-                    local isHighlighted = false
-                    if gameState.mode == "column" and c == gameState.cursor.x then
-                        isHighlighted = true
-                    end
-                    if gameState.mode == "row" and r == gameState.cursor.y then
-                        isHighlighted = true
-                    end
-                    if gameState.mode == "name" and r == gameState.cursor.y and c == gameState.cursor.x then
-                        isHighlighted = true
-                    end
+                    local isCursor = c == gameState.cursor.x and r == gameState.cursor.y
                     if char == FROZEN_CELL then
                         playdate.graphics.setColor(PlaydateColor.Black)
                         playdate.graphics.fillRect(cellX + 2, cellY + 2, CELL_WIDTH - 4, CELL_HEIGHT - 4)
-                        if isHighlighted then
+                        if isCursor then
                             playdate.graphics.setColor(PlaydateColor.White)
+                            playdate.graphics.setLineWidth(2)
                             playdate.graphics.drawRect(cellX + 4, cellY + 4, CELL_WIDTH - 8, CELL_HEIGHT - 8)
+                            playdate.graphics.setLineWidth(1)
                         end
                     else
-                        if isHighlighted then
+                        playdate.graphics.setImageDrawMode(PlaydateDrawMode.FillBlack)
+                        playdate.graphics.setFont(playdate.graphics.getSystemFont(PlaydateFontVariant.Normal))
+                        if isCursor then
+                            playdate.graphics.setLineWidth(2)
                             playdate.graphics.setColor(PlaydateColor.Black)
-                            playdate.graphics.fillRect(cellX + 2, cellY + 2, CELL_WIDTH - 4, CELL_HEIGHT - 4)
-                            playdate.graphics.setImageDrawMode(PlaydateDrawMode.FillWhite)
-                        else
-                            playdate.graphics.setImageDrawMode(PlaydateDrawMode.FillBlack)
+                            playdate.graphics.drawRect(cellX + 1, cellY + 1, CELL_WIDTH - 2, CELL_HEIGHT - 2)
+                            playdate.graphics.setLineWidth(1)
                         end
-                        if gameState.intersections[r + 1][c + 1] then
-                            playdate.graphics.setFont(playdate.graphics.getSystemFont(PlaydateFontVariant.Normal))
-                        elseif gameState.boldMask[r + 1][c + 1] then
-                            playdate.graphics.setFont(playdate.graphics.getSystemFont(PlaydateFontVariant.Bold))
-                        else
-                            playdate.graphics.setFont(playdate.graphics.getSystemFont(PlaydateFontVariant.Normal))
-                        end
-                        local textToDraw = gameState.intersections[r + 1][c + 1] and (char .. "|") .. char or char
-                        local textW, textH = playdate.graphics.getTextSize(textToDraw)
+                        local textW, textH = playdate.graphics.getTextSize(char)
                         local textX = cellX + (CELL_WIDTH - textW) / 2
                         local textY = cellY + (CELL_HEIGHT - textH) / 2
-                        playdate.graphics.drawText(textToDraw, textX, textY)
+                        playdate.graphics.drawText(char, textX, textY)
                     end
                     c = c + 1
                 end
