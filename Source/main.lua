@@ -2766,7 +2766,7 @@ return {
 ["src.names"] = function(...) 
 --[[ Generated with https://github.com/TypeScriptToLua/TypeScriptToLua ]]
 local ____exports = {}
-local names = {
+____exports.names = {
     "Aaberg",
     "Aalst",
     "Aara",
@@ -24754,13 +24754,12 @@ local names = {
     "Zwiebel",
     "Zysk"
 }
-____exports.default = names
 return ____exports
  end,
 ["src.index"] = function(...) 
 local ____lualib = require("lualib_bundle")
-local __TS__ArrayFrom = ____lualib.__TS__ArrayFrom
 local __TS__ArrayMap = ____lualib.__TS__ArrayMap
+local __TS__ArrayFrom = ____lualib.__TS__ArrayFrom
 local __TS__StringIncludes = ____lualib.__TS__StringIncludes
 local __TS__ArrayForEach = ____lualib.__TS__ArrayForEach
 local __TS__ArrayUnshift = ____lualib.__TS__ArrayUnshift
@@ -24768,12 +24767,14 @@ local ____exports = {}
 local ____core = require("lua_modules.@crankscript.core.src.index")
 local PlaydateColor = ____core.PlaydateColor
 local PlaydateDrawMode = ____core.PlaydateDrawMode
-local PlaydateFontVariant = ____core.PlaydateFontVariant
 local ____names = require("src.names")
-local nameList = ____names.default
+local names = ____names.names
 local ROWS = 5
 local COLS = 10
-local NAMES_TO_FIND = nameList
+local NAMES_TO_FIND = __TS__ArrayMap(
+    names,
+    function(____, name) return string.upper(name) end
+)
 local CELL_WIDTH = 30
 local CELL_HEIGHT = 30
 local GRID_OFFSET_X = 50
@@ -24782,6 +24783,7 @@ local grid = {}
 local mode = "column"
 local cursor = {x = 0, y = 0}
 local score = 0
+local crankAccumulator = 0
 local chaosCounter = 0
 local function randomChar()
     return string.char(65 + math.floor(math.random() * 26))
@@ -24794,6 +24796,20 @@ local function initGrid()
             function() return randomChar(nil) end
         ) end
     )
+end
+local function shuffleArray(____, array)
+    local newArr = {table.unpack(array)}
+    do
+        local i = #newArr - 1
+        while i > 0 do
+            local j = math.floor(math.random() * (i + 1))
+            local ____temp_0 = {newArr[j + 1], newArr[i + 1]}
+            newArr[i + 1] = ____temp_0[1]
+            newArr[j + 1] = ____temp_0[2]
+            i = i - 1
+        end
+    end
+    return newArr
 end
 initGrid(nil)
 local inputHandler = {
@@ -24851,14 +24867,36 @@ local inputHandler = {
             end
         end
     end,
+    cranked = function(____, change, acceleratedChange)
+        crankAccumulator = crankAccumulator + change
+        if math.abs(crankAccumulator) >= 360 then
+            crankAccumulator = 0
+            if mode == "row" then
+                grid[cursor.y + 1] = shuffleArray(nil, grid[cursor.y + 1])
+            elseif mode == "column" then
+                local col = __TS__ArrayMap(
+                    grid,
+                    function(____, row) return row[cursor.x + 1] end
+                )
+                local shuffledCol = shuffleArray(nil, col)
+                do
+                    local r = 0
+                    while r < ROWS do
+                        grid[r + 1][cursor.x + 1] = shuffledCol[r + 1]
+                        r = r + 1
+                    end
+                end
+            end
+        end
+    end,
     leftButtonDown = function()
         if mode == "column" then
             cursor.x = (cursor.x - 1 + COLS) % COLS
         elseif mode == "row" then
             local first = table.remove(grid[cursor.y + 1], 1)
             if first then
-                local ____grid_index_0 = grid[cursor.y + 1]
-                ____grid_index_0[#____grid_index_0 + 1] = first
+                local ____grid_index_1 = grid[cursor.y + 1]
+                ____grid_index_1[#____grid_index_1 + 1] = first
             end
         else
             cursor.x = (cursor.x - 1 + COLS) % COLS
@@ -24910,12 +24948,15 @@ local inputHandler = {
 playdate.inputHandlers.push(inputHandler)
 playdate.update = function()
     playdate.graphics.clear(PlaydateColor.White)
-    playdate.graphics.setFont(playdate.graphics.getSystemFont(PlaydateFontVariant.Bold))
     chaosCounter = chaosCounter + 1
-    if chaosCounter > 60 then
-        local r = math.floor(math.random() * ROWS)
-        local c = math.floor(math.random() * COLS)
-        grid[r + 1][c + 1] = randomChar(nil)
+    if chaosCounter > 300 then
+        do
+            local c = 0
+            while c < COLS do
+                grid[ROWS][c + 1] = randomChar(nil)
+                c = c + 1
+            end
+        end
         chaosCounter = 0
     end
     playdate.graphics.drawText(
@@ -24928,6 +24969,13 @@ playdate.update = function()
         10,
         30
     )
+    if math.abs(crankAccumulator) > 10 then
+        playdate.graphics.drawText(
+            "Crank: " .. tostring(math.floor(math.abs(crankAccumulator))),
+            200,
+            10
+        )
+    end
     do
         local r = 0
         while r < ROWS do

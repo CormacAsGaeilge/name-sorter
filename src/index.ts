@@ -3,12 +3,14 @@ import {
   PlaydateDrawMode,
   PlaydateFontVariant,
 } from "@crankscript/core";
-import nameList from "./names";
+
+// Import from the names.ts file you created
+import { names } from "./names";
 
 // --- Constants ---
 const ROWS = 5;
 const COLS = 10;
-const NAMES_TO_FIND = nameList;
+const NAMES_TO_FIND = names.map((name) => name.toUpperCase());
 const CELL_WIDTH = 30;
 const CELL_HEIGHT = 30;
 const GRID_OFFSET_X = 50;
@@ -21,6 +23,10 @@ let grid: string[][] = [];
 let mode: Mode = "column";
 let cursor = { x: 0, y: 0 };
 let score = 0;
+
+// New state for tracking crank rotation
+let crankAccumulator = 0;
+// Optional: Chaos counter if you want tiles to randomise over time
 let chaosCounter = 0;
 
 // --- Helper Functions ---
@@ -33,22 +39,30 @@ const initGrid = () => {
   );
 };
 
+// Helper to shuffle an array (Fisher-Yates algorithm)
+const shuffleArray = (array: string[]) => {
+  const newArr = [...array];
+  for (let i = newArr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [newArr[i], newArr[j]] = [newArr[j], newArr[i]];
+  }
+  return newArr;
+};
+
 // Initialize the game
 initGrid();
 
 // --- Input Handling ---
-// We define the handler to modify our global state variables directly
 const inputHandler = {
   BButtonDown: () => {
     if (mode === "column") mode = "row";
     else if (mode === "row") mode = "column";
-    else mode = "column"; // Default back to column from name mode
+    else mode = "column";
   },
   AButtonDown: () => {
     if (mode === "column" || mode === "row") {
-      mode = "name"; // Switch to Name Selector
+      mode = "name";
     } else if (mode === "name") {
-      // Check logic
       const rowStr = grid[cursor.y].join("");
       const colStr = grid.map((row) => row[cursor.x]).join("");
 
@@ -62,7 +76,6 @@ const inputHandler = {
 
       if (foundRow || foundCol) {
         score += 100;
-        // Scramble Logic
         if (foundRow) {
           grid[cursor.y] = Array.from({ length: COLS }, () => randomChar());
         }
@@ -74,11 +87,35 @@ const inputHandler = {
       }
     }
   },
+  // --- NEW: Crank Handler ---
+  cranked: (change: number, acceleratedChange: number) => {
+    // 'change' is the angle in degrees moved since the last frame
+    crankAccumulator += change;
+
+    // Check if we have rotated 360 degrees (either direction)
+    if (Math.abs(crankAccumulator) >= 360) {
+      crankAccumulator = 0; // Reset the accumulator
+
+      // Shuffle based on the current mode
+      if (mode === "row") {
+        // Shuffle the selected row
+        grid[cursor.y] = shuffleArray(grid[cursor.y]);
+      } else if (mode === "column") {
+        // Shuffle the selected column
+        const col = grid.map((row) => row[cursor.x]);
+        const shuffledCol = shuffleArray(col);
+
+        // Write the shuffled column back to the grid
+        for (let r = 0; r < ROWS; r++) {
+          grid[r][cursor.x] = shuffledCol[r];
+        }
+      }
+    }
+  },
   leftButtonDown: () => {
     if (mode === "column") {
       cursor.x = (cursor.x - 1 + COLS) % COLS;
     } else if (mode === "row") {
-      // Shift Row Left
       const first = grid[cursor.y].shift();
       if (first) grid[cursor.y].push(first);
     } else {
@@ -89,7 +126,6 @@ const inputHandler = {
     if (mode === "column") {
       cursor.x = (cursor.x + 1) % COLS;
     } else if (mode === "row") {
-      // Shift Row Right
       const last = grid[cursor.y].pop();
       if (last) grid[cursor.y].unshift(last);
     } else {
@@ -98,7 +134,6 @@ const inputHandler = {
   },
   upButtonDown: () => {
     if (mode === "column") {
-      // Shift Column Up
       const topChar = grid[0][cursor.x];
       for (let r = 0; r < ROWS - 1; r++) {
         grid[r][cursor.x] = grid[r + 1][cursor.x];
@@ -110,7 +145,6 @@ const inputHandler = {
   },
   downButtonDown: () => {
     if (mode === "column") {
-      // Shift Column Down
       const bottomChar = grid[ROWS - 1][cursor.x];
       for (let r = ROWS - 1; r > 0; r--) {
         grid[r][cursor.x] = grid[r - 1][cursor.x];
@@ -125,22 +159,32 @@ const inputHandler = {
 // Register the inputs
 playdate.inputHandlers.push(inputHandler as any);
 
+// --- Main Render Loop ---
 playdate.update = () => {
   playdate.graphics.clear(PlaydateColor.White);
-  playdate.graphics.setFont(
-    playdate.graphics.getSystemFont(PlaydateFontVariant.Bold),
-  );
-  // Chaos Mechanic: Every 360 frames (approx 12-18 seconds), change one random letter
+
+  // Entropy Logic: Randomly flip a tile every ~2 seconds
   chaosCounter++;
-  if (chaosCounter > 60) {
-    const r = Math.floor(Math.random() * ROWS);
-    const c = Math.floor(Math.random() * COLS);
-    grid[r][c] = randomChar();
+  if (chaosCounter > 300) {
+    // Loop through every column in the last row (ROWS - 1)
+    for (let c = 0; c < COLS; c++) {
+      grid[ROWS - 1][c] = randomChar();
+    }
     chaosCounter = 0; // Reset timer
   }
+
   // Draw UI
   playdate.graphics.drawText(`Score: ${score}`, 10, 10);
   playdate.graphics.drawText(`Mode: ${mode.toUpperCase()}`, 10, 30);
+
+  // Draw Crank Indicator if accumulation is happening
+  if (Math.abs(crankAccumulator) > 10) {
+    playdate.graphics.drawText(
+      `Crank: ${Math.floor(Math.abs(crankAccumulator))}`,
+      200,
+      10,
+    );
+  }
 
   // Draw Grid
   for (let r = 0; r < ROWS; r++) {
@@ -157,14 +201,10 @@ playdate.update = () => {
         isHighlighted = true;
 
       if (isHighlighted) {
-        // Draw a black box background for the highlight
         playdate.graphics.setColor(PlaydateColor.Black);
-        playdate.graphics.fillRect(x - 2, y - 2, 20, 20); // adjust size slightly for text
-
-        // Draw white text on top
+        playdate.graphics.fillRect(x - 2, y - 2, 20, 20);
         playdate.graphics.setImageDrawMode(PlaydateDrawMode.FillWhite);
       } else {
-        // Normal black text
         playdate.graphics.setImageDrawMode(PlaydateDrawMode.FillBlack);
       }
 

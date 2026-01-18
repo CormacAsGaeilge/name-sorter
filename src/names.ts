@@ -1,4 +1,4 @@
-const names: string[] = [
+export const names: string[] = [
   "Aaberg",
   "Aalst",
   "Aara",
@@ -21986,5 +21986,3 @@ const names: string[] = [
   "Zwiebel",
   "Zysk",
 ];
-
-export default names;
