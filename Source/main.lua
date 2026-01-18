@@ -24848,6 +24848,7 @@ ____exports.gameState = {
         ) end
     ),
     detectedNames = {},
+    particles = {},
     mode = "column",
     cursor = {x = 0, y = 0},
     score = 0,
@@ -24861,6 +24862,7 @@ return ____exports
 ["src.logic"] = function(...) 
 local ____lualib = require("lualib_bundle")
 local __TS__ArraySort = ____lualib.__TS__ArraySort
+local __TS__ArraySplice = ____lualib.__TS__ArraySplice
 local __TS__ArrayFrom = ____lualib.__TS__ArrayFrom
 local __TS__ArrayForEach = ____lualib.__TS__ArrayForEach
 local __TS__ArrayPushArray = ____lualib.__TS__ArrayPushArray
@@ -24883,6 +24885,10 @@ local FROZEN_CELL = ____constants.FROZEN_CELL
 local INITIAL_FREEZE_THRESHOLD = ____constants.INITIAL_FREEZE_THRESHOLD
 local MIN_FREEZE_THRESHOLD = ____constants.MIN_FREEZE_THRESHOLD
 local FREEZE_DECREMENT = ____constants.FREEZE_DECREMENT
+local GRID_OFFSET_X = ____constants.GRID_OFFSET_X
+local GRID_OFFSET_Y = ____constants.GRID_OFFSET_Y
+local CELL_WIDTH = ____constants.CELL_WIDTH
+local CELL_HEIGHT = ____constants.CELL_HEIGHT
 local ____grid = require("src.grid")
 local randomChar = ____grid.randomChar
 local shuffleArray = ____grid.shuffleArray
@@ -24930,6 +24936,42 @@ local function filterMatches(____, matches)
     return accepted
 end
 ____exports.GameLogic = {
+    spawnExplosion = function(____, c, r)
+        local centerX = GRID_OFFSET_X + c * CELL_WIDTH + CELL_WIDTH / 2
+        local centerY = GRID_OFFSET_Y + r * CELL_HEIGHT + CELL_HEIGHT / 2
+        local count = 8 + math.floor(math.random() * 4)
+        do
+            local i = 0
+            while i < count do
+                local ____gameState_particles_0 = gameState.particles
+                ____gameState_particles_0[#____gameState_particles_0 + 1] = {
+                    x = centerX,
+                    y = centerY,
+                    vx = (math.random() - 0.5) * 5,
+                    vy = (math.random() - 0.5) * 5,
+                    size = 1 + math.floor(math.random() * 3),
+                    life = 15 + math.floor(math.random() * 15)
+                }
+                i = i + 1
+            end
+        end
+    end,
+    updateParticles = function()
+        do
+            local i = #gameState.particles - 1
+            while i >= 0 do
+                local p = gameState.particles[i + 1]
+                p.x = p.x + p.vx
+                p.y = p.y + p.vy
+                p.life = p.life - 1
+                p.vy = p.vy + 0.2
+                if p.life <= 0 then
+                    __TS__ArraySplice(gameState.particles, i, 1)
+                end
+                i = i - 1
+            end
+        end
+    end,
     recalculateBoldMask = function()
         gameState.detectedNames = {}
         local cellCounts = __TS__ArrayFrom(
@@ -24981,8 +25023,8 @@ ____exports.GameLogic = {
                             do
                                 local i = 0
                                 while i < #name do
-                                    local ____instance_cells_0 = instance.cells
-                                    ____instance_cells_0[#____instance_cells_0 + 1] = {x = startIndex + i, y = r}
+                                    local ____instance_cells_1 = instance.cells
+                                    ____instance_cells_1[#____instance_cells_1 + 1] = {x = startIndex + i, y = r}
                                     i = i + 1
                                 end
                             end
@@ -25031,8 +25073,8 @@ ____exports.GameLogic = {
                             do
                                 local i = 0
                                 while i < #name do
-                                    local ____instance_cells_1 = instance.cells
-                                    ____instance_cells_1[#____instance_cells_1 + 1] = {x = c, y = startIndex + i}
+                                    local ____instance_cells_2 = instance.cells
+                                    ____instance_cells_2[#____instance_cells_2 + 1] = {x = c, y = startIndex + i}
                                     i = i + 1
                                 end
                             end
@@ -25056,8 +25098,8 @@ ____exports.GameLogic = {
                     name.cells,
                     function(____, cell)
                         gameState.boldMask[cell.y + 1][cell.x + 1] = true
-                        local ____cellCounts_index_2, ____temp_3 = cellCounts[cell.y + 1], cell.x + 1
-                        ____cellCounts_index_2[____temp_3] = ____cellCounts_index_2[____temp_3] + 1
+                        local ____cellCounts_index_3, ____temp_4 = cellCounts[cell.y + 1], cell.x + 1
+                        ____cellCounts_index_3[____temp_4] = ____cellCounts_index_3[____temp_4] + 1
                     end
                 )
             end
@@ -25079,9 +25121,9 @@ ____exports.GameLogic = {
         end
     end,
     checkNameMatch = function()
-        local ____gameState_4 = gameState
-        local mode = ____gameState_4.mode
-        local cursor = ____gameState_4.cursor
+        local ____gameState_5 = gameState
+        local mode = ____gameState_5.mode
+        local cursor = ____gameState_5.cursor
         if mode ~= "name" then
             gameState.mode = "name"
             return
@@ -25132,6 +25174,7 @@ ____exports.GameLogic = {
             local x = __TS__ParseInt(xStr)
             local y = __TS__ParseInt(yStr)
             if gameState.grid[y + 1][x + 1] ~= FROZEN_CELL then
+                ____exports.GameLogic:spawnExplosion(x, y)
                 gameState.grid[y + 1][x + 1] = randomChar(nil)
             end
         end)
@@ -25144,6 +25187,7 @@ ____exports.GameLogic = {
         gameState.freezeTimer = 0
         gameState.freezeThreshold = INITIAL_FREEZE_THRESHOLD
         gameState.cursor = {x = 0, y = 0}
+        gameState.particles = {}
         ____exports.GameLogic:recalculateBoldMask()
     end,
     updateFreeze = function()
@@ -25173,6 +25217,7 @@ ____exports.GameLogic = {
             if #validSpots > 0 then
                 local randomSpot = validSpots[math.floor(math.random() * #validSpots) + 1]
                 gameState.grid[randomSpot.r + 1][randomSpot.c + 1] = FROZEN_CELL
+                ____exports.GameLogic:spawnExplosion(randomSpot.c, randomSpot.r)
                 ____exports.GameLogic:recalculateBoldMask()
                 if #validSpots == 1 then
                     gameState.gameOver = true
@@ -25190,10 +25235,10 @@ ____exports.GameLogic = {
             else
                 gameState.crankAccumulator = gameState.crankAccumulator + 360
             end
-            local ____gameState_5 = gameState
-            local mode = ____gameState_5.mode
-            local cursor = ____gameState_5.cursor
-            local grid = ____gameState_5.grid
+            local ____gameState_6 = gameState
+            local mode = ____gameState_6.mode
+            local cursor = ____gameState_6.cursor
+            local grid = ____gameState_6.grid
             if mode == "row" then
                 grid[cursor.y + 1] = shuffleArray(nil, grid[cursor.y + 1])
             elseif mode == "column" then
@@ -25219,8 +25264,8 @@ ____exports.GameLogic = {
         elseif gameState.mode == "row" then
             local first = table.remove(gameState.grid[gameState.cursor.y + 1], 1)
             if first then
-                local ____gameState_grid_index_6 = gameState.grid[gameState.cursor.y + 1]
-                ____gameState_grid_index_6[#____gameState_grid_index_6 + 1] = first
+                local ____gameState_grid_index_7 = gameState.grid[gameState.cursor.y + 1]
+                ____gameState_grid_index_7[#____gameState_grid_index_7 + 1] = first
             end
             ____exports.GameLogic:recalculateBoldMask()
         else
@@ -25501,6 +25546,13 @@ ____exports.drawGame = function()
             r = r + 1
         end
     end
+    playdate.graphics.setColor(PlaydateColor.Black)
+    __TS__ArrayForEach(
+        gameState.particles,
+        function(____, p)
+            playdate.graphics.fillRect(p.x, p.y, p.size, p.size)
+        end
+    )
 end
 return ____exports
  end,
@@ -25762,6 +25814,7 @@ GameLogic:recalculateBoldMask()
 playdate.inputHandlers.push(inputHandler)
 playdate.update = function()
     GameLogic:updateFreeze()
+    GameLogic:updateParticles()
     drawGame(nil)
 end
 return ____exports

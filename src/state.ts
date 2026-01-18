@@ -10,6 +10,7 @@ export const gameState: GameState = {
     Array.from({ length: COLS }, () => false),
   ),
   detectedNames: [],
+  particles: [],
   mode: "column",
   cursor: { x: 0, y: 0 },
   score: 0,

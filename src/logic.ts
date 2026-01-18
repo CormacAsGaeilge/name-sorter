@@ -7,11 +7,15 @@ import {
   INITIAL_FREEZE_THRESHOLD,
   MIN_FREEZE_THRESHOLD,
   FREEZE_DECREMENT,
+  GRID_OFFSET_X,
+  GRID_OFFSET_Y,
+  CELL_WIDTH,
+  CELL_HEIGHT, // Import layout for particles
 } from "./constants";
 import { randomChar, shuffleArray, createInitialGrid } from "./grid";
 import { NameInstance, Point } from "./types";
 
-// Helper: Check if two names intersect (share any cell)
+// ... (Keep existing helpers: doNamesIntersect, calculateOverlap, filterMatches) ...
 const doNamesIntersect = (a: NameInstance, b: NameInstance) => {
   for (const cellA of a.cells) {
     for (const cellB of b.cells) {
@@ -21,7 +25,6 @@ const doNamesIntersect = (a: NameInstance, b: NameInstance) => {
   return false;
 };
 
-// Helper: Calculate overlap count between two instances
 const calculateOverlap = (a: NameInstance, b: NameInstance) => {
   let overlap = 0;
   for (const cellA of a.cells) {
@@ -32,12 +35,9 @@ const calculateOverlap = (a: NameInstance, b: NameInstance) => {
   return overlap;
 };
 
-// Helper: Filter matches based on the "Max 1 Char Overlap" Rule
 const filterMatches = (matches: NameInstance[]) => {
   matches.sort((a, b) => b.text.length - a.text.length);
-
   const accepted: NameInstance[] = [];
-
   for (const candidate of matches) {
     let rejected = false;
     for (const existing of accepted) {
@@ -47,18 +47,52 @@ const filterMatches = (matches: NameInstance[]) => {
         break;
       }
     }
-    if (!rejected) {
-      accepted.push(candidate);
-    }
+    if (!rejected) accepted.push(candidate);
   }
   return accepted;
 };
 
 export const GameLogic = {
+  // --- NEW: Particle Logic ---
+  spawnExplosion: (c: number, r: number) => {
+    // Calculate center of the cell in pixels
+    const centerX = GRID_OFFSET_X + c * CELL_WIDTH + CELL_WIDTH / 2;
+    const centerY = GRID_OFFSET_Y + r * CELL_HEIGHT + CELL_HEIGHT / 2;
+
+    // Spawn 8-12 particles per cell
+    const count = 8 + Math.floor(Math.random() * 4);
+    for (let i = 0; i < count; i++) {
+      gameState.particles.push({
+        x: centerX,
+        y: centerY,
+        vx: (Math.random() - 0.5) * 5, // Random X speed
+        vy: (Math.random() - 0.5) * 5, // Random Y speed
+        size: 1 + Math.floor(Math.random() * 3), // Random Size (1-3px)
+        life: 15 + Math.floor(Math.random() * 15), // Random Life (0.5 - 1 sec)
+      });
+    }
+  },
+
+  updateParticles: () => {
+    for (let i = gameState.particles.length - 1; i >= 0; i--) {
+      const p = gameState.particles[i];
+      p.x += p.vx;
+      p.y += p.vy;
+      p.life--;
+
+      // Gravity effect (optional, makes debris fall)
+      p.vy += 0.2;
+
+      // Remove dead particles
+      if (p.life <= 0) {
+        gameState.particles.splice(i, 1);
+      }
+    }
+  },
+
   recalculateBoldMask: () => {
-    // 1. Reset State
+    // ... (Keep existing implementation identical) ...
     gameState.detectedNames = [];
-    // FIX: Use Array.from instead of Array() constructor
     const cellCounts = Array.from({ length: ROWS }, () =>
       Array.from({ length: COLS }, () => 0),
     );
@@ -72,11 +106,10 @@ export const GameLogic = {
 
     const allMatches: NameInstance[] = [];
 
-    // 2. Scan Rows
+    // Scan Rows
     for (let r = 0; r < ROWS; r++) {
       const rowStr = gameState.grid[r].join("");
       const rowMatches: NameInstance[] = [];
-
       NAMES_TO_FIND.forEach((name) => {
         let startIndex = 0;
         while ((startIndex = rowStr.indexOf(name, startIndex)) > -1) {
@@ -85,22 +118,19 @@ export const GameLogic = {
             cells: [],
             id: `R-${r}-${startIndex}-${name}`,
           };
-          for (let i = 0; i < name.length; i++) {
+          for (let i = 0; i < name.length; i++)
             instance.cells.push({ x: startIndex + i, y: r });
-          }
           rowMatches.push(instance);
           startIndex += 1;
         }
       });
-
       allMatches.push(...filterMatches(rowMatches));
     }
 
-    // 3. Scan Columns
+    // Scan Columns
     for (let c = 0; c < COLS; c++) {
       const colStr = gameState.grid.map((row) => row[c]).join("");
       const colMatches: NameInstance[] = [];
-
       NAMES_TO_FIND.forEach((name) => {
         let startIndex = 0;
         while ((startIndex = colStr.indexOf(name, startIndex)) > -1) {
@@ -109,20 +139,16 @@ export const GameLogic = {
             cells: [],
             id: `C-${c}-${startIndex}-${name}`,
           };
-          for (let i = 0; i < name.length; i++) {
+          for (let i = 0; i < name.length; i++)
             instance.cells.push({ x: c, y: startIndex + i });
-          }
           colMatches.push(instance);
           startIndex += 1;
         }
       });
-
       allMatches.push(...filterMatches(colMatches));
     }
 
-    // 4. Update State based on filtered matches
     gameState.detectedNames = allMatches;
-
     allMatches.forEach((name) => {
       name.cells.forEach((cell) => {
         gameState.boldMask[cell.y][cell.x] = true;
@@ -130,12 +156,9 @@ export const GameLogic = {
       });
     });
 
-    // 5. Identify Intersections
     for (let r = 0; r < ROWS; r++) {
       for (let c = 0; c < COLS; c++) {
-        if (cellCounts[r][c] > 1) {
-          gameState.intersections[r][c] = true;
-        }
+        if (cellCounts[r][c] > 1) gameState.intersections[r][c] = true;
       }
     }
   },
@@ -169,7 +192,6 @@ export const GameLogic = {
       }
     }
 
-    // Scoring
     const cellsToScramble = new Set<string>();
     let chainScore = 0;
 
@@ -181,8 +203,6 @@ export const GameLogic = {
     if (chain.size > 1) chainScore += (chain.size - 1) * 50;
 
     gameState.score += chainScore;
-
-    // --- NEW: Rewind Freeze Timer by 50% ---
     gameState.freezeTimer = Math.floor(gameState.freezeTimer * 0.5);
 
     cellsToScramble.forEach((key) => {
@@ -190,6 +210,9 @@ export const GameLogic = {
       const x = parseInt(xStr);
       const y = parseInt(yStr);
       if (gameState.grid[y][x] !== FROZEN_CELL) {
+        // --- NEW: Spawn Particles before destroying the cell ---
+        GameLogic.spawnExplosion(x, y);
+
         gameState.grid[y][x] = randomChar();
       }
     });
@@ -197,6 +220,7 @@ export const GameLogic = {
     GameLogic.recalculateBoldMask();
   },
 
+  // ... (Keep resetGame, updateFreeze, processCrank, and navigation handlers exactly as they were) ...
   resetGame: () => {
     gameState.grid = createInitialGrid();
     gameState.score = 0;
@@ -204,6 +228,7 @@ export const GameLogic = {
     gameState.freezeTimer = 0;
     gameState.freezeThreshold = INITIAL_FREEZE_THRESHOLD;
     gameState.cursor = { x: 0, y: 0 };
+    gameState.particles = []; // Clear particles
     GameLogic.recalculateBoldMask();
   },
 
@@ -228,6 +253,10 @@ export const GameLogic = {
         const randomSpot =
           validSpots[Math.floor(Math.random() * validSpots.length)];
         gameState.grid[randomSpot.r][randomSpot.c] = FROZEN_CELL;
+
+        // Optional: Explode frozen block too?
+        GameLogic.spawnExplosion(randomSpot.c, randomSpot.r);
+
         GameLogic.recalculateBoldMask();
         if (validSpots.length === 1) gameState.gameOver = true;
       } else {
@@ -236,6 +265,7 @@ export const GameLogic = {
     }
   },
 
+  // (Include processCrank, handleLeft, handleRight, handleUp, handleDown, toggleMode here...)
   processCrank: (change: number) => {
     gameState.crankAccumulator += change;
     if (Math.abs(gameState.crankAccumulator) >= 360) {

@@ -106,7 +106,6 @@ export const drawGame = () => {
   playdate.graphics.drawText(`Mode: ${gameState.mode.toUpperCase()}`, 10, 30);
 
   // --- PROGRESS BAR ---
-  // Moved down to +25 to avoid overlapping with the bottom caret
   const barX = GRID_OFFSET_X;
   const barY = GRID_OFFSET_Y + ROWS * CELL_HEIGHT + 25;
   const barWidth = COLS * CELL_WIDTH;
@@ -201,4 +200,11 @@ export const drawGame = () => {
       }
     }
   }
+
+  // --- LAYER 4: PARTICLES (Top Layer) ---
+  playdate.graphics.setColor(PlaydateColor.Black);
+  gameState.particles.forEach((p) => {
+    // Draw a small square for each particle
+    playdate.graphics.fillRect(p.x, p.y, p.size, p.size);
+  });
 };

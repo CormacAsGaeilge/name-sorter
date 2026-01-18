@@ -5,6 +5,15 @@ export interface Point {
   y: number;
 }
 
+export interface Particle {
+  x: number;
+  y: number;
+  vx: number;
+  vy: number;
+  size: number;
+  life: number;
+}
+
 export interface NameInstance {
   text: string;
   cells: Point[];
@@ -16,6 +25,7 @@ export interface GameState {
   boldMask: boolean[][];
   intersections: boolean[][];
   detectedNames: NameInstance[];
+  particles: Particle[];
   mode: Mode;
   cursor: Point;
   score: number;
