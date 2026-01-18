@@ -1,0 +1,43 @@
+# macOS
+.DS_Store
+
+# Playdate SDK build artifacts
+build/
+*.pdx
+
+# Node.js (if using for tooling)
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Logs
+*.log
+
+# Environment files
+.env
+.env.*
+
+# VSCode settings
+.vscode/
+
+# OS generated files
+Thumbs.db
+ehthumbs.db
+Icon?
+._*
+
+# Backup files
+*.bak
+*.tmp
+*.swp
+*.swo
+*~
+
+# Playdate Simulator preferences
+*.ini
+*.zip
+*.js
+
+!dist-web/**/*.js
+
