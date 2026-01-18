@@ -16,14 +16,17 @@ import {
 } from "./constants";
 
 export const drawGame = () => {
+  // 1. RESET GRAPHICS STATE (Fixes Bug #1: UI Disappearing)
   playdate.graphics.clear(PlaydateColor.White);
+  playdate.graphics.setColor(PlaydateColor.Black);
+  playdate.graphics.setImageDrawMode(PlaydateDrawMode.FillBlack);
 
   // --- GAME OVER SCREEN ---
   if (gameState.gameOver) {
     playdate.graphics.drawText(`GAME OVER`, 150, 100);
     playdate.graphics.drawText(`Final Score: ${gameState.score}`, 140, 130);
     playdate.graphics.drawText(`Press A to Restart`, 130, 160);
-    return; // Stop drawing the rest
+    return;
   }
 
   // --- HUD ---
@@ -31,16 +34,13 @@ export const drawGame = () => {
   playdate.graphics.drawText(`Mode: ${gameState.mode.toUpperCase()}`, 10, 30);
 
   // --- PROGRESS BAR ---
-  // Draw below the grid
   const barX = GRID_OFFSET_X;
   const barY = GRID_OFFSET_Y + ROWS * CELL_HEIGHT + 10;
   const barWidth = COLS * CELL_WIDTH;
   const barHeight = 5;
 
-  // Background Frame
   playdate.graphics.drawRect(barX, barY, barWidth, barHeight);
 
-  // Fill (percentage of timer)
   const fillPercent = gameState.freezeTimer / gameState.freezeThreshold;
   const fillWidth = Math.floor(barWidth * fillPercent);
   if (fillWidth > 0) {
@@ -51,10 +51,10 @@ export const drawGame = () => {
   for (let r = 0; r < ROWS; r++) {
     for (let c = 0; c < COLS; c++) {
       const char = gameState.grid[r][c];
-      const x = GRID_OFFSET_X + c * CELL_WIDTH;
-      const y = GRID_OFFSET_Y + r * CELL_HEIGHT;
+      const cellX = GRID_OFFSET_X + c * CELL_WIDTH;
+      const cellY = GRID_OFFSET_Y + r * CELL_HEIGHT;
 
-      // Highlight Logic
+      // Determine Highlight State
       let isHighlighted = false;
       if (gameState.mode === "column" && c === gameState.cursor.x)
         isHighlighted = true;
@@ -67,33 +67,46 @@ export const drawGame = () => {
       )
         isHighlighted = true;
 
-      // DRAWING LOGIC
       if (char === FROZEN_CELL) {
-        // 1. FROZEN BLOCK
+        // --- FROZEN BLOCK RENDER ---
         playdate.graphics.setColor(PlaydateColor.Black);
-        // Draw full black square
+        // Draw a box padded by 2px on all sides (Centered)
         playdate.graphics.fillRect(
-          x + 2,
-          y + 2,
+          cellX + 2,
+          cellY + 2,
           CELL_WIDTH - 4,
           CELL_HEIGHT - 4,
         );
 
-        // If cursor is here, we invert it so you can see selection
+        // If cursor is here, draw a white border so we can see selection
         if (isHighlighted) {
           playdate.graphics.setColor(PlaydateColor.White);
-          playdate.graphics.drawRect(x, y, CELL_WIDTH, CELL_HEIGHT); // Selection Border
+          playdate.graphics.drawRect(
+            cellX + 4,
+            cellY + 4,
+            CELL_WIDTH - 8,
+            CELL_HEIGHT - 8,
+          );
         }
       } else {
-        // 2. NORMAL LETTER
+        // --- TEXT RENDER ---
+
+        // Draw Highlight Background (Centered)
         if (isHighlighted) {
           playdate.graphics.setColor(PlaydateColor.Black);
-          playdate.graphics.fillRect(x - 2, y - 2, 20, 20);
+          // Draw box with 2px padding inside the cell
+          playdate.graphics.fillRect(
+            cellX + 2,
+            cellY + 2,
+            CELL_WIDTH - 4,
+            CELL_HEIGHT - 4,
+          );
           playdate.graphics.setImageDrawMode(PlaydateDrawMode.FillWhite);
         } else {
           playdate.graphics.setImageDrawMode(PlaydateDrawMode.FillBlack);
         }
 
+        // Set Font
         if (gameState.boldMask[r][c]) {
           playdate.graphics.setFont(
             playdate.graphics.getSystemFont(PlaydateFontVariant.Bold),
@@ -103,7 +116,13 @@ export const drawGame = () => {
             playdate.graphics.getSystemFont(PlaydateFontVariant.Normal),
           );
         }
-        playdate.graphics.drawText(char, x, y);
+
+        // CENTERING LOGIC (Fixes Bug #2: Off-center text)
+        const [textW, textH] = playdate.graphics.getTextSize(char);
+        const textX = cellX + (CELL_WIDTH - textW) / 2;
+        const textY = cellY + (CELL_HEIGHT - textH) / 2;
+
+        playdate.graphics.drawText(char, textX, textY);
       }
     }
   }

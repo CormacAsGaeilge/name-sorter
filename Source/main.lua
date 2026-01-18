@@ -24845,9 +24845,9 @@ return ____exports
  end,
 ["src.logic"] = function(...) 
 local ____lualib = require("lualib_bundle")
+local __TS__ArrayForEach = ____lualib.__TS__ArrayForEach
 local __TS__ArrayMap = ____lualib.__TS__ArrayMap
 local __TS__StringIncludes = ____lualib.__TS__StringIncludes
-local __TS__ArrayForEach = ____lualib.__TS__ArrayForEach
 local __TS__ArrayFrom = ____lualib.__TS__ArrayFrom
 local __TS__ArrayUnshift = ____lualib.__TS__ArrayUnshift
 local ____exports = {}
@@ -24866,97 +24866,6 @@ local randomChar = ____grid.randomChar
 local shuffleArray = ____grid.shuffleArray
 local createInitialGrid = ____grid.createInitialGrid
 ____exports.GameLogic = {
-    toggleMode = function()
-        if gameState.mode == "column" then
-            gameState.mode = "row"
-        elseif gameState.mode == "row" then
-            gameState.mode = "column"
-        else
-            gameState.mode = "column"
-        end
-    end,
-    checkNameMatch = function()
-        local ____gameState_0 = gameState
-        local mode = ____gameState_0.mode
-        local grid = ____gameState_0.grid
-        local cursor = ____gameState_0.cursor
-        if mode == "column" or mode == "row" then
-            gameState.mode = "name"
-            return
-        end
-        if mode == "name" then
-            local rowStr = table.concat(grid[cursor.y + 1], "")
-            local colStr = table.concat(
-                __TS__ArrayMap(
-                    grid,
-                    function(____, row) return row[cursor.x + 1] end
-                ),
-                ""
-            )
-            local foundRow = false
-            local foundCol = false
-            __TS__ArrayForEach(
-                NAMES_TO_FIND,
-                function(____, name)
-                    if __TS__StringIncludes(rowStr, name) then
-                        foundRow = true
-                    end
-                    if __TS__StringIncludes(colStr, name) then
-                        foundCol = true
-                    end
-                end
-            )
-            if foundRow or foundCol then
-                gameState.score = gameState.score + 100
-                if foundRow then
-                    grid[cursor.y + 1] = __TS__ArrayFrom(
-                        {length = COLS},
-                        function() return randomChar(nil) end
-                    )
-                end
-                if foundCol then
-                    do
-                        local r = 0
-                        while r < ROWS do
-                            grid[r + 1][cursor.x + 1] = randomChar(nil)
-                            r = r + 1
-                        end
-                    end
-                end
-                gameState.mode = "column"
-            end
-        end
-    end,
-    processCrank = function(____, change)
-        gameState.crankAccumulator = gameState.crankAccumulator + change
-        if math.abs(gameState.crankAccumulator) >= 360 then
-            if gameState.crankAccumulator > 0 then
-                gameState.crankAccumulator = gameState.crankAccumulator - 360
-            else
-                gameState.crankAccumulator = gameState.crankAccumulator + 360
-            end
-            local ____gameState_1 = gameState
-            local mode = ____gameState_1.mode
-            local cursor = ____gameState_1.cursor
-            local grid = ____gameState_1.grid
-            if mode == "row" then
-                grid[cursor.y + 1] = shuffleArray(nil, grid[cursor.y + 1])
-            elseif mode == "column" then
-                local col = __TS__ArrayMap(
-                    grid,
-                    function(____, row) return row[cursor.x + 1] end
-                )
-                local shuffledCol = shuffleArray(nil, col)
-                do
-                    local r = 0
-                    while r < ROWS do
-                        grid[r + 1][cursor.x + 1] = shuffledCol[r + 1]
-                        r = r + 1
-                    end
-                end
-            end
-        end
-    end,
     recalculateBoldMask = function()
         do
             local r = 0
@@ -25049,6 +24958,7 @@ ____exports.GameLogic = {
         gameState.freezeTimer = 0
         gameState.freezeThreshold = INITIAL_FREEZE_THRESHOLD
         gameState.cursor = {x = 0, y = 0}
+        ____exports.GameLogic:recalculateBoldMask()
     end,
     updateFreeze = function()
         if gameState.gameOver then
@@ -25077,12 +24987,96 @@ ____exports.GameLogic = {
             if #validSpots > 0 then
                 local randomSpot = validSpots[math.floor(math.random() * #validSpots) + 1]
                 gameState.grid[randomSpot.r + 1][randomSpot.c + 1] = FROZEN_CELL
+                ____exports.GameLogic:recalculateBoldMask()
                 if #validSpots == 1 then
                     gameState.gameOver = true
                 end
             else
                 gameState.gameOver = true
             end
+        end
+    end,
+    checkNameMatch = function()
+        local ____gameState_0 = gameState
+        local mode = ____gameState_0.mode
+        local grid = ____gameState_0.grid
+        local cursor = ____gameState_0.cursor
+        if mode == "column" or mode == "row" then
+            gameState.mode = "name"
+            return
+        end
+        if mode == "name" then
+            local rowStr = table.concat(grid[cursor.y + 1], "")
+            local colStr = table.concat(
+                __TS__ArrayMap(
+                    grid,
+                    function(____, row) return row[cursor.x + 1] end
+                ),
+                ""
+            )
+            local foundRow = false
+            local foundCol = false
+            __TS__ArrayForEach(
+                NAMES_TO_FIND,
+                function(____, name)
+                    if __TS__StringIncludes(rowStr, name) then
+                        foundRow = true
+                    end
+                    if __TS__StringIncludes(colStr, name) then
+                        foundCol = true
+                    end
+                end
+            )
+            if foundRow or foundCol then
+                gameState.score = gameState.score + 100
+                if foundRow then
+                    grid[cursor.y + 1] = __TS__ArrayFrom(
+                        {length = COLS},
+                        function() return randomChar(nil) end
+                    )
+                end
+                if foundCol then
+                    do
+                        local r = 0
+                        while r < ROWS do
+                            grid[r + 1][cursor.x + 1] = randomChar(nil)
+                            r = r + 1
+                        end
+                    end
+                end
+                ____exports.GameLogic:recalculateBoldMask()
+            end
+        end
+    end,
+    processCrank = function(____, change)
+        gameState.crankAccumulator = gameState.crankAccumulator + change
+        if math.abs(gameState.crankAccumulator) >= 360 then
+            if gameState.crankAccumulator > 0 then
+                gameState.crankAccumulator = gameState.crankAccumulator - 360
+            else
+                gameState.crankAccumulator = gameState.crankAccumulator + 360
+            end
+            local ____gameState_1 = gameState
+            local mode = ____gameState_1.mode
+            local cursor = ____gameState_1.cursor
+            local grid = ____gameState_1.grid
+            if mode == "row" then
+                grid[cursor.y + 1] = shuffleArray(nil, grid[cursor.y + 1])
+            elseif mode == "column" then
+                local col = __TS__ArrayMap(
+                    grid,
+                    function(____, row) return row[cursor.x + 1] end
+                )
+                local shuffledCol = shuffleArray(nil, col)
+                do
+                    local r = 0
+                    while r < ROWS do
+                        grid[r + 1][cursor.x + 1] = shuffledCol[r + 1]
+                        r = r + 1
+                    end
+                end
+            end
+            ____exports.GameLogic:recalculateBoldMask()
         end
     end,
     handleLeft = function()
@@ -25094,6 +25088,7 @@ ____exports.GameLogic = {
                 local ____gameState_grid_index_2 = gameState.grid[gameState.cursor.y + 1]
                 ____gameState_grid_index_2[#____gameState_grid_index_2 + 1] = first
             end
+            ____exports.GameLogic:recalculateBoldMask()
         else
             gameState.cursor.x = (gameState.cursor.x - 1 + COLS) % COLS
         end
@@ -25106,6 +25101,7 @@ ____exports.GameLogic = {
             if last then
                 __TS__ArrayUnshift(gameState.grid[gameState.cursor.y + 1], last)
             end
+            ____exports.GameLogic:recalculateBoldMask()
         else
             gameState.cursor.x = (gameState.cursor.x + 1) % COLS
         end
@@ -25121,6 +25117,7 @@ ____exports.GameLogic = {
                 end
             end
             gameState.grid[ROWS][gameState.cursor.x + 1] = topChar
+            ____exports.GameLogic:recalculateBoldMask()
         else
             gameState.cursor.y = (gameState.cursor.y - 1 + ROWS) % ROWS
         end
@@ -25136,8 +25133,18 @@ ____exports.GameLogic = {
                 end
             end
             gameState.grid[1][gameState.cursor.x + 1] = bottomChar
+            ____exports.GameLogic:recalculateBoldMask()
         else
             gameState.cursor.y = (gameState.cursor.y + 1) % ROWS
+        end
+    end,
+    toggleMode = function()
+        if gameState.mode == "column" then
+            gameState.mode = "row"
+        elseif gameState.mode == "row" then
+            gameState.mode = "column"
+        else
+            gameState.mode = "column"
         end
     end
 }
@@ -25211,6 +25218,8 @@ local GRID_OFFSET_Y = ____constants.GRID_OFFSET_Y
 local FROZEN_CELL = ____constants.FROZEN_CELL
 ____exports.drawGame = function()
     playdate.graphics.clear(PlaydateColor.White)
+    playdate.graphics.setColor(PlaydateColor.Black)
+    playdate.graphics.setImageDrawMode(PlaydateDrawMode.FillBlack)
     if gameState.gameOver then
         playdate.graphics.drawText("GAME OVER", 150, 100)
         playdate.graphics.drawText(
@@ -25248,8 +25257,8 @@ ____exports.drawGame = function()
                 local c = 0
                 while c < COLS do
                     local char = gameState.grid[r + 1][c + 1]
-                    local x = GRID_OFFSET_X + c * CELL_WIDTH
-                    local y = GRID_OFFSET_Y + r * CELL_HEIGHT
+                    local cellX = GRID_OFFSET_X + c * CELL_WIDTH
+                    local cellY = GRID_OFFSET_Y + r * CELL_HEIGHT
                     local isHighlighted = false
                     if gameState.mode == "column" and c == gameState.cursor.x then
                         isHighlighted = true
@@ -25262,15 +25271,15 @@ ____exports.drawGame = function()
                     end
                     if char == FROZEN_CELL then
                         playdate.graphics.setColor(PlaydateColor.Black)
-                        playdate.graphics.fillRect(x + 2, y + 2, CELL_WIDTH - 4, CELL_HEIGHT - 4)
+                        playdate.graphics.fillRect(cellX + 2, cellY + 2, CELL_WIDTH - 4, CELL_HEIGHT - 4)
                         if isHighlighted then
                             playdate.graphics.setColor(PlaydateColor.White)
-                            playdate.graphics.drawRect(x, y, CELL_WIDTH, CELL_HEIGHT)
+                            playdate.graphics.drawRect(cellX + 4, cellY + 4, CELL_WIDTH - 8, CELL_HEIGHT - 8)
                         end
                     else
                         if isHighlighted then
                             playdate.graphics.setColor(PlaydateColor.Black)
-                            playdate.graphics.fillRect(x - 2, y - 2, 20, 20)
+                            playdate.graphics.fillRect(cellX + 2, cellY + 2, CELL_WIDTH - 4, CELL_HEIGHT - 4)
                             playdate.graphics.setImageDrawMode(PlaydateDrawMode.FillWhite)
                         else
                             playdate.graphics.setImageDrawMode(PlaydateDrawMode.FillBlack)
@@ -25280,7 +25289,10 @@ ____exports.drawGame = function()
                         else
                             playdate.graphics.setFont(playdate.graphics.getSystemFont(PlaydateFontVariant.Normal))
                         end
-                        playdate.graphics.drawText(char, x, y)
+                        local textW, textH = playdate.graphics.getTextSize(char)
+                        local textX = cellX + (CELL_WIDTH - textW) / 2
+                        local textY = cellY + (CELL_HEIGHT - textH) / 2
+                        playdate.graphics.drawText(char, textX, textY)
                     end
                     c = c + 1
                 end
