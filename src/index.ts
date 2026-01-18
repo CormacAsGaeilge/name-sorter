@@ -1,8 +1,4 @@
-import {
-  PlaydateColor,
-  PlaydateDrawMode,
-  PlaydateFontVariant,
-} from "@crankscript/core";
+import { PlaydateColor, PlaydateDrawMode } from "@crankscript/core";
 import {
   ROWS,
   COLS,
@@ -13,30 +9,20 @@ import {
   GRID_OFFSET_Y,
 } from "./constants";
 
-// --- State Definitions ---
-type Mode = "column" | "row" | "name";
-
-let grid: string[][] = [];
-let mode: Mode = "column";
-let cursor = { x: 0, y: 0 };
-let score = 0;
-
-// New state for tracking crank rotation
-let crankAccumulator = 0;
-// Optional: Chaos counter if you want tiles to randomise over time
-let chaosCounter = 0;
+// NEW IMPORTS
+import { gameState } from "./state";
 
 // --- Helper Functions ---
 const randomChar = () =>
   String.fromCharCode(65 + Math.floor(Math.random() * 26));
 
 const initGrid = () => {
-  grid = Array.from({ length: ROWS }, () =>
+  // Update state directly
+  gameState.grid = Array.from({ length: ROWS }, () =>
     Array.from({ length: COLS }, () => randomChar()),
   );
 };
 
-// Helper to shuffle an array (Fisher-Yates algorithm)
 const shuffleArray = (array: string[]) => {
   const newArr = [...array];
   for (let i = newArr.length - 1; i > 0; i--) {
@@ -52,13 +38,16 @@ initGrid();
 // --- Input Handling ---
 const inputHandler = {
   BButtonDown: () => {
-    if (mode === "column") mode = "row";
-    else if (mode === "row") mode = "column";
-    else mode = "column";
+    // Access state via gameState
+    if (gameState.mode === "column") gameState.mode = "row";
+    else if (gameState.mode === "row") gameState.mode = "column";
+    else gameState.mode = "column";
   },
   AButtonDown: () => {
+    const { mode, grid, cursor } = gameState; // Destructure for cleaner reading
+
     if (mode === "column" || mode === "row") {
-      mode = "name";
+      gameState.mode = "name";
     } else if (mode === "name") {
       const rowStr = grid[cursor.y].join("");
       const colStr = grid.map((row) => row[cursor.x]).join("");
@@ -72,7 +61,7 @@ const inputHandler = {
       });
 
       if (foundRow || foundCol) {
-        score += 100;
+        gameState.score += 100;
         if (foundRow) {
           grid[cursor.y] = Array.from({ length: COLS }, () => randomChar());
         }
@@ -81,28 +70,26 @@ const inputHandler = {
             grid[r][cursor.x] = randomChar();
           }
         }
+        // Force mode reset if successful to keep game flowing
+        gameState.mode = "column";
       }
     }
   },
-  // --- NEW: Crank Handler ---
   cranked: (change: number, acceleratedChange: number) => {
-    // 'change' is the angle in degrees moved since the last frame
-    crankAccumulator += change;
+    gameState.crankAccumulator += change;
 
-    // Check if we have rotated 360 degrees (either direction)
-    if (Math.abs(crankAccumulator) >= 360) {
-      crankAccumulator = 0; // Reset the accumulator
+    if (Math.abs(gameState.crankAccumulator) >= 360) {
+      // Logic for 360 rotation...
+      if (gameState.crankAccumulator > 0) gameState.crankAccumulator -= 360;
+      else gameState.crankAccumulator += 360;
 
-      // Shuffle based on the current mode
+      const { mode, cursor, grid } = gameState;
+
       if (mode === "row") {
-        // Shuffle the selected row
         grid[cursor.y] = shuffleArray(grid[cursor.y]);
       } else if (mode === "column") {
-        // Shuffle the selected column
         const col = grid.map((row) => row[cursor.x]);
         const shuffledCol = shuffleArray(col);
-
-        // Write the shuffled column back to the grid
         for (let r = 0; r < ROWS; r++) {
           grid[r][cursor.x] = shuffledCol[r];
         }
@@ -110,74 +97,72 @@ const inputHandler = {
     }
   },
   leftButtonDown: () => {
-    if (mode === "column") {
-      cursor.x = (cursor.x - 1 + COLS) % COLS;
-    } else if (mode === "row") {
-      const first = grid[cursor.y].shift();
-      if (first) grid[cursor.y].push(first);
+    if (gameState.mode === "column") {
+      gameState.cursor.x = (gameState.cursor.x - 1 + COLS) % COLS;
+    } else if (gameState.mode === "row") {
+      const first = gameState.grid[gameState.cursor.y].shift();
+      if (first) gameState.grid[gameState.cursor.y].push(first);
     } else {
-      cursor.x = (cursor.x - 1 + COLS) % COLS;
+      gameState.cursor.x = (gameState.cursor.x - 1 + COLS) % COLS;
     }
   },
   rightButtonDown: () => {
-    if (mode === "column") {
-      cursor.x = (cursor.x + 1) % COLS;
-    } else if (mode === "row") {
-      const last = grid[cursor.y].pop();
-      if (last) grid[cursor.y].unshift(last);
+    if (gameState.mode === "column") {
+      gameState.cursor.x = (gameState.cursor.x + 1) % COLS;
+    } else if (gameState.mode === "row") {
+      const last = gameState.grid[gameState.cursor.y].pop();
+      if (last) gameState.grid[gameState.cursor.y].unshift(last);
     } else {
-      cursor.x = (cursor.x + 1) % COLS;
+      gameState.cursor.x = (gameState.cursor.x + 1) % COLS;
     }
   },
   upButtonDown: () => {
-    if (mode === "column") {
-      const topChar = grid[0][cursor.x];
+    if (gameState.mode === "column") {
+      const topChar = gameState.grid[0][gameState.cursor.x];
       for (let r = 0; r < ROWS - 1; r++) {
-        grid[r][cursor.x] = grid[r + 1][cursor.x];
+        gameState.grid[r][gameState.cursor.x] =
+          gameState.grid[r + 1][gameState.cursor.x];
       }
-      grid[ROWS - 1][cursor.x] = topChar;
+      gameState.grid[ROWS - 1][gameState.cursor.x] = topChar;
     } else {
-      cursor.y = (cursor.y - 1 + ROWS) % ROWS;
+      gameState.cursor.y = (gameState.cursor.y - 1 + ROWS) % ROWS;
     }
   },
   downButtonDown: () => {
-    if (mode === "column") {
-      const bottomChar = grid[ROWS - 1][cursor.x];
+    if (gameState.mode === "column") {
+      const bottomChar = gameState.grid[ROWS - 1][gameState.cursor.x];
       for (let r = ROWS - 1; r > 0; r--) {
-        grid[r][cursor.x] = grid[r - 1][cursor.x];
+        gameState.grid[r][gameState.cursor.x] =
+          gameState.grid[r - 1][gameState.cursor.x];
       }
-      grid[0][cursor.x] = bottomChar;
+      gameState.grid[0][gameState.cursor.x] = bottomChar;
     } else {
-      cursor.y = (cursor.y + 1) % ROWS;
+      gameState.cursor.y = (gameState.cursor.y + 1) % ROWS;
     }
   },
 };
 
-// Register the inputs
 playdate.inputHandlers.push(inputHandler as any);
 
 // --- Main Render Loop ---
 playdate.update = () => {
   playdate.graphics.clear(PlaydateColor.White);
 
-  // Entropy Logic: Randomly flip a tile every ~2 seconds
-  chaosCounter++;
-  if (chaosCounter > 300) {
-    // Loop through every column in the last row (ROWS - 1)
+  gameState.chaosCounter++;
+  if (gameState.chaosCounter > 300) {
     for (let c = 0; c < COLS; c++) {
-      grid[ROWS - 1][c] = randomChar();
+      gameState.grid[ROWS - 1][c] = randomChar();
     }
-    chaosCounter = 0; // Reset timer
+    gameState.chaosCounter = 0;
   }
 
   // Draw UI
-  playdate.graphics.drawText(`Score: ${score}`, 10, 10);
-  playdate.graphics.drawText(`Mode: ${mode.toUpperCase()}`, 10, 30);
+  playdate.graphics.drawText(`Score: ${gameState.score}`, 10, 10);
+  playdate.graphics.drawText(`Mode: ${gameState.mode.toUpperCase()}`, 10, 30);
 
-  // Draw Crank Indicator if accumulation is happening
-  if (Math.abs(crankAccumulator) > 10) {
+  if (Math.abs(gameState.crankAccumulator) > 10) {
     playdate.graphics.drawText(
-      `Crank: ${Math.floor(Math.abs(crankAccumulator))}`,
+      `Crank: ${Math.floor(Math.abs(gameState.crankAccumulator))}`,
       200,
       10,
     );
@@ -186,15 +171,20 @@ playdate.update = () => {
   // Draw Grid
   for (let r = 0; r < ROWS; r++) {
     for (let c = 0; c < COLS; c++) {
-      const char = grid[r][c];
+      const char = gameState.grid[r][c];
       const x = GRID_OFFSET_X + c * CELL_WIDTH;
       const y = GRID_OFFSET_Y + r * CELL_HEIGHT;
 
-      // Determine if highlighted
       let isHighlighted = false;
-      if (mode === "column" && c === cursor.x) isHighlighted = true;
-      if (mode === "row" && r === cursor.y) isHighlighted = true;
-      if (mode === "name" && r === cursor.y && c === cursor.x)
+      if (gameState.mode === "column" && c === gameState.cursor.x)
+        isHighlighted = true;
+      if (gameState.mode === "row" && r === gameState.cursor.y)
+        isHighlighted = true;
+      if (
+        gameState.mode === "name" &&
+        r === gameState.cursor.y &&
+        c === gameState.cursor.x
+      )
         isHighlighted = true;
 
       if (isHighlighted) {

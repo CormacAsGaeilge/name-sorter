@@ -24774,6 +24774,29 @@ ____exports.GRID_OFFSET_X = 50
 ____exports.GRID_OFFSET_Y = 60
 return ____exports
  end,
+["src.grid"] = function(...) 
+--[[ Generated with https://github.com/TypeScriptToLua/TypeScriptToLua ]]
+local ____exports = {}
+return ____exports
+ end,
+["src.types"] = function(...) 
+--[[ Generated with https://github.com/TypeScriptToLua/TypeScriptToLua ]]
+local ____exports = {}
+return ____exports
+ end,
+["src.state"] = function(...) 
+--[[ Generated with https://github.com/TypeScriptToLua/TypeScriptToLua ]]
+local ____exports = {}
+____exports.gameState = {
+    grid = {},
+    mode = "column",
+    cursor = {x = 0, y = 0},
+    score = 0,
+    crankAccumulator = 0,
+    chaosCounter = 0
+}
+return ____exports
+ end,
 ["src.index"] = function(...) 
 local ____lualib = require("lualib_bundle")
 local __TS__ArrayFrom = ____lualib.__TS__ArrayFrom
@@ -24793,17 +24816,13 @@ local CELL_WIDTH = ____constants.CELL_WIDTH
 local CELL_HEIGHT = ____constants.CELL_HEIGHT
 local GRID_OFFSET_X = ____constants.GRID_OFFSET_X
 local GRID_OFFSET_Y = ____constants.GRID_OFFSET_Y
-local grid = {}
-local mode = "column"
-local cursor = {x = 0, y = 0}
-local score = 0
-local crankAccumulator = 0
-local chaosCounter = 0
+local ____state = require("src.state")
+local gameState = ____state.gameState
 local function randomChar()
     return string.char(65 + math.floor(math.random() * 26))
 end
 local function initGrid()
-    grid = __TS__ArrayFrom(
+    gameState.grid = __TS__ArrayFrom(
         {length = ROWS},
         function() return __TS__ArrayFrom(
             {length = COLS},
@@ -24828,17 +24847,21 @@ end
 initGrid(nil)
 local inputHandler = {
     BButtonDown = function()
-        if mode == "column" then
-            mode = "row"
-        elseif mode == "row" then
-            mode = "column"
+        if gameState.mode == "column" then
+            gameState.mode = "row"
+        elseif gameState.mode == "row" then
+            gameState.mode = "column"
         else
-            mode = "column"
+            gameState.mode = "column"
         end
     end,
     AButtonDown = function()
+        local ____gameState_1 = gameState
+        local mode = ____gameState_1.mode
+        local grid = ____gameState_1.grid
+        local cursor = ____gameState_1.cursor
         if mode == "column" or mode == "row" then
-            mode = "name"
+            gameState.mode = "name"
         elseif mode == "name" then
             local rowStr = table.concat(grid[cursor.y + 1], "")
             local colStr = table.concat(
@@ -24862,7 +24885,7 @@ local inputHandler = {
                 end
             )
             if foundRow or foundCol then
-                score = score + 100
+                gameState.score = gameState.score + 100
                 if foundRow then
                     grid[cursor.y + 1] = __TS__ArrayFrom(
                         {length = COLS},
@@ -24878,13 +24901,22 @@ local inputHandler = {
                         end
                     end
                 end
+                gameState.mode = "column"
             end
         end
     end,
     cranked = function(____, change, acceleratedChange)
-        crankAccumulator = crankAccumulator + change
-        if math.abs(crankAccumulator) >= 360 then
-            crankAccumulator = 0
+        gameState.crankAccumulator = gameState.crankAccumulator + change
+        if math.abs(gameState.crankAccumulator) >= 360 then
+            if gameState.crankAccumulator > 0 then
+                gameState.crankAccumulator = gameState.crankAccumulator - 360
+            else
+                gameState.crankAccumulator = gameState.crankAccumulator + 360
+            end
+            local ____gameState_2 = gameState
+            local mode = ____gameState_2.mode
+            local cursor = ____gameState_2.cursor
+            local grid = ____gameState_2.grid
             if mode == "row" then
                 grid[cursor.y + 1] = shuffleArray(nil, grid[cursor.y + 1])
             elseif mode == "column" then
@@ -24904,88 +24936,88 @@ local inputHandler = {
         end
     end,
     leftButtonDown = function()
-        if mode == "column" then
-            cursor.x = (cursor.x - 1 + COLS) % COLS
-        elseif mode == "row" then
-            local first = table.remove(grid[cursor.y + 1], 1)
+        if gameState.mode == "column" then
+            gameState.cursor.x = (gameState.cursor.x - 1 + COLS) % COLS
+        elseif gameState.mode == "row" then
+            local first = table.remove(gameState.grid[gameState.cursor.y + 1], 1)
             if first then
-                local ____grid_index_1 = grid[cursor.y + 1]
-                ____grid_index_1[#____grid_index_1 + 1] = first
+                local ____gameState_grid_index_3 = gameState.grid[gameState.cursor.y + 1]
+                ____gameState_grid_index_3[#____gameState_grid_index_3 + 1] = first
             end
         else
-            cursor.x = (cursor.x - 1 + COLS) % COLS
+            gameState.cursor.x = (gameState.cursor.x - 1 + COLS) % COLS
         end
     end,
     rightButtonDown = function()
-        if mode == "column" then
-            cursor.x = (cursor.x + 1) % COLS
-        elseif mode == "row" then
-            local last = table.remove(grid[cursor.y + 1])
+        if gameState.mode == "column" then
+            gameState.cursor.x = (gameState.cursor.x + 1) % COLS
+        elseif gameState.mode == "row" then
+            local last = table.remove(gameState.grid[gameState.cursor.y + 1])
             if last then
-                __TS__ArrayUnshift(grid[cursor.y + 1], last)
+                __TS__ArrayUnshift(gameState.grid[gameState.cursor.y + 1], last)
             end
         else
-            cursor.x = (cursor.x + 1) % COLS
+            gameState.cursor.x = (gameState.cursor.x + 1) % COLS
         end
     end,
     upButtonDown = function()
-        if mode == "column" then
-            local topChar = grid[1][cursor.x + 1]
+        if gameState.mode == "column" then
+            local topChar = gameState.grid[1][gameState.cursor.x + 1]
             do
                 local r = 0
                 while r < ROWS - 1 do
-                    grid[r + 1][cursor.x + 1] = grid[r + 1 + 1][cursor.x + 1]
+                    gameState.grid[r + 1][gameState.cursor.x + 1] = gameState.grid[r + 1 + 1][gameState.cursor.x + 1]
                     r = r + 1
                 end
             end
-            grid[ROWS][cursor.x + 1] = topChar
+            gameState.grid[ROWS][gameState.cursor.x + 1] = topChar
         else
-            cursor.y = (cursor.y - 1 + ROWS) % ROWS
+            gameState.cursor.y = (gameState.cursor.y - 1 + ROWS) % ROWS
         end
     end,
     downButtonDown = function()
-        if mode == "column" then
-            local bottomChar = grid[ROWS][cursor.x + 1]
+        if gameState.mode == "column" then
+            local bottomChar = gameState.grid[ROWS][gameState.cursor.x + 1]
             do
                 local r = ROWS - 1
                 while r > 0 do
-                    grid[r + 1][cursor.x + 1] = grid[r][cursor.x + 1]
+                    gameState.grid[r + 1][gameState.cursor.x + 1] = gameState.grid[r][gameState.cursor.x + 1]
                     r = r - 1
                 end
             end
-            grid[1][cursor.x + 1] = bottomChar
+            gameState.grid[1][gameState.cursor.x + 1] = bottomChar
         else
-            cursor.y = (cursor.y + 1) % ROWS
+            gameState.cursor.y = (gameState.cursor.y + 1) % ROWS
         end
     end
 }
 playdate.inputHandlers.push(inputHandler)
 playdate.update = function()
     playdate.graphics.clear(PlaydateColor.White)
-    chaosCounter = chaosCounter + 1
-    if chaosCounter > 300 then
+    gameState.chaosCounter = gameState.chaosCounter + 1
+    if gameState.chaosCounter > 300 then
         do
             local c = 0
             while c < COLS do
-                grid[ROWS][c + 1] = randomChar(nil)
+                gameState.grid[ROWS][c + 1] = randomChar(nil)
                 c = c + 1
             end
         end
-        chaosCounter = 0
+        gameState.chaosCounter = 0
     end
     playdate.graphics.drawText(
-        "Score: " .. tostring(score),
+        "Score: " .. tostring(gameState.score),
         10,
         10
     )
     playdate.graphics.drawText(
-        "Mode: " .. string.upper(mode),
+        "Mode: " .. string.upper(gameState.mode),
         10,
         30
     )
-    if math.abs(crankAccumulator) > 10 then
+    if math.abs(gameState.crankAccumulator) > 10 then
         playdate.graphics.drawText(
-            "Crank: " .. tostring(math.floor(math.abs(crankAccumulator))),
+            "Crank: " .. tostring(math.floor(math.abs(gameState.crankAccumulator))),
             200,
             10
         )
@@ -24996,17 +25028,17 @@ playdate.update = function()
             do
                 local c = 0
                 while c < COLS do
-                    local char = grid[r + 1][c + 1]
+                    local char = gameState.grid[r + 1][c + 1]
                     local x = GRID_OFFSET_X + c * CELL_WIDTH
                     local y = GRID_OFFSET_Y + r * CELL_HEIGHT
                     local isHighlighted = false
-                    if mode == "column" and c == cursor.x then
+                    if gameState.mode == "column" and c == gameState.cursor.x then
                         isHighlighted = true
                     end
-                    if mode == "row" and r == cursor.y then
+                    if gameState.mode == "row" and r == gameState.cursor.y then
                         isHighlighted = true
                     end
-                    if mode == "name" and r == cursor.y and c == cursor.x then
+                    if gameState.mode == "name" and r == gameState.cursor.y and c == gameState.cursor.x then
                         isHighlighted = true
                     end
                     if isHighlighted then
