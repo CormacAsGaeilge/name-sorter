@@ -38,3 +38,7 @@ Icon?
 *.ini
 *.zip
 *.js
+
+# Web build artifacts
+dist-web/
+
