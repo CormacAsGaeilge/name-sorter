@@ -39,6 +39,4 @@ Icon?
 *.zip
 *.js
 
-# Web build artifacts
-dist-web/
 
