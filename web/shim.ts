@@ -5,7 +5,7 @@ declare global {
   }
 }
 
-// 1. Setup Canvas in the Wrapper
+// 1. Setup Canvas
 const canvas = document.createElement("canvas");
 canvas.width = 400;
 canvas.height = 240;
@@ -13,7 +13,6 @@ canvas.style.imageRendering = "pixelated";
 canvas.style.width = "100%";
 canvas.style.height = "100%";
 
-// Find wrapper or fallback to body
 const wrapper = document.getElementById("game-wrapper") || document.body;
 wrapper.appendChild(canvas);
 
@@ -27,7 +26,10 @@ const inputState = {
   pressed: {} as Record<string, boolean>,
 };
 
-let mockCrankChange = 0;
+// Crank State
+let crankPosition = 0;
+let pendingCrankDelta = 0; // Accumulates between frames
+let frameCrankDelta = 0; // Snapshot for the current frame
 
 // --- KEYBOARD HANDLERS ---
 const KEY_MAP: Record<string, string> = {
@@ -40,13 +42,14 @@ const KEY_MAP: Record<string, string> = {
 };
 
 window.addEventListener("keydown", (e) => {
-  const btn = KEY_MAP[e.key];
-  if (btn) {
-    if (!inputState.current[btn]) inputState.pressed[btn] = true;
-    inputState.current[btn] = true;
+  constYZ = KEY_MAP[e.key];
+  if (constYZ) {
+    if (!inputState.current[constYZ]) inputState.pressed[constYZ] = true;
+    inputState.current[constYZ] = true;
   }
-  if (e.key === "," || e.key === "<") mockCrankChange = -15;
-  if (e.key === "." || e.key === ">") mockCrankChange = 15;
+  // Crank Keys (< and >)
+  if (e.key === "," || e.key === "<") pendingCrankDelta -= 15;
+  if (e.key === "." || e.key === ">") pendingCrankDelta += 15;
 });
 
 window.addEventListener("keyup", (e) => {
@@ -60,13 +63,13 @@ const bindButton = (id: string, btnName: string) => {
   if (!el) return;
 
   const press = (e: Event) => {
-    e.preventDefault(); // Stop mouse emulation
+    if (e.cancelable) e.preventDefault();
     if (!inputState.current[btnName]) inputState.pressed[btnName] = true;
     inputState.current[btnName] = true;
   };
 
   const release = (e: Event) => {
-    e.preventDefault();
+    if (e.cancelable) e.preventDefault();
     inputState.current[btnName] = false;
   };
 
@@ -74,33 +77,31 @@ const bindButton = (id: string, btnName: string) => {
   el.addEventListener("touchstart", press);
   el.addEventListener("mouseup", release);
   el.addEventListener("touchend", release);
-  el.addEventListener("mouseleave", release); // Handle sliding finger off
+  el.addEventListener("mouseleave", release);
 };
 
 const bindCrank = (id: string, amount: number) => {
   const el = document.getElementById(id);
   if (!el) return;
 
-  const turn = (e: Event) => {
-    e.preventDefault();
-    mockCrankChange = amount;
-  };
-
-  // Crank only moves while holding/tapping
-  // We'll just apply one tick per tap or rapid fire while holding
-  // For simplicity: tap = move once.
-  // Better UX: Interval while holding.
-
   let interval: any;
-  const start = (e: Event) => {
-    e.preventDefault();
-    mockCrankChange = amount; // Immediate
-    interval = setInterval(() => {
-      mockCrankChange = amount;
-    }, 100);
+
+  const tick = () => {
+    pendingCrankDelta += amount;
+    crankPosition = (crankPosition + amount) % 360;
+    if (crankPosition < 0) crankPosition += 360;
   };
+
+  const start = (e: Event) => {
+    if (e.cancelable) e.preventDefault();
+    tick(); // Immediate movement
+    // Repeat while holding
+    clearInterval(interval);
+    interval = setInterval(tick, 100);
+  };
+
   const stop = (e: Event) => {
-    e.preventDefault();
+    if (e.cancelable) e.preventDefault();
     clearInterval(interval);
   };
 
@@ -111,7 +112,7 @@ const bindCrank = (id: string, amount: number) => {
   el.addEventListener("mouseleave", stop);
 };
 
-// Bind UI
+// Bind Controls
 bindButton("btn-up", "up");
 bindButton("btn-down", "down");
 bindButton("btn-left", "left");
@@ -119,11 +120,18 @@ bindButton("btn-right", "right");
 bindButton("btn-a", "A");
 bindButton("btn-b", "B");
 
-bindCrank("btn-crank-left", -45); // Faster crank on mobile for better feel
-bindCrank("btn-crank-right", 45);
+// Using larger increments for touch buttons to make it feel responsive
+bindCrank("btn-crank-left", -30);
+bindCrank("btn-crank-right", 30);
 
 // --- THE SHIM ---
 export const playdateShim = {
+  // API: Input
+  isCrankDocked: () => false,
+  getCrankChange: () => frameCrankDelta,
+  getCrankPosition: () => crankPosition,
+
+  // API: Graphics
   graphics: {
     clear: (color: number) => {
       ctx.fillStyle = color === 1 ? "#FFFFFF" : "#000000";
@@ -145,11 +153,8 @@ export const playdateShim = {
     },
     drawRoundRect: (x: number, y: number, w: number, h: number, r: number) => {
       ctx.beginPath();
-      if (ctx.roundRect) {
-        ctx.roundRect(x, y, w, h, r);
-      } else {
-        ctx.rect(x, y, w, h); // Fallback for old browsers
-      }
+      if (ctx.roundRect) ctx.roundRect(x, y, w, h, r);
+      else ctx.rect(x, y, w, h);
       ctx.stroke();
     },
     drawText: (text: string, x: number, y: number) => {
@@ -167,6 +172,7 @@ export const playdateShim = {
     getSystemFont: (variant: string) => variant,
     setLineWidth: (w: number) => (ctx.lineWidth = w),
   },
+  // API: Handlers
   inputHandlers: {
     push: (handler: any) => {
       window.playdate._activeHandler = handler;
@@ -176,15 +182,19 @@ export const playdateShim = {
   update: () => {},
 };
 
-// Mock Constants
+// Initialize Global
 window.playdate = playdateShim;
 
 // --- GAME LOOP ---
 function loop() {
+  // 1. Snapshot Inputs for this Frame
+  frameCrankDelta = pendingCrankDelta;
+  pendingCrankDelta = 0; // Reset accumulator
+
+  // 2. Handle Inputs (Callbacks)
   if (window.playdate._activeHandler) {
     const h = window.playdate._activeHandler;
 
-    // Check Pressed (One-shot)
     if (inputState.pressed["A"] && h.AButtonDown) h.AButtonDown();
     if (inputState.pressed["B"] && h.BButtonDown) h.BButtonDown();
     if (inputState.pressed["up"] && h.upButtonDown) h.upButtonDown();
@@ -192,19 +202,20 @@ function loop() {
     if (inputState.pressed["left"] && h.leftButtonDown) h.leftButtonDown();
     if (inputState.pressed["right"] && h.rightButtonDown) h.rightButtonDown();
 
-    // Handle Crank
-    if (mockCrankChange !== 0 && h.cranked) {
-      h.cranked(mockCrankChange, mockCrankChange);
-      mockCrankChange = 0;
+    // Callback: Cranked (Only if moved)
+    if (frameCrankDelta !== 0 && h.cranked) {
+      h.cranked(frameCrankDelta, frameCrankDelta);
     }
   }
 
-  // Clear "Pressed" state but keep "Current" state
+  // Clear "Pressed" state (One-shot)
   inputState.pressed = {};
 
+  // 3. Run Game Update (Game might poll getCrankChange() here)
   if (window.playdate.update) {
     window.playdate.update();
   }
+
   requestAnimationFrame(loop);
 }
 
