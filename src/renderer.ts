@@ -13,41 +13,18 @@ import {
   GRID_OFFSET_Y,
   FROZEN_CELL,
 } from "./constants";
-import { NameInstance } from "./types";
 
 let animationTick = 0;
 
-const drawCapsule = (name: NameInstance) => {
-  // Trivial Math! No looping through cells!
-  let minCol, maxCol, minRow, maxRow;
-
-  if (name.isRow) {
-    minCol = name.c;
-    maxCol = name.c + name.len - 1;
-    minRow = maxRow = name.r;
-  } else {
-    minCol = maxCol = name.c;
-    minRow = name.r;
-    maxRow = name.r + name.len - 1;
-  }
-
-  const x = GRID_OFFSET_X + minCol * CELL_WIDTH;
-  const y = GRID_OFFSET_Y + minRow * CELL_HEIGHT;
-
-  const padding = 2;
-  const width = (maxCol - minCol + 1) * CELL_WIDTH - padding * 2;
-  const height = (maxRow - minRow + 1) * CELL_HEIGHT - padding * 2;
-
-  const drawX = x + padding;
-  const drawY = y + padding;
-
+// Optimized: Uses pre-calculated rects from logic.ts
+// No math, no allocations.
+const drawCapsule = (drawX: number, drawY: number, w: number, h: number) => {
   playdate.graphics.setColor(PlaydateColor.Black);
   playdate.graphics.setLineWidth(2);
-  playdate.graphics.drawRoundRect(drawX, drawY, width, height, 10);
+  playdate.graphics.drawRoundRect(drawX, drawY, w, h, 10);
   playdate.graphics.setLineWidth(1);
 };
 
-// ... (drawAnimatedCaret remains exactly the same) ...
 const drawAnimatedCaret = (
   cx: number,
   cy: number,
@@ -95,8 +72,10 @@ export const drawGame = () => {
 
   // Legend
   const legendX = 260;
-  playdate.graphics.drawText(`A: Select Name`, legendX, 10);
-  playdate.graphics.drawText(`B: Switch Mode`, legendX, 30);
+  playdate.graphics.drawText(`CONTROLS:`, legendX, 10);
+  playdate.graphics.drawText(`A: Match`, legendX, 30);
+  playdate.graphics.drawText(`B: Mode`, legendX, 45);
+  playdate.graphics.drawText(`Crank: Shuffle`, legendX, 60);
 
   // Progress Bar
   const barX = GRID_OFFSET_X;
@@ -109,8 +88,12 @@ export const drawGame = () => {
   if (fillWidth > 0)
     playdate.graphics.fillRect(barX, barY, fillWidth, barHeight);
 
-  // Capsules
-  gameState.detectedNames.forEach((name) => drawCapsule(name));
+  // --- CAPSULES (Optimized Loop) ---
+  // Using for-of avoids closure allocation (fixes GC spike)
+  // Using pre-calc values avoids math (fixes frametime spike)
+  for (const name of gameState.detectedNames) {
+    drawCapsule(name.drawX, name.drawY, name.drawW, name.drawH);
+  }
 
   // Carets
   if (gameState.mode === "row" || gameState.mode === "name") {
@@ -153,7 +136,7 @@ export const drawGame = () => {
           playdate.graphics.setLineWidth(1);
         }
       } else {
-        playdate.graphics.setColor(PlaydateColor.Black); // FIX: Ensure text is black
+        playdate.graphics.setColor(PlaydateColor.Black);
         playdate.graphics.setImageDrawMode(PlaydateDrawMode.FillBlack);
         playdate.graphics.setFont(
           playdate.graphics.getSystemFont(PlaydateFontVariant.Normal),
@@ -179,9 +162,9 @@ export const drawGame = () => {
     }
   }
 
-  // Particles
+  // --- PARTICLES (Optimized Loop) ---
   playdate.graphics.setColor(PlaydateColor.Black);
-  gameState.particles.forEach((p) =>
-    playdate.graphics.fillRect(p.x, p.y, p.size, p.size),
-  );
+  for (const p of gameState.particles) {
+    playdate.graphics.fillRect(p.x, p.y, p.size, p.size);
+  }
 };

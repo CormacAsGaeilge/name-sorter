@@ -15,25 +15,23 @@ import {
 import { randomChar, shuffleArray, createInitialGrid } from "./grid";
 import { NameInstance } from "./types";
 
-// --- STATIC MEMORY BUFFERS (Reuse to avoid GC) ---
+// --- STATIC MEMORY BUFFERS ---
 let INTERSECTION_COUNTS: number[] | null = null;
 let ROW_USAGE: number[] | null = null;
 let COL_USAGE: number[] | null = null;
 let NAME_BUCKETS: string[][] | null = null;
 
-// Helper: Zero-fill array
 const createZeroArray = (len: number) => {
   const arr: number[] = [];
   for (let i = 0; i < len; i++) arr.push(0);
   return arr;
 };
 
-// Helper: Clear buffer
 const clearBuffer = (buf: number[]) => {
   for (let i = 0; i < buf.length; i++) buf[i] = 0;
 };
 
-// Init Buckets (Run Once)
+// Init Buckets
 const initBuckets = () => {
   if (NAME_BUCKETS) return;
   NAME_BUCKETS = [];
@@ -54,7 +52,6 @@ const initBuckets = () => {
   if (!COL_USAGE) COL_USAGE = createZeroArray(ROWS);
 };
 
-// Fast Intersection Check
 const doNamesIntersect = (a: NameInstance, b: NameInstance) => {
   if (a.isRow === b.isRow) {
     if (a.isRow) {
@@ -81,7 +78,7 @@ export const GameLogic = {
   spawnExplosion: (c: number, r: number) => {
     const centerX = GRID_OFFSET_X + c * CELL_WIDTH + CELL_WIDTH / 2;
     const centerY = GRID_OFFSET_Y + r * CELL_HEIGHT + CELL_HEIGHT / 2;
-    const count = 5 + Math.floor(Math.random() * 3); // Reduced particle count slightly
+    const count = 5 + Math.floor(Math.random() * 3);
     for (let i = 0; i < count; i++) {
       gameState.particles.push({
         x: centerX,
@@ -106,8 +103,6 @@ export const GameLogic = {
   },
 
   recalculateBoldMask: () => {
-    // OPTIMIZATION: If grid hasn't changed, DO NOTHING.
-    // This makes cursor movement instant!
     if (!gameState.gridDirty) return;
 
     initBuckets();
@@ -119,7 +114,6 @@ export const GameLogic = {
     gameState.detectedNames = [];
     clearBuffer(intersectionCounts);
 
-    // Clear BoldMask
     for (let r = 0; r < ROWS; r++) {
       for (let c = 0; c < COLS; c++) {
         gameState.boldMask[r][c] = false;
@@ -128,13 +122,13 @@ export const GameLogic = {
     }
 
     const allMatches: NameInstance[] = [];
+    const padding = 2; // Pre-calc padding
 
     // --- SCAN ROWS ---
     for (let r = 0; r < ROWS; r++) {
       const rowStr = gameState.grid[r].join("");
       const rowMatches: NameInstance[] = [];
 
-      // Bucket Optimization: Only check relevant letters
       const checkedBuckets = new Set<number>();
       for (let i = 0; i < rowStr.length; i++) {
         const code = rowStr.charCodeAt(i);
@@ -147,12 +141,17 @@ export const GameLogic = {
           for (const name of bucket) {
             let startIndex = 0;
             while ((startIndex = rowStr.indexOf(name, startIndex)) > -1) {
+              // OPTIMIZATION: Calculate render Rect HERE
               rowMatches.push({
                 text: name,
                 r: r,
                 c: startIndex,
                 isRow: true,
                 len: name.length,
+                drawX: GRID_OFFSET_X + startIndex * CELL_WIDTH + padding,
+                drawY: GRID_OFFSET_Y + r * CELL_HEIGHT + padding,
+                drawW: name.length * CELL_WIDTH - padding * 2,
+                drawH: CELL_HEIGHT - padding * 2,
               });
               startIndex += 1;
             }
@@ -198,12 +197,17 @@ export const GameLogic = {
           for (const name of bucket) {
             let startIndex = 0;
             while ((startIndex = colStr.indexOf(name, startIndex)) > -1) {
+              // OPTIMIZATION: Calculate render Rect HERE
               colMatches.push({
                 text: name,
                 r: startIndex,
                 c: c,
                 isRow: false,
                 len: name.length,
+                drawX: GRID_OFFSET_X + c * CELL_WIDTH + padding,
+                drawY: GRID_OFFSET_Y + startIndex * CELL_HEIGHT + padding,
+                drawW: CELL_WIDTH - padding * 2,
+                drawH: name.length * CELL_HEIGHT - padding * 2,
               });
               startIndex += 1;
             }
@@ -255,7 +259,6 @@ export const GameLogic = {
       }
     }
 
-    // Reset Dirty Flag
     gameState.gridDirty = false;
   },
 
@@ -319,7 +322,6 @@ export const GameLogic = {
       }
     });
 
-    // Grid changed -> Mark Dirty!
     gameState.gridDirty = true;
     GameLogic.recalculateBoldMask();
   },
@@ -359,7 +361,6 @@ export const GameLogic = {
         gameState.grid[randomSpot.r][randomSpot.c] = FROZEN_CELL;
         GameLogic.spawnExplosion(randomSpot.c, randomSpot.r);
 
-        // Grid changed -> Mark Dirty!
         gameState.gridDirty = true;
         GameLogic.recalculateBoldMask();
 
@@ -386,8 +387,6 @@ export const GameLogic = {
           grid[r][cursor.x] = shuffledCol[r];
         }
       }
-
-      // Grid changed -> Mark Dirty!
       gameState.gridDirty = true;
       GameLogic.recalculateBoldMask();
     }
@@ -396,7 +395,6 @@ export const GameLogic = {
   handleLeft: () => {
     if (gameState.mode === "column") {
       gameState.cursor.x = (gameState.cursor.x - 1 + COLS) % COLS;
-      // Cursor move = NO dirty flag needed!
     } else if (gameState.mode === "row") {
       const first = gameState.grid[gameState.cursor.y].shift();
       if (first) gameState.grid[gameState.cursor.y].push(first);
@@ -454,6 +452,5 @@ export const GameLogic = {
     if (gameState.mode === "column") gameState.mode = "row";
     else if (gameState.mode === "row") gameState.mode = "column";
     else gameState.mode = "column";
-    // Mode switch = NO dirty flag needed!
   },
 };

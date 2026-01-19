@@ -1,0 +1,2970 @@
+time:29421400	frame:822230	frametime:0	gctime:0
+stack:
+	(C)	
+time:29421416	frame:822230	frametime:0	gctime:0
+stack:
+	(C)	
+time:29421434	frame:822231	frametime:0	gctime:0
+stack:
+	(C)	
+time:29421452	frame:822232	frametime:0	gctime:0
+stack:
+	field drawRoundRect	[C]
+	function main.lua:25345	main.lua:25370
+	(...tail calls...)	
+	upvalue __TS__ArrayForEach	main.lua:141
+	upvalue drawGame	main.lua:25444
+	function main.lua:25762	main.lua:25765
+time:29421471	frame:822232	frametime:0	gctime:0
+stack:
+	(C)	
+time:29421489	frame:822233	frametime:0	gctime:1
+stack:
+	(C)	
+time:29421508	frame:822233	frametime:0	gctime:1
+stack:
+	(C)	
+time:29421527	frame:822234	frametime:0	gctime:0
+stack:
+	(C)	
+time:29421546	frame:822234	frametime:0	gctime:0
+stack:
+	(C)	
+time:29421564	frame:822235	frametime:0	gctime:1
+stack:
+	(C)	
+time:29421583	frame:822235	frametime:0	gctime:1
+stack:
+	(C)	
+time:29421602	frame:822236	frametime:1	gctime:0
+stack:
+	(C)	
+time:29421620	frame:822236	frametime:1	gctime:0
+stack:
+	(C)	
+time:29421639	frame:822237	frametime:0	gctime:0
+stack:
+	(C)	
+time:29421658	frame:822238	frametime:0	gctime:0
+stack:
+	(C)	
+time:29421677	frame:822238	frametime:0	gctime:0
+stack:
+	(C)	
+time:29421695	frame:822239	frametime:0	gctime:0
+stack:
+	(C)	
+time:29421714	frame:822239	frametime:0	gctime:0
+stack:
+	(C)	
+time:29421733	frame:822240	frametime:0	gctime:0
+stack:
+	(C)	
+time:29421751	frame:822240	frametime:0	gctime:0
+stack:
+	(C)	
+time:29421768	frame:822241	frametime:0	gctime:0
+stack:
+	(C)	
+time:29421787	frame:822242	frametime:0	gctime:0
+stack:
+	field drawText	[C]
+	upvalue drawGame	main.lua:25490
+	function main.lua:25762	main.lua:25765
+time:29421806	frame:822242	frametime:0	gctime:0
+stack:
+	(C)	
+time:29421824	frame:822243	frametime:0	gctime:0
+stack:
+	(C)	
+time:29421840	frame:822243	frametime:0	gctime:0
+stack:
+	(C)	
+time:29421859	frame:822244	frametime:0	gctime:0
+stack:
+	(C)	
+time:29421877	frame:822244	frametime:0	gctime:0
+stack:
+	(C)	
+time:29421896	frame:822245	frametime:0	gctime:0
+stack:
+	(C)	
+time:29421915	frame:822245	frametime:0	gctime:0
+stack:
+	(C)	
+time:29421934	frame:822246	frametime:0	gctime:0
+stack:
+	(C)	
+time:29421952	frame:822246	frametime:0	gctime:0
+stack:
+	(C)	
+time:29421971	frame:822247	frametime:0	gctime:0
+stack:
+	(C)	
+time:29421990	frame:822248	frametime:0	gctime:0
+stack:
+	(C)	
+time:29422009	frame:822248	frametime:0	gctime:0
+stack:
+	(C)	
+time:29422027	frame:822249	frametime:0	gctime:0
+stack:
+	(C)	
+time:29422046	frame:822249	frametime:0	gctime:0
+stack:
+	(C)	
+time:29422064	frame:822250	frametime:0	gctime:0
+stack:
+	(C)	
+time:29422083	frame:822250	frametime:0	gctime:0
+stack:
+	(C)	
+time:29422102	frame:822251	frametime:0	gctime:0
+stack:
+	(C)	
+time:29422117	frame:822251	frametime:0	gctime:0
+stack:
+	(C)	
+time:29422136	frame:822252	frametime:0	gctime:0
+stack:
+	(C)	
+time:29422154	frame:822253	frametime:0	gctime:0
+stack:
+	(C)	
+time:29422173	frame:822253	frametime:0	gctime:0
+stack:
+	(C)	
+time:29422192	frame:822254	frametime:1	gctime:0
+stack:
+	(C)	
+time:29422211	frame:822254	frametime:1	gctime:0
+stack:
+	(C)	
+time:29422229	frame:822255	frametime:0	gctime:0
+stack:
+	(C)	
+time:29422247	frame:822255	frametime:0	gctime:0
+stack:
+	(C)	
+time:29422266	frame:822256	frametime:0	gctime:0
+stack:
+	(C)	
+time:29422284	frame:822256	frametime:0	gctime:0
+stack:
+	(C)	
+time:29422303	frame:822257	frametime:0	gctime:1
+stack:
+	(C)	
+time:29422322	frame:822258	frametime:1	gctime:0
+stack:
+	(C)	
+time:29422341	frame:822258	frametime:1	gctime:0
+stack:
+	(C)	
+time:29422359	frame:822259	frametime:0	gctime:0
+stack:
+	(C)	
+time:29422375	frame:822259	frametime:0	gctime:0
+stack:
+	(C)	
+time:29422394	frame:822260	frametime:0	gctime:0
+stack:
+	(C)	
+time:29422413	frame:822260	frametime:0	gctime:0
+stack:
+	(C)	
+time:29422432	frame:822261	frametime:0	gctime:0
+stack:
+	(C)	
+time:29422450	frame:822261	frametime:0	gctime:0
+stack:
+	(C)	
+time:29422466	frame:822262	frametime:0	gctime:0
+stack:
+	(C)	
+time:29422485	frame:822262	frametime:0	gctime:0
+stack:
+	(C)	
+time:29422504	frame:822263	frametime:0	gctime:0
+stack:
+	(C)	
+time:29422523	frame:822264	frametime:0	gctime:0
+stack:
+	(C)	
+time:29422541	frame:822264	frametime:0	gctime:0
+stack:
+	(C)	
+time:29422560	frame:822265	frametime:0	gctime:0
+stack:
+	(C)	
+time:29422579	frame:822265	frametime:0	gctime:0
+stack:
+	(C)	
+time:29422598	frame:822266	frametime:0	gctime:0
+stack:
+	(C)	
+time:29422616	frame:822266	frametime:0	gctime:0
+stack:
+	(C)	
+time:29422635	frame:822267	frametime:1	gctime:0
+stack:
+	(C)	
+time:29422654	frame:822268	frametime:0	gctime:0
+stack:
+	(C)	
+time:29422673	frame:822268	frametime:0	gctime:0
+stack:
+	(C)	
+time:29422692	frame:822269	frametime:0	gctime:0
+stack:
+	(C)	
+time:29422710	frame:822269	frametime:0	gctime:0
+stack:
+	(C)	
+time:29422729	frame:822270	frametime:0	gctime:0
+stack:
+	(C)	
+time:29422748	frame:822270	frametime:0	gctime:0
+stack:
+	(C)	
+time:29422767	frame:822271	frametime:0	gctime:0
+stack:
+	(C)	
+time:29422783	frame:822271	frametime:0	gctime:0
+stack:
+	(C)	
+time:29422802	frame:822271	frametime:0	gctime:0
+stack:
+	(C)	
+time:29422817	frame:822272	frametime:0	gctime:1
+stack:
+	(C)	
+time:29422836	frame:822273	frametime:0	gctime:0
+stack:
+	(C)	
+time:29422854	frame:822274	frametime:0	gctime:0
+stack:
+	(C)	
+time:29422873	frame:822274	frametime:0	gctime:0
+stack:
+	(C)	
+time:29422892	frame:822275	frametime:0	gctime:0
+stack:
+	(C)	
+time:29422908	frame:822275	frametime:0	gctime:0
+stack:
+	(C)	
+time:29422927	frame:822276	frametime:0	gctime:0
+stack:
+	(C)	
+time:29422945	frame:822276	frametime:0	gctime:0
+stack:
+	(C)	
+time:29422964	frame:822277	frametime:0	gctime:0
+stack:
+	(C)	
+time:29422982	frame:822277	frametime:0	gctime:0
+stack:
+	(C)	
+time:29423001	frame:822278	frametime:0	gctime:0
+stack:
+	(C)	
+time:29423017	frame:822279	frametime:0	gctime:0
+stack:
+	(C)	
+time:29423036	frame:822279	frametime:0	gctime:0
+stack:
+	(C)	
+time:29423055	frame:822280	frametime:0	gctime:1
+stack:
+	(C)	
+time:29423074	frame:822280	frametime:0	gctime:1
+stack:
+	(C)	
+time:29423092	frame:822281	frametime:0	gctime:0
+stack:
+	(C)	
+time:29423111	frame:822281	frametime:0	gctime:0
+stack:
+	(C)	
+time:29423130	frame:822282	frametime:0	gctime:0
+stack:
+	(C)	
+time:29423149	frame:822282	frametime:0	gctime:0
+stack:
+	(C)	
+time:29423167	frame:822283	frametime:0	gctime:0
+stack:
+	(C)	
+time:29423186	frame:822284	frametime:0	gctime:0
+stack:
+	(C)	
+time:29423205	frame:822284	frametime:0	gctime:0
+stack:
+	(C)	
+time:29423224	frame:822285	frametime:0	gctime:0
+stack:
+	(C)	
+time:29423242	frame:822285	frametime:0	gctime:0
+stack:
+	(C)	
+time:29423261	frame:822286	frametime:0	gctime:0
+stack:
+	(C)	
+time:29423280	frame:822286	frametime:0	gctime:0
+stack:
+	(C)	
+time:29423299	frame:822287	frametime:0	gctime:0
+stack:
+	(C)	
+time:29423314	frame:822287	frametime:0	gctime:0
+stack:
+	(C)	
+time:29423332	frame:822288	frametime:0	gctime:0
+stack:
+	(C)	
+time:29423350	frame:822289	frametime:0	gctime:0
+stack:
+	(C)	
+time:29423365	frame:822289	frametime:0	gctime:0
+stack:
+	(C)	
+time:29423384	frame:822290	frametime:0	gctime:0
+stack:
+	(C)	
+time:29423402	frame:822290	frametime:0	gctime:0
+stack:
+	(C)	
+time:29423421	frame:822291	frametime:0	gctime:0
+stack:
+	(C)	
+time:29423440	frame:822291	frametime:0	gctime:0
+stack:
+	(C)	
+time:29423459	frame:822292	frametime:0	gctime:0
+stack:
+	(C)	
+time:29423477	frame:822292	frametime:0	gctime:0
+stack:
+	(C)	
+time:29423496	frame:822293	frametime:0	gctime:0
+stack:
+	(C)	
+time:29423515	frame:822294	frametime:0	gctime:1
+stack:
+	(C)	
+time:29423534	frame:822294	frametime:0	gctime:1
+stack:
+	(C)	
+time:29423552	frame:822295	frametime:0	gctime:0
+stack:
+	(C)	
+time:29423568	frame:822295	frametime:0	gctime:0
+stack:
+	(C)	
+time:29423587	frame:822296	frametime:0	gctime:0
+stack:
+	(C)	
+time:29423606	frame:822296	frametime:0	gctime:0
+stack:
+	(C)	
+time:29423622	frame:822297	frametime:0	gctime:0
+stack:
+	(C)	
+time:29423640	frame:822297	frametime:0	gctime:0
+stack:
+	(C)	
+time:29423659	frame:822298	frametime:0	gctime:1
+stack:
+	(C)	
+time:29423678	frame:822298	frametime:0	gctime:1
+stack:
+	(C)	
+time:29423693	frame:822299	frametime:0	gctime:0
+stack:
+	(C)	
+time:29423709	frame:822299	frametime:0	gctime:0
+stack:
+	(C)	
+time:29423728	frame:822300	frametime:0	gctime:0
+stack:
+	(C)	
+time:29423746	frame:822300	frametime:0	gctime:0
+stack:
+	(C)	
+time:29423765	frame:822301	frametime:0	gctime:0
+stack:
+	(C)	
+time:29423782	frame:822302	frametime:0	gctime:0
+stack:
+	(C)	
+time:29423801	frame:822302	frametime:0	gctime:0
+stack:
+	(C)	
+time:29423820	frame:822303	frametime:0	gctime:0
+stack:
+	(C)	
+time:29423838	frame:822303	frametime:0	gctime:0
+stack:
+	(C)	
+time:29423857	frame:822304	frametime:0	gctime:0
+stack:
+	(C)	
+time:29423876	frame:822304	frametime:0	gctime:0
+stack:
+	(C)	
+time:29423895	frame:822305	frametime:0	gctime:1
+stack:
+	(C)	
+time:29423912	frame:822305	frametime:0	gctime:1
+stack:
+	(C)	
+time:29423931	frame:822306	frametime:0	gctime:0
+stack:
+	(C)	
+time:29423950	frame:822307	frametime:0	gctime:0
+stack:
+	(C)	
+time:29423968	frame:822307	frametime:0	gctime:0
+stack:
+	(C)	
+time:29423987	frame:822308	frametime:0	gctime:0
+stack:
+	(C)	
+time:29424006	frame:822308	frametime:0	gctime:0
+stack:
+	(C)	
+time:29424025	frame:822309	frametime:0	gctime:0
+stack:
+	(C)	
+time:29424043	frame:822309	frametime:0	gctime:0
+stack:
+	(C)	
+time:29424062	frame:822310	frametime:0	gctime:0
+stack:
+	(C)	
+time:29424077	frame:822310	frametime:0	gctime:0
+stack:
+	(C)	
+time:29424096	frame:822311	frametime:0	gctime:1
+stack:
+	(C)	
+time:29424115	frame:822312	frametime:0	gctime:0
+stack:
+	(C)	
+time:29424134	frame:822312	frametime:0	gctime:0
+stack:
+	(C)	
+time:29424152	frame:822313	frametime:0	gctime:0
+stack:
+	(C)	
+time:29424171	frame:822313	frametime:0	gctime:0
+stack:
+	(C)	
+time:29424186	frame:822314	frametime:1	gctime:0
+stack:
+	(C)	
+time:29424204	frame:822314	frametime:1	gctime:0
+stack:
+	(C)	
+time:29424223	frame:822315	frametime:0	gctime:0
+stack:
+	(C)	
+time:29424242	frame:822315	frametime:0	gctime:0
+stack:
+	(C)	
+time:29424260	frame:822316	frametime:0	gctime:0
+stack:
+	(C)	
+time:29424279	frame:822317	frametime:0	gctime:0
+stack:
+	(C)	
+time:29424298	frame:822317	frametime:0	gctime:0
+stack:
+	(C)	
+time:29424317	frame:822318	frametime:0	gctime:0
+stack:
+	(C)	
+time:29424336	frame:822318	frametime:0	gctime:0
+stack:
+	(C)	
+time:29424354	frame:822319	frametime:0	gctime:0
+stack:
+	(C)	
+time:29424373	frame:822319	frametime:0	gctime:0
+stack:
+	(C)	
+time:29424392	frame:822320	frametime:0	gctime:0
+stack:
+	(C)	
+time:29424409	frame:822320	frametime:0	gctime:0
+stack:
+	(C)	
+time:29424426	frame:822321	frametime:0	gctime:0
+stack:
+	(C)	
+time:29424444	frame:822322	frametime:0	gctime:0
+stack:
+	(C)	
+time:29424462	frame:822322	frametime:0	gctime:0
+stack:
+	(C)	
+time:29424481	frame:822323	frametime:0	gctime:0
+stack:
+	(C)	
+time:29424500	frame:822323	frametime:0	gctime:0
+stack:
+	(C)	
+time:29424518	frame:822324	frametime:0	gctime:0
+stack:
+	(C)	
+time:29424536	frame:822324	frametime:0	gctime:0
+stack:
+	(C)	
+time:29424555	frame:822325	frametime:0	gctime:0
+stack:
+	(C)	
+time:29424571	frame:822325	frametime:0	gctime:0
+stack:
+	(C)	
+time:29424590	frame:822326	frametime:1	gctime:0
+stack:
+	(C)	
+time:29424608	frame:822326	frametime:1	gctime:0
+stack:
+	(C)	
+time:29424627	frame:822327	frametime:0	gctime:0
+stack:
+	(C)	
+time:29424643	frame:822327	frametime:0	gctime:0
+stack:
+	(C)	
+time:29424658	frame:822328	frametime:0	gctime:0
+stack:
+	(C)	
+time:29424677	frame:822329	frametime:0	gctime:0
+stack:
+	(C)	
+time:29424696	frame:822329	frametime:0	gctime:0
+stack:
+	(C)	
+time:29424714	frame:822330	frametime:0	gctime:0
+stack:
+	(C)	
+time:29424733	frame:822330	frametime:0	gctime:0
+stack:
+	(C)	
+time:29424752	frame:822331	frametime:0	gctime:0
+stack:
+	(C)	
+time:29424768	frame:822331	frametime:0	gctime:0
+stack:
+	(C)	
+time:29424786	frame:822332	frametime:0	gctime:0
+stack:
+	(C)	
+time:29424805	frame:822332	frametime:0	gctime:0
+stack:
+	(C)	
+time:29424824	frame:822333	frametime:0	gctime:0
+stack:
+	(C)	
+time:29424842	frame:822333	frametime:0	gctime:0
+stack:
+	(C)	
+time:29424861	frame:822334	frametime:0	gctime:0
+stack:
+	(C)	
+time:29424879	frame:822335	frametime:0	gctime:0
+stack:
+	(C)	
+time:29424898	frame:822335	frametime:0	gctime:0
+stack:
+	(C)	
+time:29424917	frame:822336	frametime:0	gctime:0
+stack:
+	(C)	
+time:29424936	frame:822336	frametime:0	gctime:0
+stack:
+	(C)	
+time:29424952	frame:822337	frametime:0	gctime:0
+stack:
+	(C)	
+time:29424970	frame:822337	frametime:0	gctime:0
+stack:
+	(C)	
+time:29424985	frame:822338	frametime:0	gctime:0
+stack:
+	(C)	
+time:29425004	frame:822338	frametime:0	gctime:0
+stack:
+	(C)	
+time:29425021	frame:822339	frametime:0	gctime:0
+stack:
+	(C)	
+time:29425040	frame:822339	frametime:0	gctime:0
+stack:
+	(C)	
+time:29425059	frame:822340	frametime:0	gctime:0
+stack:
+	(C)	
+time:29425077	frame:822341	frametime:0	gctime:0
+stack:
+	(C)	
+time:29425092	frame:822341	frametime:0	gctime:0
+stack:
+	(C)	
+time:29425111	frame:822342	frametime:0	gctime:1
+stack:
+	(C)	
+time:29425129	frame:822342	frametime:0	gctime:1
+stack:
+	(C)	
+time:29425148	frame:822343	frametime:0	gctime:0
+stack:
+	(C)	
+time:29425167	frame:822343	frametime:0	gctime:0
+stack:
+	(C)	
+time:29425183	frame:822344	frametime:0	gctime:0
+stack:
+	(C)	
+time:29425202	frame:822344	frametime:0	gctime:0
+stack:
+	(C)	
+time:29425220	frame:822345	frametime:0	gctime:0
+stack:
+	(C)	
+time:29425239	frame:822345	frametime:0	gctime:0
+stack:
+	(C)	
+time:29425258	frame:822346	frametime:0	gctime:0
+stack:
+	(C)	
+time:29425273	frame:822346	frametime:0	gctime:0
+stack:
+	(C)	
+time:29425292	frame:822347	frametime:1	gctime:0
+stack:
+	(C)	
+time:29425308	frame:822347	frametime:1	gctime:0
+stack:
+	(C)	
+time:29425323	frame:822348	frametime:0	gctime:0
+stack:
+	(C)	
+time:29425341	frame:822348	frametime:0	gctime:0
+stack:
+	(C)	
+time:29425360	frame:822349	frametime:0	gctime:0
+stack:
+	(C)	
+time:29425378	frame:822350	frametime:0	gctime:0
+stack:
+	method recalculateBoldMask	main.lua:24862
+	method handleDown	main.lua:25260
+	function main.lua:25313	main.lua:25315
+time:29425397	frame:822350	frametime:0	gctime:0
+stack:
+	field find	[C]
+	method recalculateBoldMask	main.lua:24949
+	method handleDown	main.lua:25260
+	function main.lua:25313	main.lua:25315
+time:29425416	frame:822351	frametime:0	gctime:0
+stack:
+	(C)	
+time:29425434	frame:822351	frametime:0	gctime:0
+stack:
+	(C)	
+time:29425449	frame:822351	frametime:0	gctime:0
+stack:
+	(C)	
+time:29425468	frame:822352	frametime:0	gctime:0
+stack:
+	(C)	
+time:29425484	frame:822353	frametime:0	gctime:0
+stack:
+	(C)	
+time:29425501	frame:822353	frametime:0	gctime:0
+stack:
+	(C)	
+time:29425516	frame:822354	frametime:0	gctime:0
+stack:
+	(C)	
+time:29425534	frame:822354	frametime:0	gctime:0
+stack:
+	(C)	
+time:29425553	frame:822355	frametime:0	gctime:0
+stack:
+	(C)	
+time:29425572	frame:822355	frametime:0	gctime:0
+stack:
+	(C)	
+time:29425591	frame:822356	frametime:0	gctime:0
+stack:
+	(C)	
+time:29425610	frame:822356	frametime:0	gctime:0
+stack:
+	(C)	
+time:29425628	frame:822357	frametime:0	gctime:0
+stack:
+	(C)	
+time:29425645	frame:822357	frametime:0	gctime:0
+stack:
+	(C)	
+time:29425664	frame:822358	frametime:0	gctime:0
+stack:
+	(C)	
+time:29425682	frame:822359	frametime:1	gctime:0
+stack:
+	(C)	
+time:29425701	frame:822359	frametime:1	gctime:0
+stack:
+	(C)	
+time:29425720	frame:822360	frametime:0	gctime:0
+stack:
+	(C)	
+time:29425739	frame:822360	frametime:0	gctime:0
+stack:
+	(C)	
+time:29425757	frame:822361	frametime:1	gctime:0
+stack:
+	(C)	
+time:29425776	frame:822361	frametime:1	gctime:0
+stack:
+	(C)	
+time:29425795	frame:822362	frametime:1	gctime:0
+stack:
+	(C)	
+time:29425814	frame:822363	frametime:0	gctime:0
+stack:
+	(C)	
+time:29425832	frame:822363	frametime:0	gctime:0
+stack:
+	(C)	
+time:29425851	frame:822364	frametime:0	gctime:0
+stack:
+	(C)	
+time:29425870	frame:822364	frametime:0	gctime:0
+stack:
+	(C)	
+time:29425889	frame:822365	frametime:0	gctime:0
+stack:
+	(C)	
+time:29425907	frame:822365	frametime:0	gctime:0
+stack:
+	(C)	
+time:29425925	frame:822366	frametime:0	gctime:0
+stack:
+	(C)	
+time:29425943	frame:822366	frametime:0	gctime:0
+stack:
+	(C)	
+time:29425962	frame:822367	frametime:0	gctime:0
+stack:
+	(C)	
+time:29425981	frame:822368	frametime:1	gctime:0
+stack:
+	(C)	
+time:29426000	frame:822368	frametime:1	gctime:0
+stack:
+	(C)	
+time:29426018	frame:822369	frametime:0	gctime:0
+stack:
+	(C)	
+time:29426037	frame:822369	frametime:0	gctime:0
+stack:
+	(C)	
+time:29426056	frame:822370	frametime:0	gctime:0
+stack:
+	(C)	
+time:29426075	frame:822370	frametime:0	gctime:0
+stack:
+	(C)	
+time:29426094	frame:822371	frametime:1	gctime:0
+stack:
+	(C)	
+time:29426112	frame:822372	frametime:0	gctime:0
+stack:
+	(C)	
+time:29426131	frame:822372	frametime:0	gctime:0
+stack:
+	(C)	
+time:29426150	frame:822373	frametime:0	gctime:0
+stack:
+	field find	[C]
+	method recalculateBoldMask	main.lua:24865
+	method handleDown	main.lua:25260
+	function main.lua:25313	main.lua:25315
+time:29426169	frame:822373	frametime:0	gctime:0
+stack:
+	method recalculateBoldMask	main.lua:24946
+	method handleDown	main.lua:25260
+	function main.lua:25313	main.lua:25315
+time:29426187	frame:822374	frametime:0	gctime:0
+stack:
+	(C)	
+time:29426206	frame:822374	frametime:0	gctime:0
+stack:
+	(C)	
+time:29426225	frame:822375	frametime:0	gctime:0
+stack:
+	(C)	
+time:29426241	frame:822375	frametime:0	gctime:0
+stack:
+	(C)	
+time:29426260	frame:822376	frametime:0	gctime:0
+stack:
+	(C)	
+time:29426278	frame:822376	frametime:0	gctime:0
+stack:
+	(C)	
+time:29426297	frame:822377	frametime:0	gctime:0
+stack:
+	(C)	
+time:29426316	frame:822377	frametime:0	gctime:0
+stack:
+	(C)	
+time:29426335	frame:822378	frametime:0	gctime:0
+stack:
+	(C)	
+time:29426351	frame:822378	frametime:0	gctime:0
+stack:
+	(C)	
+time:29426370	frame:822379	frametime:0	gctime:0
+stack:
+	(C)	
+time:29426385	frame:822379	frametime:0	gctime:0
+stack:
+	(C)	
+time:29426404	frame:822380	frametime:0	gctime:0
+stack:
+	(C)	
+time:29426423	frame:822381	frametime:0	gctime:0
+stack:
+	(C)	
+time:29426441	frame:822381	frametime:0	gctime:0
+stack:
+	(C)	
+time:29426460	frame:822382	frametime:0	gctime:0
+stack:
+	(C)	
+time:29426479	frame:822382	frametime:0	gctime:0
+stack:
+	(C)	
+time:29426498	frame:822383	frametime:0	gctime:0
+stack:
+	(C)	
+time:29426516	frame:822383	frametime:0	gctime:0
+stack:
+	(C)	
+time:29426535	frame:822384	frametime:0	gctime:0
+stack:
+	(C)	
+time:29426551	frame:822384	frametime:0	gctime:0
+stack:
+	(C)	
+time:29426570	frame:822385	frametime:0	gctime:0
+stack:
+	(C)	
+time:29426585	frame:822385	frametime:0	gctime:0
+stack:
+	(C)	
+time:29426604	frame:822386	frametime:0	gctime:0
+stack:
+	(C)	
+time:29426622	frame:822387	frametime:0	gctime:0
+stack:
+	(C)	
+time:29426641	frame:822387	frametime:0	gctime:0
+stack:
+	(C)	
+time:29426660	frame:822388	frametime:0	gctime:1
+stack:
+	(C)	
+time:29426678	frame:822388	frametime:0	gctime:1
+stack:
+	(C)	
+time:29426697	frame:822389	frametime:0	gctime:0
+stack:
+	(C)	
+time:29426716	frame:822389	frametime:0	gctime:0
+stack:
+	(C)	
+time:29426735	frame:822390	frametime:0	gctime:1
+stack:
+	(C)	
+time:29426753	frame:822391	frametime:0	gctime:0
+stack:
+	(C)	
+time:29426772	frame:822391	frametime:0	gctime:0
+stack:
+	(C)	
+time:29426791	frame:822392	frametime:0	gctime:0
+stack:
+	(C)	
+time:29426808	frame:822392	frametime:0	gctime:0
+stack:
+	(C)	
+time:29426827	frame:822393	frametime:0	gctime:0
+stack:
+	method recalculateBoldMask	main.lua:24868
+	method handleDown	main.lua:25260
+	function main.lua:25313	main.lua:25315
+time:29426846	frame:822393	frametime:0	gctime:0
+stack:
+	method recalculateBoldMask	main.lua:24946
+	method handleDown	main.lua:25260
+	function main.lua:25313	main.lua:25315
+time:29426865	frame:822394	frametime:0	gctime:0
+stack:
+	(C)	
+time:29426883	frame:822394	frametime:0	gctime:0
+stack:
+	(C)	
+time:29426901	frame:822395	frametime:0	gctime:1
+stack:
+	(C)	
+time:29426920	frame:822395	frametime:0	gctime:1
+stack:
+	(C)	
+time:29426938	frame:822396	frametime:0	gctime:0
+stack:
+	(C)	
+time:29426957	frame:822396	frametime:0	gctime:0
+stack:
+	(C)	
+time:29426976	frame:822397	frametime:0	gctime:0
+stack:
+	(C)	
+time:29426995	frame:822398	frametime:0	gctime:0
+stack:
+	(C)	
+time:29427013	frame:822398	frametime:0	gctime:0
+stack:
+	(C)	
+time:29427029	frame:822399	frametime:0	gctime:1
+stack:
+	(C)	
+time:29427048	frame:822399	frametime:0	gctime:1
+stack:
+	(C)	
+time:29427064	frame:822400	frametime:1	gctime:0
+stack:
+	(C)	
+time:29427083	frame:822400	frametime:1	gctime:0
+stack:
+	(C)	
+time:29427101	frame:822401	frametime:0	gctime:0
+stack:
+	(C)	
+time:29427120	frame:822401	frametime:0	gctime:0
+stack:
+	(C)	
+time:29427139	frame:822402	frametime:0	gctime:0
+stack:
+	(C)	
+time:29427157	frame:822402	frametime:0	gctime:0
+stack:
+	(C)	
+time:29427175	frame:822403	frametime:0	gctime:0
+stack:
+	(C)	
+time:29427193	frame:822404	frametime:1	gctime:0
+stack:
+	(C)	
+time:29427212	frame:822404	frametime:1	gctime:0
+stack:
+	(C)	
+time:29427231	frame:822405	frametime:0	gctime:0
+stack:
+	(C)	
+time:29427246	frame:822405	frametime:0	gctime:0
+stack:
+	(C)	
+time:29427262	frame:822406	frametime:0	gctime:0
+stack:
+	(C)	
+time:29427281	frame:822406	frametime:0	gctime:0
+stack:
+	(C)	
+time:29427299	frame:822407	frametime:0	gctime:0
+stack:
+	method recalculateBoldMask	main.lua:24862
+	method handleDown	main.lua:25260
+	function main.lua:25313	main.lua:25315
+time:29427316	frame:822407	frametime:0	gctime:0
+stack:
+	field find	[C]
+	method recalculateBoldMask	main.lua:24949
+	method handleDown	main.lua:25260
+	function main.lua:25313	main.lua:25315
+time:29427334	frame:822408	frametime:0	gctime:0
+stack:
+	(C)	
+time:29427353	frame:822408	frametime:0	gctime:0
+stack:
+	(C)	
+time:29427372	frame:822409	frametime:0	gctime:0
+stack:
+	(C)	
+time:29427390	frame:822409	frametime:0	gctime:0
+stack:
+	(C)	
+time:29427409	frame:822410	frametime:1	gctime:0
+stack:
+	(C)	
+time:29427426	frame:822410	frametime:1	gctime:0
+stack:
+	(C)	
+time:29427445	frame:822411	frametime:0	gctime:0
+stack:
+	(C)	
+time:29427464	frame:822412	frametime:0	gctime:0
+stack:
+	(C)	
+time:29427483	frame:822412	frametime:0	gctime:0
+stack:
+	(C)	
+time:29427501	frame:822413	frametime:0	gctime:0
+stack:
+	(C)	
+time:29427519	frame:822413	frametime:0	gctime:0
+stack:
+	(C)	
+time:29427535	frame:822414	frametime:0	gctime:0
+stack:
+	(C)	
+time:29427554	frame:822414	frametime:0	gctime:0
+stack:
+	(C)	
+time:29427573	frame:822415	frametime:0	gctime:1
+stack:
+	(C)	
+time:29427588	frame:822415	frametime:0	gctime:1
+stack:
+	(C)	
+time:29427606	frame:822416	frametime:0	gctime:0
+stack:
+	(C)	
+time:29427625	frame:822416	frametime:0	gctime:0
+stack:
+	(C)	
+time:29427643	frame:822417	frametime:0	gctime:0
+stack:
+	(C)	
+time:29427661	frame:822418	frametime:0	gctime:0
+stack:
+	(C)	
+time:29427680	frame:822418	frametime:0	gctime:0
+stack:
+	(C)	
+time:29427698	frame:822419	frametime:0	gctime:0
+stack:
+	(C)	
+time:29427717	frame:822419	frametime:0	gctime:0
+stack:
+	(C)	
+time:29427732	frame:822420	frametime:0	gctime:0
+stack:
+	(C)	
+time:29427749	frame:822420	frametime:0	gctime:0
+stack:
+	(C)	
+time:29427765	frame:822421	frametime:0	gctime:0
+stack:
+	(C)	
+time:29427783	frame:822421	frametime:0	gctime:0
+stack:
+	(C)	
+time:29427799	frame:822422	frametime:0	gctime:0
+stack:
+	(C)	
+time:29427816	frame:822422	frametime:0	gctime:0
+stack:
+	(C)	
+time:29427835	frame:822423	frametime:0	gctime:1
+stack:
+	(C)	
+time:29427852	frame:822423	frametime:0	gctime:1
+stack:
+	(C)	
+time:29427869	frame:822424	frametime:0	gctime:0
+stack:
+	(C)	
+time:29427887	frame:822424	frametime:0	gctime:0
+stack:
+	(C)	
+time:29427906	frame:822425	frametime:0	gctime:0
+stack:
+	(C)	
+time:29427923	frame:822425	frametime:0	gctime:0
+stack:
+	(C)	
+time:29427942	frame:822426	frametime:0	gctime:0
+stack:
+	(C)	
+time:29427961	frame:822427	frametime:0	gctime:1
+stack:
+	(C)	
+time:29427979	frame:822427	frametime:0	gctime:1
+stack:
+	(C)	
+time:29427998	frame:822428	frametime:0	gctime:0
+stack:
+	(C)	
+time:29428017	frame:822428	frametime:0	gctime:0
+stack:
+	(C)	
+time:29428036	frame:822429	frametime:0	gctime:0
+stack:
+	(C)	
+time:29428054	frame:822429	frametime:0	gctime:0
+stack:
+	(C)	
+time:29428073	frame:822430	frametime:0	gctime:0
+stack:
+	(C)	
+time:29428092	frame:822430	frametime:0	gctime:0
+stack:
+	(C)	
+time:29428111	frame:822431	frametime:0	gctime:0
+stack:
+	(C)	
+time:29428129	frame:822432	frametime:0	gctime:0
+stack:
+	(C)	
+time:29428148	frame:822432	frametime:0	gctime:0
+stack:
+	(C)	
+time:29428167	frame:822433	frametime:0	gctime:0
+stack:
+	(C)	
+time:29428186	frame:822433	frametime:0	gctime:0
+stack:
+	(C)	
+time:29428205	frame:822434	frametime:0	gctime:0
+stack:
+	(C)	
+time:29428223	frame:822434	frametime:0	gctime:0
+stack:
+	(C)	
+time:29428242	frame:822435	frametime:1	gctime:0
+stack:
+	(C)	
+time:29428259	frame:822435	frametime:1	gctime:0
+stack:
+	(C)	
+time:29428276	frame:822436	frametime:0	gctime:0
+stack:
+	(C)	
+time:29428294	frame:822437	frametime:0	gctime:1
+stack:
+	(C)	
+time:29428313	frame:822437	frametime:0	gctime:1
+stack:
+	(C)	
+time:29428332	frame:822438	frametime:1	gctime:0
+stack:
+	(C)	
+time:29428351	frame:822438	frametime:1	gctime:0
+stack:
+	(C)	
+time:29428369	frame:822439	frametime:0	gctime:0
+stack:
+	(C)	
+time:29428388	frame:822439	frametime:0	gctime:0
+stack:
+	(C)	
+time:29428407	frame:822440	frametime:0	gctime:0
+stack:
+	(C)	
+time:29428426	frame:822441	frametime:0	gctime:0
+stack:
+	(C)	
+time:29428445	frame:822441	frametime:0	gctime:0
+stack:
+	(C)	
+time:29428463	frame:822442	frametime:0	gctime:0
+stack:
+	(C)	
+time:29428482	frame:822442	frametime:0	gctime:0
+stack:
+	(C)	
+time:29428501	frame:822443	frametime:0	gctime:0
+stack:
+	(C)	
+time:29428516	frame:822443	frametime:0	gctime:0
+stack:
+	(C)	
+time:29428535	frame:822444	frametime:0	gctime:0
+stack:
+	(C)	
+time:29428554	frame:822444	frametime:0	gctime:0
+stack:
+	(C)	
+time:29428572	frame:822445	frametime:0	gctime:0
+stack:
+	(C)	
+time:29428591	frame:822446	frametime:0	gctime:0
+stack:
+	(C)	
+time:29428610	frame:822446	frametime:0	gctime:0
+stack:
+	(C)	
+time:29428628	frame:822447	frametime:0	gctime:0
+stack:
+	(C)	
+time:29428647	frame:822447	frametime:0	gctime:0
+stack:
+	(C)	
+time:29428665	frame:822448	frametime:0	gctime:0
+stack:
+	(C)	
+time:29428682	frame:822448	frametime:0	gctime:0
+stack:
+	(C)	
+time:29428701	frame:822449	frametime:0	gctime:0
+stack:
+	(C)	
+time:29428720	frame:822449	frametime:0	gctime:0
+stack:
+	(C)	
+time:29428739	frame:822450	frametime:0	gctime:0
+stack:
+	(C)	
+time:29428757	frame:822451	frametime:0	gctime:0
+stack:
+	(C)	
+time:29428773	frame:822451	frametime:0	gctime:0
+stack:
+	(C)	
+time:29428790	frame:822451	frametime:0	gctime:0
+stack:
+	(C)	
+time:29428809	frame:822452	frametime:0	gctime:0
+stack:
+	(C)	
+time:29428825	frame:822453	frametime:0	gctime:1
+stack:
+	(C)	
+time:29428844	frame:822453	frametime:0	gctime:1
+stack:
+	(C)	
+time:29428862	frame:822454	frametime:0	gctime:0
+stack:
+	(C)	
+time:29428881	frame:822454	frametime:0	gctime:0
+stack:
+	(C)	
+time:29428899	frame:822455	frametime:0	gctime:0
+stack:
+	(C)	
+time:29428918	frame:822455	frametime:0	gctime:0
+stack:
+	(C)	
+time:29428937	frame:822456	frametime:1	gctime:0
+stack:
+	(C)	
+time:29428956	frame:822457	frametime:0	gctime:0
+stack:
+	(C)	
+time:29428975	frame:822457	frametime:0	gctime:0
+stack:
+	(C)	
+time:29428993	frame:822458	frametime:0	gctime:0
+stack:
+	(C)	
+time:29429012	frame:822458	frametime:0	gctime:0
+stack:
+	(C)	
+time:29429031	frame:822459	frametime:0	gctime:1
+stack:
+	(C)	
+time:29429050	frame:822459	frametime:0	gctime:1
+stack:
+	(C)	
+time:29429068	frame:822460	frametime:0	gctime:0
+stack:
+	(C)	
+time:29429086	frame:822460	frametime:0	gctime:0
+stack:
+	(C)	
+time:29429104	frame:822461	frametime:0	gctime:0
+stack:
+	(C)	
+time:29429121	frame:822461	frametime:0	gctime:0
+stack:
+	(C)	
+time:29429140	frame:822462	frametime:0	gctime:0
+stack:
+	(C)	
+time:29429158	frame:822463	frametime:0	gctime:0
+stack:
+	(C)	
+time:29429176	frame:822463	frametime:0	gctime:0
+stack:
+	(C)	
+time:29429195	frame:822464	frametime:1	gctime:0
+stack:
+	(C)	
+time:29429214	frame:822464	frametime:1	gctime:0
+stack:
+	(C)	
+time:29429231	frame:822465	frametime:0	gctime:0
+stack:
+	(C)	
+time:29429250	frame:822465	frametime:0	gctime:0
+stack:
+	(C)	
+time:29429268	frame:822466	frametime:0	gctime:0
+stack:
+	(C)	
+time:29429287	frame:822466	frametime:0	gctime:0
+stack:
+	(C)	
+time:29429305	frame:822467	frametime:1	gctime:0
+stack:
+	(C)	
+time:29429324	frame:822468	frametime:0	gctime:0
+stack:
+	(C)	
+time:29429343	frame:822468	frametime:0	gctime:0
+stack:
+	(C)	
+time:29429362	frame:822469	frametime:0	gctime:0
+stack:
+	(C)	
+time:29429381	frame:822469	frametime:0	gctime:0
+stack:
+	(C)	
+time:29429399	frame:822470	frametime:0	gctime:0
+stack:
+	(C)	
+time:29429418	frame:822470	frametime:0	gctime:0
+stack:
+	(C)	
+time:29429437	frame:822471	frametime:0	gctime:1
+stack:
+	(C)	
+time:29429456	frame:822472	frametime:0	gctime:1
+stack:
+	method recalculateBoldMask	main.lua:24865
+	method handleDown	main.lua:25260
+	function main.lua:25313	main.lua:25315
+time:29429474	frame:822472	frametime:0	gctime:1
+stack:
+	method recalculateBoldMask	main.lua:24946
+	method handleDown	main.lua:25260
+	function main.lua:25313	main.lua:25315
+time:29429493	frame:822473	frametime:37	gctime:0
+stack:
+	field drawRoundRect	[C]
+	function main.lua:25345	main.lua:25370
+	(...tail calls...)	
+	upvalue __TS__ArrayForEach	main.lua:141
+	upvalue drawGame	main.lua:25444
+	function main.lua:25762	main.lua:25765
+time:29429510	frame:822473	frametime:0	gctime:0
+stack:
+	(C)	
+time:29429527	frame:822474	frametime:0	gctime:0
+stack:
+	(C)	
+time:29429546	frame:822474	frametime:0	gctime:0
+stack:
+	(C)	
+time:29429564	frame:822475	frametime:0	gctime:0
+stack:
+	(C)	
+time:29429581	frame:822475	frametime:0	gctime:0
+stack:
+	(C)	
+time:29429599	frame:822476	frametime:1	gctime:0
+stack:
+	(C)	
+time:29429618	frame:822476	frametime:1	gctime:0
+stack:
+	(C)	
+time:29429637	frame:822477	frametime:0	gctime:0
+stack:
+	(C)	
+time:29429655	frame:822477	frametime:0	gctime:0
+stack:
+	(C)	
+time:29429674	frame:822478	frametime:0	gctime:0
+stack:
+	(C)	
+time:29429693	frame:822478	frametime:0	gctime:0
+stack:
+	(C)	
+time:29429712	frame:822479	frametime:0	gctime:0
+stack:
+	(C)	
+time:29429730	frame:822480	frametime:0	gctime:1
+stack:
+	(C)	
+time:29429749	frame:822480	frametime:0	gctime:1
+stack:
+	(C)	
+time:29429768	frame:822481	frametime:0	gctime:0
+stack:
+	(C)	
+time:29429787	frame:822481	frametime:0	gctime:0
+stack:
+	(C)	
+time:29429805	frame:822482	frametime:0	gctime:0
+stack:
+	(C)	
+time:29429824	frame:822482	frametime:0	gctime:0
+stack:
+	(C)	
+time:29429843	frame:822483	frametime:0	gctime:0
+stack:
+	(C)	
+time:29429860	frame:822483	frametime:0	gctime:0
+stack:
+	(C)	
+time:29429879	frame:822484	frametime:0	gctime:0
+stack:
+	(C)	
+time:29429894	frame:822484	frametime:0	gctime:0
+stack:
+	(C)	
+time:29429913	frame:822485	frametime:0	gctime:1
+stack:
+	(C)	
+time:29429931	frame:822486	frametime:1	gctime:0
+stack:
+	(C)	
+time:29429950	frame:822486	frametime:1	gctime:0
+stack:
+	(C)	
+time:29429969	frame:822487	frametime:0	gctime:0
+stack:
+	(C)	
+time:29429988	frame:822487	frametime:0	gctime:0
+stack:
+	(C)	
+time:29430006	frame:822488	frametime:0	gctime:0
+stack:
+	(C)	
+time:29430025	frame:822488	frametime:0	gctime:0
+stack:
+	(C)	
+time:29430044	frame:822489	frametime:0	gctime:0
+stack:
+	(C)	
+time:29430060	frame:822489	frametime:0	gctime:0
+stack:
+	(C)	
+time:29430079	frame:822490	frametime:1	gctime:0
+stack:
+	(C)	
+time:29430098	frame:822491	frametime:0	gctime:0
+stack:
+	(C)	
+time:29430116	frame:822491	frametime:0	gctime:0
+stack:
+	(C)	
+time:29430135	frame:822492	frametime:0	gctime:0
+stack:
+	(C)	
+time:29430154	frame:822492	frametime:0	gctime:0
+stack:
+	(C)	
+time:29430173	frame:822493	frametime:0	gctime:0
+stack:
+	(C)	
+time:29430191	frame:822493	frametime:0	gctime:0
+stack:
+	(C)	
+time:29430210	frame:822494	frametime:0	gctime:0
+stack:
+	(C)	
+time:29430229	frame:822495	frametime:0	gctime:0
+stack:
+	(C)	
+time:29430248	frame:822495	frametime:0	gctime:0
+stack:
+	(C)	
+time:29430266	frame:822496	frametime:0	gctime:0
+stack:
+	(C)	
+time:29430285	frame:822496	frametime:0	gctime:0
+stack:
+	(C)	
+time:29430304	frame:822497	frametime:0	gctime:0
+stack:
+	(C)	
+time:29430323	frame:822497	frametime:0	gctime:0
+stack:
+	(C)	
+time:29430341	frame:822498	frametime:1	gctime:0
+stack:
+	(C)	
+time:29430360	frame:822498	frametime:1	gctime:0
+stack:
+	(C)	
+time:29430379	frame:822499	frametime:0	gctime:0
+stack:
+	(C)	
+time:29430398	frame:822500	frametime:0	gctime:0
+stack:
+	(C)	
+time:29430416	frame:822500	frametime:0	gctime:0
+stack:
+	(C)	
+time:29430435	frame:822501	frametime:0	gctime:1
+stack:
+	(C)	
+time:29430454	frame:822501	frametime:0	gctime:1
+stack:
+	(C)	
+time:29430473	frame:822502	frametime:0	gctime:0
+stack:
+	(C)	
+time:29430492	frame:822502	frametime:0	gctime:0
+stack:
+	(C)	
+time:29430510	frame:822503	frametime:0	gctime:0
+stack:
+	(C)	
+time:29430527	frame:822503	frametime:0	gctime:0
+stack:
+	(C)	
+time:29430545	frame:822504	frametime:1	gctime:0
+stack:
+	(C)	
+time:29430562	frame:822505	frametime:0	gctime:0
+stack:
+	(C)	
+time:29430581	frame:822505	frametime:0	gctime:0
+stack:
+	(C)	
+time:29430600	frame:822506	frametime:0	gctime:0
+stack:
+	(C)	
+time:29430619	frame:822506	frametime:0	gctime:0
+stack:
+	(C)	
+time:29430637	frame:822507	frametime:0	gctime:0
+stack:
+	(C)	
+time:29430656	frame:822507	frametime:0	gctime:0
+stack:
+	(C)	
+time:29430672	frame:822508	frametime:0	gctime:0
+stack:
+	(C)	
+time:29430691	frame:822508	frametime:0	gctime:0
+stack:
+	(C)	
+time:29430709	frame:822509	frametime:0	gctime:0
+stack:
+	(C)	
+time:29430724	frame:822509	frametime:0	gctime:0
+stack:
+	(C)	
+time:29430743	frame:822510	frametime:0	gctime:0
+stack:
+	(C)	
+time:29430762	frame:822511	frametime:1	gctime:0
+stack:
+	(C)	
+time:29430781	frame:822511	frametime:1	gctime:0
+stack:
+	(C)	
+time:29430800	frame:822512	frametime:0	gctime:0
+stack:
+	(C)	
+time:29430818	frame:822512	frametime:0	gctime:0
+stack:
+	(C)	
+time:29430837	frame:822513	frametime:1	gctime:0
+stack:
+	(C)	
+time:29430856	frame:822513	frametime:1	gctime:0
+stack:
+	(C)	
+time:29430875	frame:822514	frametime:0	gctime:0
+stack:
+	(C)	
+time:29430892	frame:822515	frametime:0	gctime:1
+stack:
+	(C)	
+time:29430911	frame:822515	frametime:0	gctime:1
+stack:
+	(C)	
+time:29430928	frame:822516	frametime:0	gctime:0
+stack:
+	(C)	
+time:29430947	frame:822516	frametime:0	gctime:0
+stack:
+	(C)	
+time:29430965	frame:822517	frametime:0	gctime:0
+stack:
+	(C)	
+time:29430984	frame:822517	frametime:0	gctime:0
+stack:
+	(C)	
+time:29431003	frame:822518	frametime:1	gctime:0
+stack:
+	(C)	
+time:29431020	frame:822518	frametime:1	gctime:0
+stack:
+	(C)	
+time:29431038	frame:822519	frametime:0	gctime:1
+stack:
+	(C)	
+time:29431057	frame:822520	frametime:0	gctime:0
+stack:
+	(C)	
+time:29431076	frame:822520	frametime:0	gctime:0
+stack:
+	(C)	
+time:29431095	frame:822521	frametime:0	gctime:0
+stack:
+	(C)	
+time:29431113	frame:822521	frametime:0	gctime:0
+stack:
+	(C)	
+time:29431132	frame:822522	frametime:0	gctime:1
+stack:
+	(C)	
+time:29431149	frame:822522	frametime:0	gctime:1
+stack:
+	(C)	
+time:29431167	frame:822523	frametime:0	gctime:1
+stack:
+	(C)	
+time:29431186	frame:822523	frametime:0	gctime:1
+stack:
+	(C)	
+time:29431201	frame:822524	frametime:0	gctime:0
+stack:
+	(C)	
+time:29431219	frame:822524	frametime:0	gctime:0
+stack:
+	(C)	
+time:29431234	frame:822525	frametime:0	gctime:0
+stack:
+	(C)	
+time:29431253	frame:822525	frametime:0	gctime:0
+stack:
+	(C)	
+time:29431271	frame:822526	frametime:0	gctime:0
+stack:
+	(C)	
+time:29431289	frame:822526	frametime:0	gctime:0
+stack:
+	(C)	
+time:29431308	frame:822527	frametime:1	gctime:0
+stack:
+	(C)	
+time:29431326	frame:822528	frametime:0	gctime:0
+stack:
+	(C)	
+time:29431345	frame:822528	frametime:0	gctime:0
+stack:
+	(C)	
+time:29431361	frame:822529	frametime:0	gctime:0
+stack:
+	(C)	
+time:29431380	frame:822529	frametime:0	gctime:0
+stack:
+	(C)	
+time:29431399	frame:822530	frametime:0	gctime:0
+stack:
+	(C)	
+time:29431418	frame:822530	frametime:0	gctime:0
+stack:
+	(C)	
+time:29431436	frame:822531	frametime:0	gctime:0
+stack:
+	(C)	
+time:29431455	frame:822531	frametime:0	gctime:0
+stack:
+	(C)	
+time:29431470	frame:822532	frametime:0	gctime:3
+stack:
+	(C)	
+time:29431485	frame:822532	frametime:0	gctime:3
+stack:
+	(C)	
+time:29431503	frame:822533	frametime:0	gctime:0
+stack:
+	(C)	
+time:29431522	frame:822533	frametime:0	gctime:0
+stack:
+	(C)	
+time:29431540	frame:822534	frametime:0	gctime:0
+stack:
+	(C)	
+time:29431559	frame:822535	frametime:0	gctime:0
+stack:
+	(C)	
+time:29431578	frame:822535	frametime:0	gctime:0
+stack:
+	(C)	
+time:29431597	frame:822536	frametime:0	gctime:1
+stack:
+	(C)	
+time:29431615	frame:822536	frametime:0	gctime:1
+stack:
+	(C)	
+time:29431634	frame:822537	frametime:1	gctime:0
+stack:
+	(C)	
+time:29431653	frame:822537	frametime:1	gctime:0
+stack:
+	(C)	
+time:29431672	frame:822538	frametime:0	gctime:0
+stack:
+	(C)	
+time:29431691	frame:822538	frametime:0	gctime:0
+stack:
+	(C)	
+time:29431709	frame:822539	frametime:1	gctime:0
+stack:
+	(C)	
+time:29431728	frame:822540	frametime:0	gctime:0
+stack:
+	(C)	
+time:29431747	frame:822540	frametime:0	gctime:0
+stack:
+	(C)	
+time:29431766	frame:822541	frametime:0	gctime:0
+stack:
+	(C)	
+time:29431784	frame:822541	frametime:0	gctime:0
+stack:
+	(C)	
+time:29431803	frame:822542	frametime:0	gctime:0
+stack:
+	(C)	
+time:29431820	frame:822542	frametime:0	gctime:0
+stack:
+	(C)	
+time:29431837	frame:822543	frametime:0	gctime:0
+stack:
+	(C)	
+time:29431856	frame:822543	frametime:0	gctime:0
+stack:
+	(C)	
+time:29431875	frame:822544	frametime:0	gctime:0
+stack:
+	(C)	
+time:29431893	frame:822545	frametime:0	gctime:0
+stack:
+	(C)	
+time:29431912	frame:822545	frametime:0	gctime:0
+stack:
+	(C)	
+time:29431931	frame:822546	frametime:0	gctime:0
+stack:
+	(C)	
+time:29431948	frame:822546	frametime:0	gctime:0
+stack:
+	(C)	
+time:29431965	frame:822547	frametime:0	gctime:0
+stack:
+	(C)	
+time:29431983	frame:822547	frametime:0	gctime:0
+stack:
+	(C)	
+time:29431998	frame:822548	frametime:0	gctime:0
+stack:
+	(C)	
+time:29432015	frame:822548	frametime:0	gctime:0
+stack:
+	(C)	
+time:29432034	frame:822549	frametime:0	gctime:1
+stack:
+	(C)	
+time:29432050	frame:822549	frametime:0	gctime:1
+stack:
+	(C)	
+time:29432068	frame:822550	frametime:0	gctime:1
+stack:
+	(C)	
+time:29432087	frame:822550	frametime:0	gctime:1
+stack:
+	(C)	
+time:29432106	frame:822551	frametime:0	gctime:0
+stack:
+	(C)	
+time:29432124	frame:822551	frametime:0	gctime:0
+stack:
+	(C)	
+time:29432142	frame:822552	frametime:0	gctime:0
+stack:
+	(C)	
+time:29432160	frame:822553	frametime:0	gctime:0
+stack:
+	(C)	
+time:29432179	frame:822553	frametime:0	gctime:0
+stack:
+	(C)	
+time:29432197	frame:822554	frametime:0	gctime:0
+stack:
+	(C)	
+time:29432216	frame:822554	frametime:0	gctime:0
+stack:
+	(C)	
+time:29432234	frame:822555	frametime:0	gctime:0
+stack:
+	(C)	
+time:29432253	frame:822555	frametime:0	gctime:0
+stack:
+	(C)	
+time:29432272	frame:822556	frametime:0	gctime:0
+stack:
+	(C)	
+time:29432290	frame:822556	frametime:0	gctime:0
+stack:
+	(C)	
+time:29432309	frame:822557	frametime:0	gctime:0
+stack:
+	(C)	
+time:29432328	frame:822558	frametime:0	gctime:0
+stack:
+	(C)	
+time:29432347	frame:822558	frametime:0	gctime:0
+stack:
+	(C)	
+time:29432365	frame:822559	frametime:0	gctime:0
+stack:
+	(C)	
+time:29432382	frame:822559	frametime:0	gctime:0
+stack:
+	(C)	
+time:29432401	frame:822560	frametime:0	gctime:0
+stack:
+	(C)	
+time:29432418	frame:822560	frametime:0	gctime:0
+stack:
+	(C)	
+time:29432437	frame:822561	frametime:0	gctime:0
+stack:
+	(C)	
+time:29432455	frame:822561	frametime:0	gctime:0
+stack:
+	(C)	
+time:29432473	frame:822562	frametime:0	gctime:0
+stack:
+	(C)	
+time:29432492	frame:822563	frametime:0	gctime:0
+stack:
+	(C)	
+time:29432511	frame:822563	frametime:0	gctime:0
+stack:
+	(C)	
+time:29432530	frame:822564	frametime:0	gctime:0
+stack:
+	(C)	
+time:29432548	frame:822564	frametime:0	gctime:0
+stack:
+	(C)	
+time:29432567	frame:822565	frametime:0	gctime:0
+stack:
+	(C)	
+time:29432585	frame:822565	frametime:0	gctime:0
+stack:
+	(C)	
+time:29432602	frame:822566	frametime:0	gctime:0
+stack:
+	(C)	
+time:29432621	frame:822566	frametime:0	gctime:0
+stack:
+	(C)	
+time:29432639	frame:822567	frametime:0	gctime:1
+stack:
+	(C)	
+time:29432657	frame:822567	frametime:0	gctime:1
+stack:
+	(C)	
+time:29432676	frame:822568	frametime:0	gctime:0
+stack:
+	(C)	
+time:29432693	frame:822569	frametime:0	gctime:0
+stack:
+	(C)	
+time:29432711	frame:822569	frametime:0	gctime:0
+stack:
+	(C)	
+time:29432729	frame:822570	frametime:0	gctime:0
+stack:
+	(C)	
+time:29432748	frame:822570	frametime:0	gctime:0
+stack:
+	(C)	
+time:29432767	frame:822571	frametime:0	gctime:0
+stack:
+	(C)	
+time:29432782	frame:822571	frametime:0	gctime:0
+stack:
+	(C)	
+time:29432801	frame:822572	frametime:0	gctime:0
+stack:
+	(C)	
+time:29432820	frame:822572	frametime:0	gctime:0
+stack:
+	(C)	
+time:29432838	frame:822573	frametime:0	gctime:0
+stack:
+	(C)	
+time:29432857	frame:822574	frametime:1	gctime:0
+stack:
+	(C)	
+time:29432874	frame:822574	frametime:1	gctime:0
+stack:
+	(C)	
+time:29432892	frame:822575	frametime:0	gctime:0
+stack:
+	(C)	
+time:29432911	frame:822575	frametime:0	gctime:0
+stack:
+	(C)	
+time:29432930	frame:822576	frametime:0	gctime:0
+stack:
+	(C)	
+time:29432948	frame:822576	frametime:0	gctime:0
+stack:
+	(C)	
+time:29432967	frame:822577	frametime:0	gctime:0
+stack:
+	(C)	
+time:29432986	frame:822577	frametime:0	gctime:0
+stack:
+	(C)	
+time:29433004	frame:822578	frametime:0	gctime:0
+stack:
+	(C)	
+time:29433020	frame:822578	frametime:0	gctime:0
+stack:
+	(C)	
+time:29433039	frame:822579	frametime:1	gctime:0
+stack:
+	(C)	
+time:29433058	frame:822580	frametime:0	gctime:0
+stack:
+	(C)	
+time:29433076	frame:822580	frametime:0	gctime:0
+stack:
+	(C)	
+time:29433095	frame:822581	frametime:0	gctime:0
+stack:
+	(C)	
+time:29433114	frame:822581	frametime:0	gctime:0
+stack:
+	(C)	
+time:29433132	frame:822582	frametime:0	gctime:0
+stack:
+	(C)	
+time:29433148	frame:822582	frametime:0	gctime:0
+stack:
+	(C)	
+time:29433166	frame:822583	frametime:0	gctime:0
+stack:
+	(C)	
+time:29433182	frame:822583	frametime:0	gctime:0
+stack:
+	(C)	
+time:29433201	frame:822584	frametime:0	gctime:0
+stack:
+	(C)	
+time:29433218	frame:822584	frametime:0	gctime:0
+stack:
+	(C)	
+time:29433237	frame:822585	frametime:0	gctime:0
+stack:
+	(C)	
+time:29433252	frame:822585	frametime:0	gctime:0
+stack:
+	(C)	
+time:29433268	frame:822586	frametime:0	gctime:0
+stack:
+	(C)	
+time:29433286	frame:822586	frametime:0	gctime:0
+stack:
+	(C)	
+time:29433305	frame:822587	frametime:0	gctime:0
+stack:
+	(C)	
+time:29433321	frame:822588	frametime:0	gctime:1
+stack:
+	(C)	
+time:29433339	frame:822588	frametime:0	gctime:1
+stack:
+	(C)	
+time:29433357	frame:822589	frametime:1	gctime:0
+stack:
+	(C)	
+time:29433373	frame:822589	frametime:1	gctime:0
+stack:
+	(C)	
+time:29433392	frame:822590	frametime:0	gctime:0
+stack:
+	(C)	
+time:29433408	frame:822590	frametime:0	gctime:0
+stack:
+	(C)	
+time:29433427	frame:822591	frametime:0	gctime:0
+stack:
+	(C)	
+time:29433443	frame:822591	frametime:0	gctime:0
+stack:
+	(C)	
+time:29433458	frame:822592	frametime:0	gctime:0
+stack:
+	(C)	
+time:29433477	frame:822592	frametime:0	gctime:0
+stack:
+	(C)	
+time:29433496	frame:822593	frametime:0	gctime:0
+stack:
+	(C)	
+time:29433515	frame:822593	frametime:0	gctime:0
+stack:
+	(C)	
+time:29433533	frame:822594	frametime:0	gctime:0
+stack:
+	(C)	
+time:29433552	frame:822594	frametime:0	gctime:0
+stack:
+	(C)	
+time:29433568	frame:822595	frametime:0	gctime:0
+stack:
+	(C)	
+time:29433587	frame:822595	frametime:0	gctime:0
+stack:
+	(C)	
+time:29433606	frame:822596	frametime:0	gctime:0
+stack:
+	(C)	
+time:29433625	frame:822597	frametime:0	gctime:0
+stack:
+	(C)	
+time:29433644	frame:822597	frametime:0	gctime:0
+stack:
+	(C)	
+time:29433662	frame:822598	frametime:0	gctime:0
+stack:
+	(C)	
+time:29433681	frame:822598	frametime:0	gctime:0
+stack:
+	(C)	
+time:29433699	frame:822599	frametime:0	gctime:1
+stack:
+	(C)	
+time:29433717	frame:822599	frametime:0	gctime:1
+stack:
+	(C)	
+time:29433736	frame:822600	frametime:1	gctime:0
+stack:
+	(C)	
+time:29433755	frame:822601	frametime:0	gctime:0
+stack:
+	(C)	
+time:29433774	frame:822601	frametime:0	gctime:0
+stack:
+	(C)	
+time:29433793	frame:822602	frametime:0	gctime:0
+stack:
+	(C)	
+time:29433810	frame:822602	frametime:0	gctime:0
+stack:
+	(C)	
+time:29433829	frame:822603	frametime:0	gctime:0
+stack:
+	(C)	
+time:29433848	frame:822603	frametime:0	gctime:0
+stack:
+	(C)	
+time:29433866	frame:822604	frametime:0	gctime:0
+stack:
+	(C)	
+time:29433883	frame:822604	frametime:0	gctime:0
+stack:
+	(C)	
+time:29433901	frame:822605	frametime:0	gctime:0
+stack:
+	(C)	
+time:29433920	frame:822606	frametime:0	gctime:0
+stack:
+	(C)	
+time:29433939	frame:822606	frametime:0	gctime:0
+stack:
+	(C)	
+time:29433957	frame:822607	frametime:0	gctime:0
+stack:
+	field find	[C]
+	method recalculateBoldMask	main.lua:24865
+	method checkNameMatch	main.lua:25119
+	function main.lua:25291	main.lua:25295
+time:29433976	frame:822607	frametime:0	gctime:0
+stack:
+	method has	main.lua
+	method recalculateBoldMask	main.lua:24943
+	method checkNameMatch	main.lua:25119
+	function main.lua:25291	main.lua:25295
+time:29433995	frame:822608	frametime:0	gctime:0
+stack:
+	(C)	
+time:29434014	frame:822608	frametime:0	gctime:0
+stack:
+	(C)	
+time:29434032	frame:822609	frametime:0	gctime:0
+stack:
+	(C)	
+time:29434051	frame:822609	frametime:0	gctime:0
+stack:
+	(C)	
+time:29434069	frame:822610	frametime:0	gctime:0
+stack:
+	(C)	
+time:29434088	frame:822610	frametime:0	gctime:0
+stack:
+	(C)	
+time:29434107	frame:822611	frametime:1	gctime:0
+stack:
+	(C)	
+time:29434126	frame:822612	frametime:0	gctime:0
+stack:
+	(C)	
+time:29434145	frame:822612	frametime:0	gctime:0
+stack:
+	(C)	
+time:29434163	frame:822613	frametime:0	gctime:0
+stack:
+	(C)	
+time:29434182	frame:822613	frametime:0	gctime:0
+stack:
+	(C)	
+time:29434201	frame:822614	frametime:0	gctime:0
+stack:
+	(C)	
+time:29434218	frame:822614	frametime:0	gctime:0
+stack:
+	(C)	
+time:29434237	frame:822615	frametime:0	gctime:0
+stack:
+	(C)	
+time:29434256	frame:822615	frametime:0	gctime:0
+stack:
+	(C)	
+time:29434275	frame:822616	frametime:0	gctime:0
+stack:
+	(C)	
+time:29434293	frame:822616	frametime:0	gctime:0
+stack:
+	(C)	
+time:29434312	frame:822617	frametime:0	gctime:0
+stack:
+	(C)	
+time:29434331	frame:822618	frametime:0	gctime:0
+stack:
+	(C)	
+time:29434350	frame:822618	frametime:0	gctime:0
+stack:
+	(C)	
+time:29434369	frame:822619	frametime:0	gctime:0
+stack:
+	(C)	
+time:29434387	frame:822619	frametime:0	gctime:0
+stack:
+	(C)	
+time:29434406	frame:822620	frametime:0	gctime:0
+stack:
+	(C)	
+time:29434425	frame:822620	frametime:0	gctime:0
+stack:
+	(C)	
+time:29434444	frame:822621	frametime:0	gctime:0
+stack:
+	(C)	
+time:29434462	frame:822622	frametime:0	gctime:0
+stack:
+	(C)	
+time:29434481	frame:822622	frametime:0	gctime:0
+stack:
+	(C)	
+time:29434500	frame:822623	frametime:0	gctime:0
+stack:
+	(C)	
+time:29434519	frame:822623	frametime:0	gctime:0
+stack:
+	(C)	
+time:29434537	frame:822624	frametime:0	gctime:0
+stack:
+	(C)	
+time:29434556	frame:822624	frametime:0	gctime:0
+stack:
+	(C)	
+time:29434574	frame:822625	frametime:0	gctime:0
+stack:
+	(C)	
+time:29434593	frame:822626	frametime:0	gctime:0
+stack:
+	(C)	
+time:29434612	frame:822626	frametime:0	gctime:0
+stack:
+	(C)	
+time:29434627	frame:822627	frametime:0	gctime:0
+stack:
+	(C)	
+time:29434646	frame:822627	frametime:0	gctime:0
+stack:
+	(C)	
+time:29434665	frame:822628	frametime:0	gctime:0
+stack:
+	(C)	
+time:29434683	frame:822628	frametime:0	gctime:0
+stack:
+	(C)	
+time:29434702	frame:822629	frametime:0	gctime:0
+stack:
+	(C)	
+time:29434721	frame:822629	frametime:0	gctime:0
+stack:
+	(C)	
+time:29434740	frame:822630	frametime:0	gctime:0
+stack:
+	(C)	
+time:29434758	frame:822630	frametime:0	gctime:0
+stack:
+	(C)	
+time:29434777	frame:822631	frametime:1	gctime:0
+stack:
+	(C)	
+time:29434796	frame:822632	frametime:0	gctime:0
+stack:
+	(C)	
+time:29434815	frame:822632	frametime:0	gctime:0
+stack:
+	(C)	
+time:29434834	frame:822633	frametime:0	gctime:0
+stack:
+	(C)	
+time:29434852	frame:822633	frametime:0	gctime:0
+stack:
+	(C)	
+time:29434871	frame:822634	frametime:0	gctime:0
+stack:
+	(C)	
+time:29434890	frame:822634	frametime:0	gctime:0
+stack:
+	(C)	
+time:29434909	frame:822635	frametime:0	gctime:0
+stack:
+	(C)	
+time:29434927	frame:822636	frametime:1	gctime:0
+stack:
+	(C)	
+time:29434946	frame:822636	frametime:1	gctime:0
+stack:
+	(C)	
+time:29434965	frame:822637	frametime:0	gctime:0
+stack:
+	(C)	
+time:29434984	frame:822637	frametime:0	gctime:0
+stack:
+	(C)	
+time:29435002	frame:822638	frametime:0	gctime:0
+stack:
+	(C)	
+time:29435021	frame:822638	frametime:0	gctime:0
+stack:
+	(C)	
+time:29435040	frame:822639	frametime:0	gctime:0
+stack:
+	(C)	
+time:29435059	frame:822639	frametime:0	gctime:0
+stack:
+	(C)	
+time:29435078	frame:822640	frametime:0	gctime:0
+stack:
+	(C)	
+time:29435096	frame:822641	frametime:1	gctime:0
+stack:
+	(C)	
+time:29435115	frame:822641	frametime:1	gctime:0
+stack:
+	(C)	
+time:29435134	frame:822642	frametime:0	gctime:0
+stack:
+	(C)	
+time:29435153	frame:822642	frametime:0	gctime:0
+stack:
+	(C)	
+time:29435171	frame:822643	frametime:0	gctime:0
+stack:
+	(C)	
+time:29435190	frame:822643	frametime:0	gctime:0
+stack:
+	(C)	
+time:29435209	frame:822644	frametime:0	gctime:0
+stack:
+	(C)	
+time:29435228	frame:822645	frametime:0	gctime:0
+stack:
+	(C)	
+time:29435246	frame:822645	frametime:0	gctime:0
+stack:
+	(C)	
+time:29435265	frame:822646	frametime:0	gctime:0
+stack:
+	(C)	
+time:29435284	frame:822646	frametime:0	gctime:0
+stack:
+	(C)	
+time:29435303	frame:822647	frametime:0	gctime:0
+stack:
+	(C)	
+time:29435322	frame:822647	frametime:0	gctime:0
+stack:
+	(C)	
+time:29435340	frame:822648	frametime:0	gctime:0
+stack:
+	(C)	
+time:29435359	frame:822648	frametime:0	gctime:0
+stack:
+	(C)	
+time:29435378	frame:822649	frametime:0	gctime:0
+stack:
+	(C)	
+time:29435396	frame:822650	frametime:0	gctime:0
+stack:
+	(C)	
+time:29435415	frame:822650	frametime:0	gctime:0
+stack:
+	(C)	
+time:29435433	frame:822651	frametime:0	gctime:3
+stack:
+	(C)	
+time:29435452	frame:822651	frametime:0	gctime:3
+stack:
+	(C)	
+time:29435469	frame:822652	frametime:0	gctime:0
+stack:
+	(C)	
+time:29435488	frame:822652	frametime:0	gctime:0
+stack:
+	(C)	
+time:29435507	frame:822653	frametime:0	gctime:0
+stack:
+	(C)	
+time:29435523	frame:822653	frametime:0	gctime:0
+stack:
+	(C)	
+time:29435541	frame:822654	frametime:0	gctime:0
+stack:
+	(C)	
+time:29435560	frame:822655	frametime:0	gctime:0
+stack:
+	(C)	
+time:29435576	frame:822655	frametime:0	gctime:0
+stack:
+	(C)	
+time:29435595	frame:822656	frametime:0	gctime:0
+stack:
+	(C)	
+time:29435613	frame:822656	frametime:0	gctime:0
+stack:
+	(C)	
+time:29435632	frame:822657	frametime:0	gctime:0
+stack:
+	(C)	
+time:29435651	frame:822657	frametime:0	gctime:0
+stack:
+	(C)	
+time:29435670	frame:822658	frametime:0	gctime:0
+stack:
+	(C)	
+time:29435688	frame:822658	frametime:0	gctime:0
+stack:
+	(C)	
+time:29435707	frame:822659	frametime:0	gctime:0
+stack:
+	(C)	
+time:29435723	frame:822659	frametime:0	gctime:0
+stack:
+	(C)	
+time:29435742	frame:822660	frametime:0	gctime:1
+stack:
+	(C)	
+time:29435761	frame:822661	frametime:0	gctime:0
+stack:
+	(C)	
+time:29435779	frame:822661	frametime:0	gctime:0
+stack:
+	(C)	
+time:29435798	frame:822662	frametime:0	gctime:0
+stack:
+	(C)	
+time:29435817	frame:822662	frametime:0	gctime:0
+stack:
+	(C)	
+time:29435836	frame:822663	frametime:0	gctime:0
+stack:
+	(C)	
+time:29435854	frame:822663	frametime:0	gctime:0
+stack:
+	(C)	
+time:29435873	frame:822664	frametime:0	gctime:1
+stack:
+	(C)	
+time:29435892	frame:822665	frametime:0	gctime:1
+stack:
+	field drawText	[C]
+	upvalue drawGame	main.lua:25432
+	function main.lua:25762	main.lua:25765
+time:29435911	frame:822665	frametime:0	gctime:0
+stack:
+	(C)	
+time:29435929	frame:822666	frametime:0	gctime:0
+stack:
+	(C)	
+time:29435948	frame:822666	frametime:0	gctime:0
+stack:
+	(C)	
+time:29435967	frame:822667	frametime:0	gctime:0
+stack:
+	(C)	
+time:29435983	frame:822667	frametime:0	gctime:0
+stack:
+	(C)	
+time:29436002	frame:822668	frametime:1	gctime:0
+stack:
+	(C)	
+time:29436020	frame:822668	frametime:1	gctime:0
+stack:
+	(C)	
+time:29436039	frame:822669	frametime:0	gctime:0
+stack:
+	(C)	
+time:29436058	frame:822669	frametime:0	gctime:0
+stack:
+	(C)	
+time:29436077	frame:822670	frametime:0	gctime:0
+stack:
+	(C)	
+time:29436096	frame:822671	frametime:0	gctime:0
+stack:
+	(C)	
+time:29436114	frame:822671	frametime:0	gctime:0
+stack:
+	(C)	
+time:29436133	frame:822672	frametime:0	gctime:0
+stack:
+	(C)	
+time:29436152	frame:822672	frametime:0	gctime:0
+stack:
+	(C)	
+time:29436171	frame:822673	frametime:0	gctime:0
+stack:
+	(C)	
+time:29436189	frame:822673	frametime:0	gctime:0
+stack:
+	(C)	
+time:29436208	frame:822674	frametime:0	gctime:0
+stack:
+	(C)	
+time:29436227	frame:822675	frametime:0	gctime:0
+stack:
+	(C)	
+time:29436246	frame:822675	frametime:0	gctime:0
+stack:
+	(C)	
+time:29436264	frame:822676	frametime:0	gctime:0
+stack:
+	(C)	
+time:29436283	frame:822676	frametime:0	gctime:0
+stack:
+	(C)	
+time:29436302	frame:822677	frametime:0	gctime:0
+stack:
+	(C)	
+time:29436321	frame:822677	frametime:0	gctime:0
+stack:
+	(C)	
+time:29436340	frame:822678	frametime:0	gctime:1
+stack:
+	(C)	
+time:29436358	frame:822678	frametime:0	gctime:1
+stack:
+	(C)	
+time:29436377	frame:822679	frametime:1	gctime:0
+stack:
+	(C)	
+time:29436396	frame:822680	frametime:0	gctime:0
+stack:
+	(C)	
+time:29436415	frame:822680	frametime:0	gctime:0
+stack:
+	(C)	
+time:29436433	frame:822681	frametime:0	gctime:0
+stack:
+	(C)	
+time:29436452	frame:822681	frametime:0	gctime:0
+stack:
+	(C)	
+time:29436471	frame:822682	frametime:1	gctime:0
+stack:
+	(C)	
+time:29436490	frame:822682	frametime:1	gctime:0
+stack:
+	(C)	
+time:29436508	frame:822683	frametime:0	gctime:0
+stack:
+	(C)	
+time:29436525	frame:822683	frametime:0	gctime:0
+stack:
+	(C)	
+time:29436543	frame:822684	frametime:0	gctime:0
+stack:
+	(C)	
+time:29436562	frame:822685	frametime:0	gctime:0
+stack:
+	(C)	
+time:29436581	frame:822685	frametime:0	gctime:0
+stack:
+	(C)	
+time:29436600	frame:822686	frametime:0	gctime:1
+stack:
+	(C)	
+time:29436618	frame:822686	frametime:0	gctime:1
+stack:
+	(C)	
+time:29436637	frame:822687	frametime:0	gctime:0
+stack:
+	(C)	
+time:29436656	frame:822687	frametime:0	gctime:0
+stack:
+	(C)	
+time:29436675	frame:822688	frametime:0	gctime:0
+stack:
+	(C)	
+time:29436693	frame:822688	frametime:0	gctime:0
+stack:
+	(C)	
+time:29436711	frame:822689	frametime:0	gctime:0
+stack:
+	(C)	
+time:29436730	frame:822690	frametime:0	gctime:0
+stack:
+	(C)	
+time:29436748	frame:822690	frametime:0	gctime:0
+stack:
+	(C)	
+time:29436767	frame:822691	frametime:0	gctime:1
+stack:
+	(C)	
+time:29436786	frame:822691	frametime:0	gctime:1
+stack:
+	(C)	
+time:29436804	frame:822692	frametime:0	gctime:1
+stack:
+	(C)	
+time:29436823	frame:822692	frametime:0	gctime:1
+stack:
+	(C)	
+time:29436842	frame:822693	frametime:0	gctime:0
+stack:
+	(C)	
+time:29436859	frame:822693	frametime:0	gctime:0
+stack:
+	(C)	
+time:29436878	frame:822694	frametime:0	gctime:3
+stack:
+	(C)	
+time:29436897	frame:822695	frametime:1	gctime:0
+stack:
+	(C)	
+time:29436915	frame:822695	frametime:1	gctime:0
+stack:
+	(C)	
+time:29436934	frame:822696	frametime:0	gctime:0
+stack:
+	(C)	
+time:29436953	frame:822696	frametime:0	gctime:0
+stack:
+	(C)	
+time:29436972	frame:822697	frametime:0	gctime:0
+stack:
+	(C)	
+time:29436990	frame:822697	frametime:0	gctime:0
+stack:
+	(C)	
+time:29437009	frame:822698	frametime:0	gctime:1
+stack:
+	(C)	
+time:29437028	frame:822699	frametime:0	gctime:0
+stack:
+	(C)	
+time:29437047	frame:822699	frametime:0	gctime:0
+stack:
+	(C)	
+time:29437065	frame:822700	frametime:0	gctime:0
+stack:
+	(C)	
+time:29437084	frame:822700	frametime:0	gctime:0
+stack:
+	(C)	
+time:29437103	frame:822701	frametime:0	gctime:0
+stack:
+	(C)	
+time:29437122	frame:822701	frametime:0	gctime:0
+stack:
+	(C)	
+time:29437141	frame:822702	frametime:0	gctime:0
+stack:
+	(C)	
+time:29437159	frame:822703	frametime:0	gctime:0
+stack:
+	field drawText	[C]
+	upvalue drawGame	main.lua:25490
+	function main.lua:25762	main.lua:25765
+time:29437178	frame:822703	frametime:0	gctime:0
+stack:
+	(C)	
+time:29437197	frame:822704	frametime:0	gctime:0
+stack:
+	(C)	
+time:29437216	frame:822704	frametime:0	gctime:0
+stack:
+	(C)	
+time:29437234	frame:822705	frametime:0	gctime:0
+stack:
+	(C)	
+time:29437253	frame:822705	frametime:0	gctime:0
+stack:
+	(C)	
+time:29437272	frame:822706	frametime:0	gctime:0
+stack:
+	(C)	
+time:29437291	frame:822706	frametime:0	gctime:0
+stack:
+	(C)	
+time:29437310	frame:822707	frametime:0	gctime:0
+stack:
+	(C)	
+time:29437327	frame:822707	frametime:0	gctime:0
+stack:
+	(C)	
+time:29437345	frame:822708	frametime:0	gctime:0
+stack:
+	(C)	
+time:29437361	frame:822708	frametime:0	gctime:0
+stack:
+	(C)	
+time:29437379	frame:822709	frametime:0	gctime:0
+stack:
+	(C)	
+time:29437398	frame:822710	frametime:0	gctime:1
+stack:
+	(C)	
+time:29437417	frame:822710	frametime:0	gctime:1
+stack:
+	(C)	
+time:29437436	frame:822711	frametime:0	gctime:0
+stack:
+	(C)	
+time:29437452	frame:822711	frametime:0	gctime:0
+stack:
+	(C)	
+time:29437467	frame:822712	frametime:0	gctime:0
+stack:
+	(C)	
+time:29437486	frame:822712	frametime:0	gctime:0
+stack:
+	(C)	
+time:29437505	frame:822713	frametime:0	gctime:0
+stack:
+	(C)	
+time:29437523	frame:822713	frametime:0	gctime:0
+stack:
+	(C)	
+time:29437542	frame:822714	frametime:0	gctime:0
+stack:
+	(C)	
+time:29437561	frame:822715	frametime:0	gctime:0
+stack:
+	(C)	
+time:29437577	frame:822715	frametime:0	gctime:0
+stack:
+	(C)	
+time:29437596	frame:822716	frametime:0	gctime:0
+stack:
+	(C)	
+time:29437614	frame:822716	frametime:0	gctime:0
+stack:
+	(C)	
+time:29437633	frame:822717	frametime:0	gctime:0
+stack:
+	(C)	
+time:29437651	frame:822717	frametime:0	gctime:0
+stack:
+	(C)	
+time:29437670	frame:822718	frametime:0	gctime:3
+stack:
+	(C)	
+time:29437689	frame:822718	frametime:0	gctime:3
+stack:
+	(C)	
+time:29437708	frame:822719	frametime:0	gctime:0
+stack:
+	(C)	
+time:29437726	frame:822719	frametime:0	gctime:0
+stack:
+	(C)	
+time:29437745	frame:822720	frametime:0	gctime:0
+stack:
+	(C)	
+time:29437764	frame:822721	frametime:0	gctime:0
+stack:
+	(C)	
+time:29437783	frame:822721	frametime:0	gctime:0
+stack:
+	(C)	
+time:29437801	frame:822722	frametime:0	gctime:0
+stack:
+	(C)	
+time:29437820	frame:822722	frametime:0	gctime:0
+stack:
+	(C)	
+time:29437839	frame:822723	frametime:0	gctime:0
+stack:
+	(C)	
+time:29437858	frame:822723	frametime:0	gctime:0
+stack:
+	(C)	
+time:29437876	frame:822724	frametime:0	gctime:0
+stack:
+	(C)	
+time:29437895	frame:822725	frametime:0	gctime:0
+stack:
+	(C)	
+time:29437914	frame:822725	frametime:0	gctime:0
+stack:
+	(C)	
+time:29437933	frame:822726	frametime:0	gctime:0
+stack:
+	(C)	
+time:29437951	frame:822726	frametime:0	gctime:0
+stack:
+	(C)	
+time:29437970	frame:822727	frametime:0	gctime:0
+stack:
+	(C)	
+time:29437989	frame:822727	frametime:0	gctime:0
+stack:
+	(C)	
+time:29438008	frame:822728	frametime:0	gctime:0
+stack:
+	(C)	
+time:29438027	frame:822729	frametime:0	gctime:0
+stack:
+	(C)	
+time:29438043	frame:822729	frametime:0	gctime:0
+stack:
+	(C)	
+time:29438062	frame:822730	frametime:0	gctime:0
+stack:
+	(C)	
+time:29438081	frame:822730	frametime:0	gctime:0
+stack:
+	(C)	
+time:29438099	frame:822731	frametime:0	gctime:0
+stack:
+	(C)	
+time:29438118	frame:822731	frametime:0	gctime:0
+stack:
+	(C)	
+time:29438137	frame:822732	frametime:0	gctime:0
+stack:
+	(C)	
+time:29438156	frame:822732	frametime:0	gctime:0
+stack:
+	(C)	
+time:29438171	frame:822733	frametime:0	gctime:0
+stack:
+	(C)	
+time:29438190	frame:822733	frametime:0	gctime:0
+stack:
+	(C)	
+time:29438209	frame:822734	frametime:0	gctime:0
+stack:
+	(C)	
+time:29438227	frame:822734	frametime:0	gctime:0
+stack:
+	(C)	
+time:29438244	frame:822735	frametime:0	gctime:0
+stack:
+	(C)	
+time:29438262	frame:822736	frametime:1	gctime:0
+stack:
+	(C)	
+time:29438281	frame:822736	frametime:1	gctime:0
+stack:
+	(C)	
+time:29438300	frame:822737	frametime:0	gctime:0
+stack:
+	(C)	
+time:29438318	frame:822737	frametime:0	gctime:0
+stack:
+	(C)	
+time:29438337	frame:822738	frametime:0	gctime:0
+stack:
+	(C)	
+time:29438356	frame:822738	frametime:0	gctime:0
+stack:
+	(C)	
+time:29438375	frame:822739	frametime:0	gctime:0
+stack:
+	(C)	
+time:29438393	frame:822739	frametime:0	gctime:0
+stack:
+	(C)	
+time:29438411	frame:822740	frametime:0	gctime:0
+stack:
+	(C)	
+time:29438427	frame:822740	frametime:0	gctime:0
+stack:
+	(C)	
+time:29438445	frame:822741	frametime:0	gctime:0
+stack:
+	(C)	
+time:29438464	frame:822742	frametime:0	gctime:0
+stack:
+	(C)	
+time:29438483	frame:822742	frametime:0	gctime:0
+stack:
+	(C)	
+time:29438502	frame:822743	frametime:0	gctime:0
+stack:
+	(C)	
+time:29438519	frame:822743	frametime:0	gctime:0
+stack:
+	(C)	
+time:29438534	frame:822744	frametime:0	gctime:0
+stack:
+	(C)	
+time:29438553	frame:822744	frametime:0	gctime:0
+stack:
+	(C)	
+time:29438572	frame:822745	frametime:0	gctime:0
+stack:
+	(C)	
+time:29438590	frame:822745	frametime:0	gctime:0
+stack:
+	(C)	
+time:29438609	frame:822746	frametime:0	gctime:0
+stack:
+	(C)	
+time:29438628	frame:822747	frametime:0	gctime:0
+stack:
+	(C)	
+time:29438647	frame:822747	frametime:0	gctime:0
+stack:
+	(C)	
+time:29438665	frame:822748	frametime:1	gctime:0
+stack:
+	(C)	
+time:29438684	frame:822748	frametime:1	gctime:0
+stack:
+	(C)	
+time:29438703	frame:822749	frametime:0	gctime:0
+stack:
+	(C)	
+time:29438722	frame:822749	frametime:0	gctime:0
+stack:
+	(C)	
+time:29438741	frame:822750	frametime:0	gctime:0
+stack:
+	(C)	
+time:29438756	frame:822750	frametime:0	gctime:0
+stack:
+	(C)	
+time:29438775	frame:822751	frametime:1	gctime:0
+stack:
+	(C)	
+time:29438794	frame:822752	frametime:0	gctime:0
+stack:
+	(C)	
+time:29438812	frame:822752	frametime:0	gctime:0
+stack:
+	(C)	
+time:29438831	frame:822753	frametime:0	gctime:1
+stack:
+	(C)	
+time:29438850	frame:822753	frametime:0	gctime:1
+stack:
+	(C)	
+time:29438869	frame:822754	frametime:0	gctime:0
+stack:
+	(C)	
+time:29438887	frame:822754	frametime:0	gctime:0
+stack:
+	(C)	
+time:29438906	frame:822755	frametime:0	gctime:0
+stack:
+	(C)	
+time:29438925	frame:822755	frametime:0	gctime:0
+stack:
+	(C)	
+time:29438944	frame:822756	frametime:3	gctime:0
+stack:
+	(C)	
+time:29438959	frame:822756	frametime:3	gctime:0
+stack:
+	(C)	
+time:29438974	frame:822757	frametime:0	gctime:0
+stack:
+	(C)	
+time:29438993	frame:822758	frametime:0	gctime:0
+stack:
+	(C)	
+time:29439012	frame:822758	frametime:0	gctime:0
+stack:
+	(C)	
+time:29439031	frame:822759	frametime:1	gctime:0
+stack:
+	(C)	
+time:29439049	frame:822759	frametime:1	gctime:0
+stack:
+	(C)	
+time:29439068	frame:822760	frametime:0	gctime:0
+stack:
+	(C)	
+time:29439087	frame:822760	frametime:0	gctime:0
+stack:
+	(C)	
+time:29439106	frame:822761	frametime:0	gctime:1
+stack:
+	(C)	
+time:29439121	frame:822761	frametime:0	gctime:1
+stack:
+	(C)	
+time:29439139	frame:822762	frametime:0	gctime:0
+stack:
+	(C)	
+time:29439157	frame:822762	frametime:0	gctime:0
+stack:
+	(C)	
+time:29439173	frame:822763	frametime:0	gctime:1
+stack:
+	(C)	
+time:29439189	frame:822763	frametime:0	gctime:1
+stack:
+	(C)	
+time:29439207	frame:822764	frametime:0	gctime:0
+stack:
+	(C)	
+time:29439226	frame:822764	frametime:0	gctime:0
+stack:
+	(C)	
+time:29439245	frame:822765	frametime:0	gctime:0
+stack:
+	(C)	

@@ -21,6 +21,11 @@ export interface NameInstance {
   c: number; // Start Col
   isRow: boolean; // true = Horizontal, false = Vertical
   len: number; // Cached length
+  // (We calculate these once so the renderer doesn't have to)
+  drawX: number;
+  drawY: number;
+  drawW: number;
+  drawH: number;
 }
 
 export interface GameState {

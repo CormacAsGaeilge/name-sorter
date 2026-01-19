@@ -24842,6 +24842,7 @@ ____exports.GameLogic = {
             end
         end
         local allMatches = {}
+        local padding = 2
         do
             local r = 0
             while r < ROWS do
@@ -24876,7 +24877,11 @@ ____exports.GameLogic = {
                                         r = r,
                                         c = startIndex,
                                         isRow = true,
-                                        len = #name
+                                        len = #name,
+                                        drawX = GRID_OFFSET_X + startIndex * CELL_WIDTH + padding,
+                                        drawY = GRID_OFFSET_Y + r * CELL_HEIGHT + padding,
+                                        drawW = #name * CELL_WIDTH - padding * 2,
+                                        drawH = CELL_HEIGHT - padding * 2
                                     }
                                     startIndex = startIndex + 1
                                 end
@@ -24960,7 +24965,11 @@ ____exports.GameLogic = {
                                         r = startIndex,
                                         c = c,
                                         isRow = false,
-                                        len = #name
+                                        len = #name,
+                                        drawX = GRID_OFFSET_X + c * CELL_WIDTH + padding,
+                                        drawY = GRID_OFFSET_Y + startIndex * CELL_HEIGHT + padding,
+                                        drawW = CELL_WIDTH - padding * 2,
+                                        drawH = #name * CELL_HEIGHT - padding * 2
                                     }
                                     startIndex = startIndex + 1
                                 end
@@ -25324,8 +25333,7 @@ ____exports.inputHandler = {
 return ____exports
  end,
 ["src.renderer"] = function(...) 
-local ____lualib = require("lualib_bundle")
-local __TS__ArrayForEach = ____lualib.__TS__ArrayForEach
+--[[ Generated with https://github.com/TypeScriptToLua/TypeScriptToLua ]]
 local ____exports = {}
 local ____core = require("lua_modules.@crankscript.core.src.index")
 local PlaydateColor = ____core.PlaydateColor
@@ -25342,36 +25350,14 @@ local GRID_OFFSET_X = ____constants.GRID_OFFSET_X
 local GRID_OFFSET_Y = ____constants.GRID_OFFSET_Y
 local FROZEN_CELL = ____constants.FROZEN_CELL
 local animationTick = 0
-local function drawCapsule(____, name)
-    local minCol
-    local maxCol
-    local minRow
-    local maxRow
-    if name.isRow then
-        minCol = name.c
-        maxCol = name.c + name.len - 1
-        maxRow = name.r
-        minRow = maxRow
-    else
-        maxCol = name.c
-        minCol = maxCol
-        minRow = name.r
-        maxRow = name.r + name.len - 1
-    end
-    local x = GRID_OFFSET_X + minCol * CELL_WIDTH
-    local y = GRID_OFFSET_Y + minRow * CELL_HEIGHT
-    local padding = 2
-    local width = (maxCol - minCol + 1) * CELL_WIDTH - padding * 2
-    local height = (maxRow - minRow + 1) * CELL_HEIGHT - padding * 2
-    local drawX = x + padding
-    local drawY = y + padding
+local function drawCapsule(____, drawX, drawY, w, h)
     playdate.graphics.setColor(PlaydateColor.Black)
     playdate.graphics.setLineWidth(2)
     playdate.graphics.drawRoundRect(
         drawX,
         drawY,
-        width,
-        height,
+        w,
+        h,
         10
     )
     playdate.graphics.setLineWidth(1)
@@ -25429,8 +25415,10 @@ ____exports.drawGame = function()
         30
     )
     local legendX = 260
-    playdate.graphics.drawText("A: Select Name", legendX, 10)
-    playdate.graphics.drawText("B: Switch Mode", legendX, 30)
+    playdate.graphics.drawText("CONTROLS:", legendX, 10)
+    playdate.graphics.drawText("A: Match", legendX, 30)
+    playdate.graphics.drawText("B: Mode", legendX, 45)
+    playdate.graphics.drawText("Crank: Shuffle", legendX, 60)
     local barX = GRID_OFFSET_X
     local barY = GRID_OFFSET_Y + ROWS * CELL_HEIGHT + 25
     local barWidth = COLS * CELL_WIDTH
@@ -25441,10 +25429,15 @@ ____exports.drawGame = function()
     if fillWidth > 0 then
         playdate.graphics.fillRect(barX, barY, fillWidth, barHeight)
     end
-    __TS__ArrayForEach(
-        gameState.detectedNames,
-        function(____, name) return drawCapsule(nil, name) end
-    )
+    for ____, name in ipairs(gameState.detectedNames) do
+        drawCapsule(
+            nil,
+            name.drawX,
+            name.drawY,
+            name.drawW,
+            name.drawH
+        )
+    end
     if gameState.mode == "row" or gameState.mode == "name" then
         local cy = GRID_OFFSET_Y + gameState.cursor.y * CELL_HEIGHT + CELL_HEIGHT / 2
         drawAnimatedCaret(nil, GRID_OFFSET_X - 15, cy, "right")
@@ -25496,10 +25489,9 @@ ____exports.drawGame = function()
         end
     end
     playdate.graphics.setColor(PlaydateColor.Black)
-    __TS__ArrayForEach(
-        gameState.particles,
-        function(____, p) return playdate.graphics.fillRect(p.x, p.y, p.size, p.size) end
-    )
+    for ____, p in ipairs(gameState.particles) do
+        playdate.graphics.fillRect(p.x, p.y, p.size, p.size)
+    end
 end
 return ____exports
  end,
