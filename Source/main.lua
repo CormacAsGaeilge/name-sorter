@@ -25527,6 +25527,7 @@ ____exports.drawGame = function()
                             playdate.graphics.setLineWidth(1)
                         end
                     else
+                        playdate.graphics.setColor(PlaydateColor.Black)
                         playdate.graphics.setImageDrawMode(PlaydateDrawMode.FillBlack)
                         playdate.graphics.setFont(playdate.graphics.getSystemFont(PlaydateFontVariant.Normal))
                         if isCursor then
