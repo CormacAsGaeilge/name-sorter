@@ -36,4 +36,5 @@ export interface GameState {
   freezeTimer: number;
   freezeThreshold: number;
   gameOver: boolean;
+  gridDirty: boolean;
 }

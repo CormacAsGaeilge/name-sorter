@@ -18,4 +18,5 @@ export const gameState: GameState = {
   freezeTimer: 0,
   freezeThreshold: INITIAL_FREEZE_THRESHOLD,
   gameOver: false,
+  gridDirty: true,
 };
