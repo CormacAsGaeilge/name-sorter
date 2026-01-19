@@ -1,28 +1,24 @@
-// Define global Playdate types if missing
+// Define global Playdate types
 declare global {
   interface Window {
     playdate: any;
   }
 }
 
+// 1. Setup Canvas in the Wrapper
 const canvas = document.createElement("canvas");
 canvas.width = 400;
 canvas.height = 240;
-canvas.style.imageRendering = "pixelated"; // Retro look
-canvas.style.width = "800px"; // 2x Scale
-canvas.style.height = "480px";
-canvas.style.border = "10px solid #333";
-canvas.style.background = "#FFFFFF";
-document.body.style.display = "flex";
-document.body.style.justifyContent = "center";
-document.body.style.alignItems = "center";
-document.body.style.height = "100vh";
-document.body.style.background = "#222";
-document.body.style.margin = "0";
-document.body.appendChild(canvas);
+canvas.style.imageRendering = "pixelated";
+canvas.style.width = "100%";
+canvas.style.height = "100%";
+
+// Find wrapper or fallback to body
+const wrapper = document.getElementById("game-wrapper") || document.body;
+wrapper.appendChild(canvas);
 
 const ctx = canvas.getContext("2d")!;
-ctx.font = "12px monospace"; // Fallback font
+ctx.font = "12px monospace";
 ctx.textBaseline = "top";
 
 // --- INPUT STATE ---
@@ -31,7 +27,9 @@ const inputState = {
   pressed: {} as Record<string, boolean>,
 };
 
-// Map Keys to Playdate Buttons
+let mockCrankChange = 0;
+
+// --- KEYBOARD HANDLERS ---
 const KEY_MAP: Record<string, string> = {
   ArrowUp: "up",
   ArrowDown: "down",
@@ -44,10 +42,9 @@ const KEY_MAP: Record<string, string> = {
 window.addEventListener("keydown", (e) => {
   const btn = KEY_MAP[e.key];
   if (btn) {
+    if (!inputState.current[btn]) inputState.pressed[btn] = true;
     inputState.current[btn] = true;
-    inputState.pressed[btn] = true;
   }
-  // Crank Logic (Comma/Period)
   if (e.key === "," || e.key === "<") mockCrankChange = -15;
   if (e.key === "." || e.key === ">") mockCrankChange = 15;
 });
@@ -57,13 +54,79 @@ window.addEventListener("keyup", (e) => {
   if (btn) inputState.current[btn] = false;
 });
 
-let mockCrankChange = 0;
+// --- TOUCH/MOUSE HANDLERS ---
+const bindButton = (id: string, btnName: string) => {
+  const el = document.getElementById(id);
+  if (!el) return;
+
+  const press = (e: Event) => {
+    e.preventDefault(); // Stop mouse emulation
+    if (!inputState.current[btnName]) inputState.pressed[btnName] = true;
+    inputState.current[btnName] = true;
+  };
+
+  const release = (e: Event) => {
+    e.preventDefault();
+    inputState.current[btnName] = false;
+  };
+
+  el.addEventListener("mousedown", press);
+  el.addEventListener("touchstart", press);
+  el.addEventListener("mouseup", release);
+  el.addEventListener("touchend", release);
+  el.addEventListener("mouseleave", release); // Handle sliding finger off
+};
+
+const bindCrank = (id: string, amount: number) => {
+  const el = document.getElementById(id);
+  if (!el) return;
+
+  const turn = (e: Event) => {
+    e.preventDefault();
+    mockCrankChange = amount;
+  };
+
+  // Crank only moves while holding/tapping
+  // We'll just apply one tick per tap or rapid fire while holding
+  // For simplicity: tap = move once.
+  // Better UX: Interval while holding.
+
+  let interval: any;
+  const start = (e: Event) => {
+    e.preventDefault();
+    mockCrankChange = amount; // Immediate
+    interval = setInterval(() => {
+      mockCrankChange = amount;
+    }, 100);
+  };
+  const stop = (e: Event) => {
+    e.preventDefault();
+    clearInterval(interval);
+  };
+
+  el.addEventListener("mousedown", start);
+  el.addEventListener("touchstart", start);
+  el.addEventListener("mouseup", stop);
+  el.addEventListener("touchend", stop);
+  el.addEventListener("mouseleave", stop);
+};
+
+// Bind UI
+bindButton("btn-up", "up");
+bindButton("btn-down", "down");
+bindButton("btn-left", "left");
+bindButton("btn-right", "right");
+bindButton("btn-a", "A");
+bindButton("btn-b", "B");
+
+bindCrank("btn-crank-left", -45); // Faster crank on mobile for better feel
+bindCrank("btn-crank-right", 45);
 
 // --- THE SHIM ---
 export const playdateShim = {
   graphics: {
     clear: (color: number) => {
-      ctx.fillStyle = color === 1 ? "#FFFFFF" : "#000000"; // 1=White, 0=Black
+      ctx.fillStyle = color === 1 ? "#FFFFFF" : "#000000";
       ctx.fillRect(0, 0, 400, 240);
     },
     setColor: (color: number) => {
@@ -82,7 +145,11 @@ export const playdateShim = {
     },
     drawRoundRect: (x: number, y: number, w: number, h: number, r: number) => {
       ctx.beginPath();
-      ctx.roundRect(x, y, w, h, r);
+      if (ctx.roundRect) {
+        ctx.roundRect(x, y, w, h, r);
+      } else {
+        ctx.rect(x, y, w, h); // Fallback for old browsers
+      }
       ctx.stroke();
     },
     drawText: (text: string, x: number, y: number) => {
@@ -90,17 +157,14 @@ export const playdateShim = {
     },
     getTextSize: (text: string) => {
       const m = ctx.measureText(text);
-      return [m.width, 14]; // Approx height
+      return [m.width, 14];
     },
-    setImageDrawMode: (mode: number) => {
-      // Simplified: Inverted mode handled loosely by setColor logic above
-    },
+    setImageDrawMode: (mode: number) => {},
     setFont: (font: any) => {
-      // Web fallback: Bold or Normal
       if (font === "bold") ctx.font = "bold 14px monospace";
       else ctx.font = "14px monospace";
     },
-    getSystemFont: (variant: string) => variant, // Pass string through
+    getSystemFont: (variant: string) => variant,
     setLineWidth: (w: number) => (ctx.lineWidth = w),
   },
   inputHandlers: {
@@ -108,24 +172,19 @@ export const playdateShim = {
       window.playdate._activeHandler = handler;
     },
   },
-  // Internal use
   _activeHandler: null as any,
-  update: () => {}, // Will be overwritten by game
+  update: () => {},
 };
 
-// --- MOCK CONSTANTS ---
-// We need to inject these so the game code can use PlaydateColor.Black etc.
-// We cheat by attaching them to the window object or ensuring the game imports them.
-// Since your game imports from @crankscript/core, we need to alias that in Vite (Step 4).
-
-// Initialize Global
+// Mock Constants
 window.playdate = playdateShim;
 
 // --- GAME LOOP ---
 function loop() {
-  // 1. Handle Inputs
   if (window.playdate._activeHandler) {
     const h = window.playdate._activeHandler;
+
+    // Check Pressed (One-shot)
     if (inputState.pressed["A"] && h.AButtonDown) h.AButtonDown();
     if (inputState.pressed["B"] && h.BButtonDown) h.BButtonDown();
     if (inputState.pressed["up"] && h.upButtonDown) h.upButtonDown();
@@ -133,18 +192,19 @@ function loop() {
     if (inputState.pressed["left"] && h.leftButtonDown) h.leftButtonDown();
     if (inputState.pressed["right"] && h.rightButtonDown) h.rightButtonDown();
 
+    // Handle Crank
     if (mockCrankChange !== 0 && h.cranked) {
       h.cranked(mockCrankChange, mockCrankChange);
       mockCrankChange = 0;
     }
   }
-  inputState.pressed = {}; // Reset one-shot presses
 
-  // 2. Run Game Update
+  // Clear "Pressed" state but keep "Current" state
+  inputState.pressed = {};
+
   if (window.playdate.update) {
     window.playdate.update();
   }
-
   requestAnimationFrame(loop);
 }
 
