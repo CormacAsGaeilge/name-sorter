@@ -94,9 +94,16 @@ export const drawGame = () => {
     return;
   }
 
-  // --- HUD ---
+  // --- HUD (Top Left) ---
   playdate.graphics.drawText(`Score: ${gameState.score}`, 10, 10);
   playdate.graphics.drawText(`Mode: ${gameState.mode.toUpperCase()}`, 10, 30);
+
+  // --- CONTROLS LEGEND (Top Right) ---
+  // Placing this on the right side to balance the layout
+  const legendX = 200;
+  playdate.graphics.drawText(`CONTROLS:`, legendX, 10);
+  playdate.graphics.drawText(`A: Claim Name`, legendX, 30);
+  playdate.graphics.drawText(`B: Switch Mode`, legendX, 45);
 
   // --- PROGRESS BAR ---
   const barX = GRID_OFFSET_X;
@@ -162,7 +169,8 @@ export const drawGame = () => {
         }
       } else {
         // --- TEXT CELL ---
-        // FIX: Explicitly reset color to Black, in case the previous loop iteration left it White.
+        // CRITICAL FIX: Explicitly set color to Black.
+        // This prevents the White color from the frozen block (above) leaking into text rendering.
         playdate.graphics.setColor(PlaydateColor.Black);
 
         playdate.graphics.setImageDrawMode(PlaydateDrawMode.FillBlack);
@@ -173,7 +181,6 @@ export const drawGame = () => {
         // Cursor Logic
         if (isCursor) {
           playdate.graphics.setLineWidth(2);
-          // Ensure rect is black
           playdate.graphics.setColor(PlaydateColor.Black);
           playdate.graphics.drawRect(
             cellX + 1,
