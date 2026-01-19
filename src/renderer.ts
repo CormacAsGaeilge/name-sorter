@@ -15,17 +15,21 @@ import {
 } from "./constants";
 import { NameInstance } from "./types";
 
-// Global visual state for animation
 let animationTick = 0;
 
-// Helper: Draw a capsule around a found name
 const drawCapsule = (name: NameInstance) => {
-  const xs = name.cells.map((c) => c.x);
-  const ys = name.cells.map((c) => c.y);
-  const minCol = Math.min(...xs);
-  const maxCol = Math.max(...xs);
-  const minRow = Math.min(...ys);
-  const maxRow = Math.max(...ys);
+  // Trivial Math! No looping through cells!
+  let minCol, maxCol, minRow, maxRow;
+
+  if (name.isRow) {
+    minCol = name.c;
+    maxCol = name.c + name.len - 1;
+    minRow = maxRow = name.r;
+  } else {
+    minCol = maxCol = name.c;
+    minRow = name.r;
+    maxRow = name.r + name.len - 1;
+  }
 
   const x = GRID_OFFSET_X + minCol * CELL_WIDTH;
   const y = GRID_OFFSET_Y + minRow * CELL_HEIGHT;
@@ -43,7 +47,7 @@ const drawCapsule = (name: NameInstance) => {
   playdate.graphics.setLineWidth(1);
 };
 
-// Helper: Draw an animated caret (arrow)
+// ... (drawAnimatedCaret remains exactly the same) ...
 const drawAnimatedCaret = (
   cx: number,
   cy: number,
@@ -51,16 +55,12 @@ const drawAnimatedCaret = (
 ) => {
   const size = 6;
   const bounce = Math.sin(animationTick * 0.15) * 3;
-
   playdate.graphics.setColor(PlaydateColor.Black);
   playdate.graphics.setLineWidth(2);
-
-  let bx = cx;
-  let by = cy;
-
+  let bx = cx,
+    by = cy;
   if (direction === "left" || direction === "right") bx += bounce;
   else by += bounce;
-
   if (direction === "right") {
     playdate.graphics.drawLine(bx, by - size, bx + size, by);
     playdate.graphics.drawLine(bx + size, by, bx, by + size);
@@ -74,19 +74,15 @@ const drawAnimatedCaret = (
     playdate.graphics.drawLine(bx - size, by, bx, by - size);
     playdate.graphics.drawLine(bx, by - size, bx + size, by);
   }
-
   playdate.graphics.setLineWidth(1);
 };
 
 export const drawGame = () => {
   animationTick++;
-
-  // 1. RESET GRAPHICS
   playdate.graphics.clear(PlaydateColor.White);
   playdate.graphics.setColor(PlaydateColor.Black);
   playdate.graphics.setImageDrawMode(PlaydateDrawMode.FillBlack);
 
-  // --- GAME OVER ---
   if (gameState.gameOver) {
     playdate.graphics.drawText(`GAME OVER`, 150, 100);
     playdate.graphics.drawText(`Final Score: ${gameState.score}`, 140, 130);
@@ -94,50 +90,44 @@ export const drawGame = () => {
     return;
   }
 
-  // --- HUD (Top Left) ---
   playdate.graphics.drawText(`Score: ${gameState.score}`, 10, 10);
   playdate.graphics.drawText(`Mode: ${gameState.mode.toUpperCase()}`, 10, 30);
 
-  // --- CONTROLS LEGEND (Top Right) ---
-  // Placing this on the right side to balance the layout
-  const legendX = 200;
+  // Legend
+  const legendX = 260;
   playdate.graphics.drawText(`CONTROLS:`, legendX, 10);
-  playdate.graphics.drawText(`A: Claim Name`, legendX, 30);
-  playdate.graphics.drawText(`B: Switch Mode`, legendX, 45);
+  playdate.graphics.drawText(`A: Match`, legendX, 30);
+  playdate.graphics.drawText(`B: Mode`, legendX, 45);
+  playdate.graphics.drawText(`Crank: Shuffle`, legendX, 60);
 
-  // --- PROGRESS BAR ---
+  // Progress Bar
   const barX = GRID_OFFSET_X;
   const barY = GRID_OFFSET_Y + ROWS * CELL_HEIGHT + 25;
   const barWidth = COLS * CELL_WIDTH;
   const barHeight = 4;
   playdate.graphics.drawRect(barX, barY, barWidth, barHeight);
-
   const fillPercent = gameState.freezeTimer / gameState.freezeThreshold;
   const fillWidth = Math.floor(barWidth * fillPercent);
-  if (fillWidth > 0) {
+  if (fillWidth > 0)
     playdate.graphics.fillRect(barX, barY, fillWidth, barHeight);
-  }
 
-  // --- LAYER 1: CAPSULES ---
-  gameState.detectedNames.forEach((name) => {
-    drawCapsule(name);
-  });
+  // Capsules
+  gameState.detectedNames.forEach((name) => drawCapsule(name));
 
-  // --- LAYER 2: SELECTION INDICATORS ---
+  // Carets
   if (gameState.mode === "row" || gameState.mode === "name") {
     const cy =
       GRID_OFFSET_Y + gameState.cursor.y * CELL_HEIGHT + CELL_HEIGHT / 2;
     drawAnimatedCaret(GRID_OFFSET_X - 15, cy, "right");
     drawAnimatedCaret(GRID_OFFSET_X + COLS * CELL_WIDTH + 15, cy, "left");
   }
-
   if (gameState.mode === "column" || gameState.mode === "name") {
     const cx = GRID_OFFSET_X + gameState.cursor.x * CELL_WIDTH + CELL_WIDTH / 2;
     drawAnimatedCaret(cx, GRID_OFFSET_Y - 8, "down");
     drawAnimatedCaret(cx, GRID_OFFSET_Y + ROWS * CELL_HEIGHT + 8, "up");
   }
 
-  // --- LAYER 3: GRID CONTENT ---
+  // Grid
   for (let r = 0; r < ROWS; r++) {
     for (let c = 0; c < COLS; c++) {
       const char = gameState.grid[r][c];
@@ -146,7 +136,6 @@ export const drawGame = () => {
       const isCursor = c === gameState.cursor.x && r === gameState.cursor.y;
 
       if (char === FROZEN_CELL) {
-        // --- FROZEN BLOCK ---
         playdate.graphics.setColor(PlaydateColor.Black);
         playdate.graphics.fillRect(
           cellX + 2,
@@ -154,8 +143,6 @@ export const drawGame = () => {
           CELL_WIDTH - 4,
           CELL_HEIGHT - 4,
         );
-
-        // Cursor on Frozen Block = White Selection Border
         if (isCursor) {
           playdate.graphics.setColor(PlaydateColor.White);
           playdate.graphics.setLineWidth(2);
@@ -168,17 +155,12 @@ export const drawGame = () => {
           playdate.graphics.setLineWidth(1);
         }
       } else {
-        // --- TEXT CELL ---
-        // CRITICAL FIX: Explicitly set color to Black.
-        // This prevents the White color from the frozen block (above) leaking into text rendering.
-        playdate.graphics.setColor(PlaydateColor.Black);
-
+        playdate.graphics.setColor(PlaydateColor.Black); // FIX: Ensure text is black
         playdate.graphics.setImageDrawMode(PlaydateDrawMode.FillBlack);
         playdate.graphics.setFont(
           playdate.graphics.getSystemFont(PlaydateFontVariant.Normal),
         );
 
-        // Cursor Logic
         if (isCursor) {
           playdate.graphics.setLineWidth(2);
           playdate.graphics.setColor(PlaydateColor.Black);
@@ -191,19 +173,17 @@ export const drawGame = () => {
           playdate.graphics.setLineWidth(1);
         }
 
-        // Centering Logic
         const [textW, textH] = playdate.graphics.getTextSize(char);
         const textX = cellX + (CELL_WIDTH - textW) / 2;
         const textY = cellY + (CELL_HEIGHT - textH) / 2;
-
         playdate.graphics.drawText(char, textX, textY);
       }
     }
   }
 
-  // --- LAYER 4: PARTICLES ---
+  // Particles
   playdate.graphics.setColor(PlaydateColor.Black);
-  gameState.particles.forEach((p) => {
-    playdate.graphics.fillRect(p.x, p.y, p.size, p.size);
-  });
+  gameState.particles.forEach((p) =>
+    playdate.graphics.fillRect(p.x, p.y, p.size, p.size),
+  );
 };

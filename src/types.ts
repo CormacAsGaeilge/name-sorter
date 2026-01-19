@@ -14,10 +14,13 @@ export interface Particle {
   life: number;
 }
 
+// OPTIMIZED: No 'cells' array, no 'id' string. Just raw data.
 export interface NameInstance {
   text: string;
-  cells: Point[];
-  id: string;
+  r: number; // Start Row
+  c: number; // Start Col
+  isRow: boolean; // true = Horizontal, false = Vertical
+  len: number; // Cached length
 }
 
 export interface GameState {

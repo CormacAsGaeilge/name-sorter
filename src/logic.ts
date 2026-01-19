@@ -13,10 +13,10 @@ import {
   CELL_HEIGHT,
 } from "./constants";
 import { randomChar, shuffleArray, createInitialGrid } from "./grid";
-import { NameInstance, Point } from "./types";
+import { NameInstance } from "./types";
 
 // Helper: TSTL-safe zero-filled array creator
-// "new Array(len)" is not supported in TSTL, so we push 0s manually.
+// Must be defined BEFORE the constants below use it.
 const createZeroArray = (len: number) => {
   const arr: number[] = [];
   for (let i = 0; i < len; i++) {
@@ -25,70 +25,42 @@ const createZeroArray = (len: number) => {
   return arr;
 };
 
-// Helper: Check if two names intersect (share any cell)
-const doNamesIntersect = (a: NameInstance, b: NameInstance) => {
-  // Fast bounding box check first
-  const aMinX = a.cells[0].x,
-    aMaxX = a.cells[a.cells.length - 1].x;
-  const bMinX = b.cells[0].x,
-    bMaxX = b.cells[b.cells.length - 1].x;
-  const aMinY = a.cells[0].y,
-    aMaxY = a.cells[a.cells.length - 1].y;
-  const bMinY = b.cells[0].y,
-    bMaxY = b.cells[b.cells.length - 1].y;
+// Static reuse buffers to prevent GC churn
+// FIX: Use helper instead of new Array()
+const ROW_USAGE = createZeroArray(COLS);
+const COL_USAGE = createZeroArray(ROWS);
 
-  if (aMaxX < bMinX || aMinX > bMaxX || aMaxY < bMinY || aMinY > bMaxY)
-    return false;
-
-  // Detailed check
-  for (const cellA of a.cells) {
-    for (const cellB of b.cells) {
-      if (cellA.x === cellB.x && cellA.y === cellB.y) return true;
-    }
-  }
-  return false;
+// Helper: Clear a buffer fast
+const clearBuffer = (buf: number[]) => {
+  for (let i = 0; i < buf.length; i++) buf[i] = 0;
 };
 
-// --- OPTIMIZED FILTERING ---
-const filterMatchesFast = (
-  matches: NameInstance[],
-  isRow: boolean,
-  index: number,
-) => {
-  // Sort longest first
-  matches.sort((a, b) => b.text.length - a.text.length);
-
-  const accepted: NameInstance[] = [];
-
-  // Create a usage map for this specific row/col
-  // 0 = empty, 1 = used once, 2+ = used too much
-  const usageLength = isRow ? COLS : ROWS;
-
-  // FIX: Replaced "new Array(len)" with helper
-  const usageMap = createZeroArray(usageLength);
-
-  for (const candidate of matches) {
-    let fits = true;
-
-    // Check if placing this word violates the "Max 1 overlap" rule
-    for (const cell of candidate.cells) {
-      const pos = isRow ? cell.x : cell.y;
-      if (usageMap[pos] >= 2) {
-        fits = false;
-        break;
-      }
-    }
-
-    if (fits) {
-      // Mark cells as used
-      for (const cell of candidate.cells) {
-        const pos = isRow ? cell.x : cell.y;
-        usageMap[pos]++;
-      }
-      accepted.push(candidate);
+// Helper: Check if two names intersect (Math-based, O(1))
+const doNamesIntersect = (a: NameInstance, b: NameInstance) => {
+  // 1. Parallel names (Row/Row or Col/Col) - Check 1D overlap
+  if (a.isRow === b.isRow) {
+    if (a.isRow) {
+      // Both Rows
+      if (a.r !== b.r) return false; // Different rows
+      return a.c < b.c + b.len && a.c + a.len > b.c;
+    } else {
+      // Both Cols
+      if (a.c !== b.c) return false; // Different cols
+      return a.r < b.r + b.len && a.r + a.len > b.r;
     }
   }
-  return accepted;
+
+  // 2. Perpendicular names (Row/Col) - Check intersection point
+  const row = a.isRow ? a : b;
+  const col = a.isRow ? b : a;
+
+  const colX = col.c;
+  const rowY = row.r;
+
+  const colWithinRowSpan = colX >= row.c && colX < row.c + row.len;
+  const rowWithinColSpan = rowY >= col.r && rowY < col.r + col.len;
+
+  return colWithinRowSpan && rowWithinColSpan;
 };
 
 export const GameLogic = {
@@ -123,10 +95,9 @@ export const GameLogic = {
   },
 
   recalculateBoldMask: () => {
-    // 1. Reset State (Optimized)
     gameState.detectedNames = [];
 
-    // Fast Clear
+    // Fast Clear State
     for (let r = 0; r < ROWS; r++) {
       for (let c = 0; c < COLS; c++) {
         gameState.boldMask[r][c] = false;
@@ -136,36 +107,50 @@ export const GameLogic = {
 
     const allMatches: NameInstance[] = [];
 
-    // 2. Scan Rows (Optimized Loop)
+    // --- SCAN ROWS ---
     for (let r = 0; r < ROWS; r++) {
       const rowStr = gameState.grid[r].join("");
       const rowMatches: NameInstance[] = [];
 
-      // Native for-of loop is faster than .forEach
       for (const name of NAMES_TO_FIND) {
         if (name.length === 0) continue;
         let startIndex = 0;
         while ((startIndex = rowStr.indexOf(name, startIndex)) > -1) {
-          const instance: NameInstance = {
+          rowMatches.push({
             text: name,
-            cells: [],
-            id: `R-${r}-${startIndex}-${name}`,
-          };
-          for (let i = 0; i < name.length; i++) {
-            instance.cells.push({ x: startIndex + i, y: r });
-          }
-          rowMatches.push(instance);
+            r: r,
+            c: startIndex,
+            isRow: true,
+            len: name.length,
+          });
           startIndex += 1;
         }
       }
-      // Use fast filter
-      const filtered = filterMatchesFast(rowMatches, true, r);
-      for (const m of filtered) allMatches.push(m);
+
+      // Filter (Max 1 overlap)
+      if (rowMatches.length > 0) {
+        rowMatches.sort((a, b) => b.len - a.len);
+        clearBuffer(ROW_USAGE);
+
+        for (const m of rowMatches) {
+          let fits = true;
+          // Check usage
+          for (let i = 0; i < m.len; i++) {
+            if (ROW_USAGE[m.c + i] >= 2) {
+              fits = false;
+              break;
+            }
+          }
+          if (fits) {
+            for (let i = 0; i < m.len; i++) ROW_USAGE[m.c + i]++;
+            allMatches.push(m);
+          }
+        }
+      }
     }
 
-    // 3. Scan Columns (Optimized Loop)
+    // --- SCAN COLS ---
     for (let c = 0; c < COLS; c++) {
-      // Build col string manually
       let colStr = "";
       for (let r = 0; r < ROWS; r++) colStr += gameState.grid[r][c];
 
@@ -175,64 +160,94 @@ export const GameLogic = {
         if (name.length === 0) continue;
         let startIndex = 0;
         while ((startIndex = colStr.indexOf(name, startIndex)) > -1) {
-          const instance: NameInstance = {
+          colMatches.push({
             text: name,
-            cells: [],
-            id: `C-${c}-${startIndex}-${name}`,
-          };
-          for (let i = 0; i < name.length; i++) {
-            instance.cells.push({ x: c, y: startIndex + i });
-          }
-          colMatches.push(instance);
+            r: startIndex,
+            c: c,
+            isRow: false, // Vertical
+            len: name.length,
+          });
           startIndex += 1;
         }
       }
-      // Use fast filter
-      const filtered = filterMatchesFast(colMatches, false, c);
-      for (const m of filtered) allMatches.push(m);
-    }
 
-    // 4. Update State
-    gameState.detectedNames = allMatches;
+      // Filter
+      if (colMatches.length > 0) {
+        colMatches.sort((a, b) => b.len - a.len);
+        clearBuffer(COL_USAGE);
 
-    // Count cell usage for intersection highlighting
-    const cellCounts: number[][] = [];
-    // FIX: Replaced "new Array(COLS)" with helper
-    for (let r = 0; r < ROWS; r++) cellCounts.push(createZeroArray(COLS));
-
-    for (const name of allMatches) {
-      for (const cell of name.cells) {
-        gameState.boldMask[cell.y][cell.x] = true;
-        cellCounts[cell.y][cell.x]++;
+        for (const m of colMatches) {
+          let fits = true;
+          for (let i = 0; i < m.len; i++) {
+            if (COL_USAGE[m.r + i] >= 2) {
+              fits = false;
+              break;
+            }
+          }
+          if (fits) {
+            for (let i = 0; i < m.len; i++) COL_USAGE[m.r + i]++;
+            allMatches.push(m);
+          }
+        }
       }
     }
 
-    // 5. Identify Intersections
-    for (let r = 0; r < ROWS; r++) {
-      for (let c = 0; c < COLS; c++) {
-        if (cellCounts[r][c] > 1) {
-          gameState.intersections[r][c] = true;
+    gameState.detectedNames = allMatches;
+
+    // --- UPDATE MASKS (Optimization: Direct Loop) ---
+    // FIX: Use helper here too
+    const intersectionCounts = createZeroArray(ROWS * COLS);
+
+    for (const name of allMatches) {
+      if (name.isRow) {
+        for (let i = 0; i < name.len; i++) {
+          const r = name.r;
+          const c = name.c + i;
+          gameState.boldMask[r][c] = true;
+          intersectionCounts[r * COLS + c]++;
         }
+      } else {
+        for (let i = 0; i < name.len; i++) {
+          const r = name.r + i;
+          const c = name.c;
+          gameState.boldMask[r][c] = true;
+          intersectionCounts[r * COLS + c]++;
+        }
+      }
+    }
+
+    // Apply Intersections
+    for (let i = 0; i < intersectionCounts.length; i++) {
+      if (intersectionCounts[i] > 1) {
+        const r = Math.floor(i / COLS);
+        const c = i % COLS;
+        gameState.intersections[r][c] = true;
       }
     }
   },
 
   checkNameMatch: () => {
     const { mode, cursor } = gameState;
-
     if (mode !== "name") {
       gameState.mode = "name";
       return;
     }
 
-    const directMatches = gameState.detectedNames.filter((n) =>
-      n.cells.some((c) => c.x === cursor.x && c.y === cursor.y),
-    );
+    // Find match at cursor
+    const startMatch = gameState.detectedNames.find((n) => {
+      if (n.isRow) {
+        return n.r === cursor.y && cursor.x >= n.c && cursor.x < n.c + n.len;
+      } else {
+        return n.c === cursor.x && cursor.y >= n.r && cursor.y < n.r + n.len;
+      }
+    });
 
-    if (directMatches.length === 0) return;
+    if (!startMatch) return;
 
-    const chain = new Set<NameInstance>(directMatches);
-    const queue = [...directMatches];
+    // Chain Reaction
+    const chain = new Set<NameInstance>();
+    const queue = [startMatch];
+    chain.add(startMatch);
 
     while (queue.length > 0) {
       const current = queue.pop()!;
@@ -246,12 +261,19 @@ export const GameLogic = {
       }
     }
 
-    const cellsToScramble = new Set<string>();
+    // Scoring & Removal
     let chainScore = 0;
+    const cellsToClear = new Set<string>(); // "r,c" string
 
     chain.forEach((name) => {
-      chainScore += name.text.length * 100;
-      name.cells.forEach((c) => cellsToScramble.add(`${c.x},${c.y}`));
+      chainScore += name.len * 100;
+      if (name.isRow) {
+        for (let i = 0; i < name.len; i++)
+          cellsToClear.add(`${name.r},${name.c + i}`);
+      } else {
+        for (let i = 0; i < name.len; i++)
+          cellsToClear.add(`${name.r + i},${name.c}`);
+      }
     });
 
     if (chain.size > 1) chainScore += (chain.size - 1) * 50;
@@ -259,13 +281,13 @@ export const GameLogic = {
     gameState.score += chainScore;
     gameState.freezeTimer = Math.floor(gameState.freezeTimer * 0.5);
 
-    cellsToScramble.forEach((key) => {
-      const [xStr, yStr] = key.split(",");
-      const x = parseInt(xStr);
-      const y = parseInt(yStr);
-      if (gameState.grid[y][x] !== FROZEN_CELL) {
-        GameLogic.spawnExplosion(x, y);
-        gameState.grid[y][x] = randomChar();
+    cellsToClear.forEach((key) => {
+      const [rStr, cStr] = key.split(",");
+      const r = parseInt(rStr);
+      const c = parseInt(cStr);
+      if (gameState.grid[r][c] !== FROZEN_CELL) {
+        GameLogic.spawnExplosion(c, r);
+        gameState.grid[r][c] = randomChar();
       }
     });
 

@@ -24861,13 +24861,11 @@ return ____exports
  end,
 ["src.logic"] = function(...) 
 local ____lualib = require("lualib_bundle")
-local __TS__ArraySort = ____lualib.__TS__ArraySort
 local __TS__ArraySplice = ____lualib.__TS__ArraySplice
-local __TS__ArraySome = ____lualib.__TS__ArraySome
-local __TS__ArrayFilter = ____lualib.__TS__ArrayFilter
+local __TS__ArraySort = ____lualib.__TS__ArraySort
+local __TS__ArrayFind = ____lualib.__TS__ArrayFind
 local Set = ____lualib.Set
 local __TS__New = ____lualib.__TS__New
-local __TS__ArrayForEach = ____lualib.__TS__ArrayForEach
 local __TS__StringSplit = ____lualib.__TS__StringSplit
 local __TS__ParseInt = ____lualib.__TS__ParseInt
 local __TS__ArrayMap = ____lualib.__TS__ArrayMap
@@ -24902,54 +24900,38 @@ local function createZeroArray(____, len)
     end
     return arr
 end
-local function doNamesIntersect(____, a, b)
-    local aMinX = a.cells[1].x
-    local aMaxX = a.cells[#a.cells].x
-    local bMinX = b.cells[1].x
-    local bMaxX = b.cells[#b.cells].x
-    local aMinY = a.cells[1].y
-    local aMaxY = a.cells[#a.cells].y
-    local bMinY = b.cells[1].y
-    local bMaxY = b.cells[#b.cells].y
-    if aMaxX < bMinX or aMinX > bMaxX or aMaxY < bMinY or aMinY > bMaxY then
-        return false
-    end
-    for ____, cellA in ipairs(a.cells) do
-        for ____, cellB in ipairs(b.cells) do
-            if cellA.x == cellB.x and cellA.y == cellB.y then
-                return true
-            end
+local ROW_USAGE = createZeroArray(nil, COLS)
+local COL_USAGE = createZeroArray(nil, ROWS)
+local function clearBuffer(____, buf)
+    do
+        local i = 0
+        while i < #buf do
+            buf[i + 1] = 0
+            i = i + 1
         end
     end
-    return false
 end
-local function filterMatchesFast(____, matches, isRow, index)
-    __TS__ArraySort(
-        matches,
-        function(____, a, b) return #b.text - #a.text end
-    )
-    local accepted = {}
-    local usageLength = isRow and COLS or ROWS
-    local usageMap = createZeroArray(nil, usageLength)
-    for ____, candidate in ipairs(matches) do
-        local fits = true
-        for ____, cell in ipairs(candidate.cells) do
-            local pos = isRow and cell.x or cell.y
-            if usageMap[pos + 1] >= 2 then
-                fits = false
-                break
+local function doNamesIntersect(____, a, b)
+    if a.isRow == b.isRow then
+        if a.isRow then
+            if a.r ~= b.r then
+                return false
             end
-        end
-        if fits then
-            for ____, cell in ipairs(candidate.cells) do
-                local pos = isRow and cell.x or cell.y
-                local ____usageMap_0, ____temp_1 = usageMap, pos + 1
-                ____usageMap_0[____temp_1] = ____usageMap_0[____temp_1] + 1
+            return a.c < b.c + b.len and a.c + a.len > b.c
+        else
+            if a.c ~= b.c then
+                return false
             end
-            accepted[#accepted + 1] = candidate
+            return a.r < b.r + b.len and a.r + a.len > b.r
         end
     end
-    return accepted
+    local row = a.isRow and a or b
+    local col = a.isRow and b or a
+    local colX = col.c
+    local rowY = row.r
+    local colWithinRowSpan = colX >= row.c and colX < row.c + row.len
+    local rowWithinColSpan = rowY >= col.r and rowY < col.r + col.len
+    return colWithinRowSpan and rowWithinColSpan
 end
 ____exports.GameLogic = {
     spawnExplosion = function(____, c, r)
@@ -24959,8 +24941,8 @@ ____exports.GameLogic = {
         do
             local i = 0
             while i < count do
-                local ____gameState_particles_2 = gameState.particles
-                ____gameState_particles_2[#____gameState_particles_2 + 1] = {
+                local ____gameState_particles_0 = gameState.particles
+                ____gameState_particles_0[#____gameState_particles_0 + 1] = {
                     x = centerX,
                     y = centerY,
                     vx = (math.random() - 0.5) * 5,
@@ -25013,7 +24995,7 @@ ____exports.GameLogic = {
                 for ____, name in ipairs(NAMES_TO_FIND) do
                     do
                         if #name == 0 then
-                            goto __continue36
+                            goto __continue28
                         end
                         local startIndex = 0
                         while true do
@@ -25026,28 +25008,48 @@ ____exports.GameLogic = {
                             if not (startIndex > -1) then
                                 break
                             end
-                            local instance = {
+                            rowMatches[#rowMatches + 1] = {
                                 text = name,
-                                cells = {},
-                                id = (((("R-" .. tostring(r)) .. "-") .. tostring(startIndex)) .. "-") .. name
+                                r = r,
+                                c = startIndex,
+                                isRow = true,
+                                len = #name
                             }
-                            do
-                                local i = 0
-                                while i < #name do
-                                    local ____instance_cells_3 = instance.cells
-                                    ____instance_cells_3[#____instance_cells_3 + 1] = {x = startIndex + i, y = r}
-                                    i = i + 1
-                                end
-                            end
-                            rowMatches[#rowMatches + 1] = instance
                             startIndex = startIndex + 1
                         end
                     end
-                    ::__continue36::
+                    ::__continue28::
                 end
-                local filtered = filterMatchesFast(nil, rowMatches, true, r)
-                for ____, m in ipairs(filtered) do
-                    allMatches[#allMatches + 1] = m
+                if #rowMatches > 0 then
+                    __TS__ArraySort(
+                        rowMatches,
+                        function(____, a, b) return b.len - a.len end
+                    )
+                    clearBuffer(nil, ROW_USAGE)
+                    for ____, m in ipairs(rowMatches) do
+                        local fits = true
+                        do
+                            local i = 0
+                            while i < m.len do
+                                if ROW_USAGE[m.c + i + 1] >= 2 then
+                                    fits = false
+                                    break
+                                end
+                                i = i + 1
+                            end
+                        end
+                        if fits then
+                            do
+                                local i = 0
+                                while i < m.len do
+                                    local ____ROW_USAGE_1, ____temp_2 = ROW_USAGE, m.c + i + 1
+                                    ____ROW_USAGE_1[____temp_2] = ____ROW_USAGE_1[____temp_2] + 1
+                                    i = i + 1
+                                end
+                            end
+                            allMatches[#allMatches + 1] = m
+                        end
+                    end
                 end
                 r = r + 1
             end
@@ -25067,7 +25069,7 @@ ____exports.GameLogic = {
                 for ____, name in ipairs(NAMES_TO_FIND) do
                     do
                         if #name == 0 then
-                            goto __continue48
+                            goto __continue46
                         end
                         local startIndex = 0
                         while true do
@@ -25080,84 +25082,117 @@ ____exports.GameLogic = {
                             if not (startIndex > -1) then
                                 break
                             end
-                            local instance = {
+                            colMatches[#colMatches + 1] = {
                                 text = name,
-                                cells = {},
-                                id = (((("C-" .. tostring(c)) .. "-") .. tostring(startIndex)) .. "-") .. name
+                                r = startIndex,
+                                c = c,
+                                isRow = false,
+                                len = #name
                             }
-                            do
-                                local i = 0
-                                while i < #name do
-                                    local ____instance_cells_4 = instance.cells
-                                    ____instance_cells_4[#____instance_cells_4 + 1] = {x = c, y = startIndex + i}
-                                    i = i + 1
-                                end
-                            end
-                            colMatches[#colMatches + 1] = instance
                             startIndex = startIndex + 1
                         end
                     end
-                    ::__continue48::
+                    ::__continue46::
                 end
-                local filtered = filterMatchesFast(nil, colMatches, false, c)
-                for ____, m in ipairs(filtered) do
-                    allMatches[#allMatches + 1] = m
+                if #colMatches > 0 then
+                    __TS__ArraySort(
+                        colMatches,
+                        function(____, a, b) return b.len - a.len end
+                    )
+                    clearBuffer(nil, COL_USAGE)
+                    for ____, m in ipairs(colMatches) do
+                        local fits = true
+                        do
+                            local i = 0
+                            while i < m.len do
+                                if COL_USAGE[m.r + i + 1] >= 2 then
+                                    fits = false
+                                    break
+                                end
+                                i = i + 1
+                            end
+                        end
+                        if fits then
+                            do
+                                local i = 0
+                                while i < m.len do
+                                    local ____COL_USAGE_3, ____temp_4 = COL_USAGE, m.r + i + 1
+                                    ____COL_USAGE_3[____temp_4] = ____COL_USAGE_3[____temp_4] + 1
+                                    i = i + 1
+                                end
+                            end
+                            allMatches[#allMatches + 1] = m
+                        end
+                    end
                 end
                 c = c + 1
             end
         end
         gameState.detectedNames = allMatches
-        local cellCounts = {}
-        do
-            local r = 0
-            while r < ROWS do
-                cellCounts[#cellCounts + 1] = createZeroArray(nil, COLS)
-                r = r + 1
-            end
-        end
+        local intersectionCounts = createZeroArray(nil, ROWS * COLS)
         for ____, name in ipairs(allMatches) do
-            for ____, cell in ipairs(name.cells) do
-                gameState.boldMask[cell.y + 1][cell.x + 1] = true
-                local ____cellCounts_index_5, ____temp_6 = cellCounts[cell.y + 1], cell.x + 1
-                ____cellCounts_index_5[____temp_6] = ____cellCounts_index_5[____temp_6] + 1
-            end
-        end
-        do
-            local r = 0
-            while r < ROWS do
+            if name.isRow then
                 do
-                    local c = 0
-                    while c < COLS do
-                        if cellCounts[r + 1][c + 1] > 1 then
-                            gameState.intersections[r + 1][c + 1] = true
-                        end
-                        c = c + 1
+                    local i = 0
+                    while i < name.len do
+                        local r = name.r
+                        local c = name.c + i
+                        gameState.boldMask[r + 1][c + 1] = true
+                        local ____intersectionCounts_5, ____temp_6 = intersectionCounts, r * COLS + c + 1
+                        ____intersectionCounts_5[____temp_6] = ____intersectionCounts_5[____temp_6] + 1
+                        i = i + 1
                     end
                 end
-                r = r + 1
+            else
+                do
+                    local i = 0
+                    while i < name.len do
+                        local r = name.r + i
+                        local c = name.c
+                        gameState.boldMask[r + 1][c + 1] = true
+                        local ____intersectionCounts_7, ____temp_8 = intersectionCounts, r * COLS + c + 1
+                        ____intersectionCounts_7[____temp_8] = ____intersectionCounts_7[____temp_8] + 1
+                        i = i + 1
+                    end
+                end
+            end
+        end
+        do
+            local i = 0
+            while i < #intersectionCounts do
+                if intersectionCounts[i + 1] > 1 then
+                    local r = math.floor(i / COLS)
+                    local c = i % COLS
+                    gameState.intersections[r + 1][c + 1] = true
+                end
+                i = i + 1
             end
         end
     end,
     checkNameMatch = function()
-        local ____gameState_7 = gameState
-        local mode = ____gameState_7.mode
-        local cursor = ____gameState_7.cursor
+        local ____gameState_9 = gameState
+        local mode = ____gameState_9.mode
+        local cursor = ____gameState_9.cursor
         if mode ~= "name" then
             gameState.mode = "name"
             return
         end
-        local directMatches = __TS__ArrayFilter(
+        local startMatch = __TS__ArrayFind(
             gameState.detectedNames,
-            function(____, n) return __TS__ArraySome(
-                n.cells,
-                function(____, c) return c.x == cursor.x and c.y == cursor.y end
-            ) end
+            function(____, n)
+                if n.isRow then
+                    return n.r == cursor.y and cursor.x >= n.c and cursor.x < n.c + n.len
+                else
+                    return n.c == cursor.x and cursor.y >= n.r and cursor.y < n.r + n.len
+                end
+            end
         )
-        if #directMatches == 0 then
+        if not startMatch then
             return
         end
-        local chain = __TS__New(Set, directMatches)
-        local queue = {table.unpack(directMatches)}
+        local chain = __TS__New(Set)
+        local queue = {startMatch}
+        chain:add(startMatch)
         while #queue > 0 do
             local current = table.remove(queue)
             for ____, candidate in ipairs(gameState.detectedNames) do
@@ -25169,31 +25204,44 @@ ____exports.GameLogic = {
                 end
             end
         end
-        local cellsToScramble = __TS__New(Set)
         local chainScore = 0
+        local cellsToClear = __TS__New(Set)
         chain:forEach(function(____, name)
-            chainScore = chainScore + #name.text * 100
-            __TS__ArrayForEach(
-                name.cells,
-                function(____, c) return cellsToScramble:add((tostring(c.x) .. ",") .. tostring(c.y)) end
-            )
+            chainScore = chainScore + name.len * 100
+            if name.isRow then
+                do
+                    local i = 0
+                    while i < name.len do
+                        cellsToClear:add((tostring(name.r) .. ",") .. tostring(name.c + i))
+                        i = i + 1
+                    end
+                end
+            else
+                do
+                    local i = 0
+                    while i < name.len do
+                        cellsToClear:add((tostring(name.r + i) .. ",") .. tostring(name.c))
+                        i = i + 1
+                    end
+                end
+            end
         end)
         if chain.size > 1 then
             chainScore = chainScore + (chain.size - 1) * 50
         end
         gameState.score = gameState.score + chainScore
         gameState.freezeTimer = math.floor(gameState.freezeTimer * 0.5)
-        cellsToScramble:forEach(function(____, key)
-            local xStr, yStr = table.unpack(
+        cellsToClear:forEach(function(____, key)
+            local rStr, cStr = table.unpack(
                 __TS__StringSplit(key, ","),
                 1,
                 2
             )
-            local x = __TS__ParseInt(xStr)
-            local y = __TS__ParseInt(yStr)
-            if gameState.grid[y + 1][x + 1] ~= FROZEN_CELL then
-                ____exports.GameLogic:spawnExplosion(x, y)
-                gameState.grid[y + 1][x + 1] = randomChar(nil)
+            local r = __TS__ParseInt(rStr)
+            local c = __TS__ParseInt(cStr)
+            if gameState.grid[r + 1][c + 1] ~= FROZEN_CELL then
+                ____exports.GameLogic:spawnExplosion(c, r)
+                gameState.grid[r + 1][c + 1] = randomChar(nil)
             end
         end)
         ____exports.GameLogic:recalculateBoldMask()
@@ -25253,10 +25301,10 @@ ____exports.GameLogic = {
             else
                 gameState.crankAccumulator = gameState.crankAccumulator + 360
             end
-            local ____gameState_8 = gameState
-            local mode = ____gameState_8.mode
-            local cursor = ____gameState_8.cursor
-            local grid = ____gameState_8.grid
+            local ____gameState_10 = gameState
+            local mode = ____gameState_10.mode
+            local cursor = ____gameState_10.cursor
+            local grid = ____gameState_10.grid
             if mode == "row" then
                 grid[cursor.y + 1] = shuffleArray(nil, grid[cursor.y + 1])
             elseif mode == "column" then
@@ -25282,8 +25330,8 @@ ____exports.GameLogic = {
         elseif gameState.mode == "row" then
             local first = table.remove(gameState.grid[gameState.cursor.y + 1], 1)
             if first then
-                local ____gameState_grid_index_9 = gameState.grid[gameState.cursor.y + 1]
-                ____gameState_grid_index_9[#____gameState_grid_index_9 + 1] = first
+                local ____gameState_grid_index_11 = gameState.grid[gameState.cursor.y + 1]
+                ____gameState_grid_index_11[#____gameState_grid_index_11 + 1] = first
             end
             ____exports.GameLogic:recalculateBoldMask()
         else
@@ -25398,7 +25446,6 @@ return ____exports
  end,
 ["src.renderer"] = function(...) 
 local ____lualib = require("lualib_bundle")
-local __TS__ArrayMap = ____lualib.__TS__ArrayMap
 local __TS__ArrayForEach = ____lualib.__TS__ArrayForEach
 local ____exports = {}
 local ____core = require("lua_modules.@crankscript.core.src.index")
@@ -25417,18 +25464,21 @@ local GRID_OFFSET_Y = ____constants.GRID_OFFSET_Y
 local FROZEN_CELL = ____constants.FROZEN_CELL
 local animationTick = 0
 local function drawCapsule(____, name)
-    local xs = __TS__ArrayMap(
-        name.cells,
-        function(____, c) return c.x end
-    )
-    local ys = __TS__ArrayMap(
-        name.cells,
-        function(____, c) return c.y end
-    )
-    local minCol = math.min(table.unpack(xs))
-    local maxCol = math.max(table.unpack(xs))
-    local minRow = math.min(table.unpack(ys))
-    local maxRow = math.max(table.unpack(ys))
+    local minCol
+    local maxCol
+    local minRow
+    local maxRow
+    if name.isRow then
+        minCol = name.c
+        maxCol = name.c + name.len - 1
+        maxRow = name.r
+        minRow = maxRow
+    else
+        maxCol = name.c
+        minCol = maxCol
+        minRow = name.r
+        maxRow = name.r + name.len - 1
+    end
     local x = GRID_OFFSET_X + minCol * CELL_WIDTH
     local y = GRID_OFFSET_Y + minRow * CELL_HEIGHT
     local padding = 2
@@ -25499,10 +25549,11 @@ ____exports.drawGame = function()
         10,
         30
     )
-    local legendX = 200
+    local legendX = 260
     playdate.graphics.drawText("CONTROLS:", legendX, 10)
-    playdate.graphics.drawText("A: Claim Name", legendX, 30)
-    playdate.graphics.drawText("B: Switch Mode", legendX, 45)
+    playdate.graphics.drawText("A: Match", legendX, 30)
+    playdate.graphics.drawText("B: Mode", legendX, 45)
+    playdate.graphics.drawText("Crank: Shuffle", legendX, 60)
     local barX = GRID_OFFSET_X
     local barY = GRID_OFFSET_Y + ROWS * CELL_HEIGHT + 25
     local barWidth = COLS * CELL_WIDTH
@@ -25515,9 +25566,7 @@ ____exports.drawGame = function()
     end
     __TS__ArrayForEach(
         gameState.detectedNames,
-        function(____, name)
-            drawCapsule(nil, name)
-        end
+        function(____, name) return drawCapsule(nil, name) end
     )
     if gameState.mode == "row" or gameState.mode == "name" then
         local cy = GRID_OFFSET_Y + gameState.cursor.y * CELL_HEIGHT + CELL_HEIGHT / 2
@@ -25572,9 +25621,7 @@ ____exports.drawGame = function()
     playdate.graphics.setColor(PlaydateColor.Black)
     __TS__ArrayForEach(
         gameState.particles,
-        function(____, p)
-            playdate.graphics.fillRect(p.x, p.y, p.size, p.size)
-        end
+        function(____, p) return playdate.graphics.fillRect(p.x, p.y, p.size, p.size) end
     )
 end
 return ____exports
