@@ -37,7 +37,4 @@ Icon?
 # Playdate Simulator preferences
 *.ini
 *.zip
-*.js
-
-!dist-web/**/*.js
 
