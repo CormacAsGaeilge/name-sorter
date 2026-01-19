@@ -75,10 +75,8 @@ export const drawGame = () => {
   playdate.graphics.drawText(`Mode: ${gameState.mode.toUpperCase()}`, 10, 30);
 
   const legendX = 260;
-  playdate.graphics.drawText(`CONTROLS:`, legendX, 10);
-  playdate.graphics.drawText(`A: Match`, legendX, 30);
-  playdate.graphics.drawText(`B: Mode`, legendX, 45);
-  playdate.graphics.drawText(`Crank: Shuffle`, legendX, 60);
+  playdate.graphics.drawText(`A: Claim Name`, legendX, 10);
+  playdate.graphics.drawText(`B: Switch Mode`, legendX, 30);
 
   // Progress Bar
   const barX = GRID_OFFSET_X;
