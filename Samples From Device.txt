@@ -1,0 +1,388 @@
+0.72%	0.00%	method drawText	[C]
+	0.72%	0.00%	upvalue drawAlignedText	graphics.lua:349
+		0.72%	0.00%	local drawLineAndMoveToNext	graphics.lua:403
+			0.72%	0.00%	function graphics.lua:247	graphics.lua:494
+				0.72%	0.00%	(...tail calls...)	
+					0.72%	0.00%	method draw	gameDetailView.lua:637
+						0.72%	0.00%	method update	controller.lua:811
+							0.72%	0.72%	function main.lua:39	main.lua:40
+9.04%	9.04%	GC	
+0.18%	0.00%	method gmatch	[C]
+	0.18%	0.00%	function graphics.lua:247	graphics.lua:413
+		0.18%	0.00%	(...tail calls...)	
+			0.18%	0.00%	method draw	gameDetailView.lua:716
+				0.18%	0.00%	method update	controller.lua:811
+					0.18%	0.18%	function main.lua:39	main.lua:40
+0.63%	0.00%	method draw	gameDetailView.lua:747
+	0.45%	0.00%	method update	controller.lua:811
+		0.45%	0.45%	function main.lua:39	main.lua:40
+	0.14%	0.00%	upvalue drawButton	button.lua:129
+		0.14%	0.00%	method draw	gameDetailView.lua:849
+			0.14%	0.00%	method update	controller.lua:811
+				0.14%	0.14%	function main.lua:39	main.lua:40
+	0.05%	0.00%	method draw	gameDetailView.lua:710
+		0.05%	0.00%	method update	controller.lua:811
+			0.05%	0.05%	function main.lua:39	main.lua:40
+2.80%	0.00%	upvalue _originalGetTextSize	[C]
+	0.32%	0.00%	function graphics.lua:519	graphics.lua:523
+		0.32%	0.00%	(...tail calls...)	
+			0.32%	0.00%	function graphics.lua:247	graphics.lua:464
+				0.32%	0.00%	(...tail calls...)	
+					0.32%	0.00%	method draw	gameDetailView.lua:716
+						0.32%	0.00%	method update	controller.lua:811
+							0.32%	0.32%	function main.lua:39	main.lua:40
+	2.49%	0.00%	field getTextSize	graphics.lua:523
+		0.05%	0.00%	field drawTextAligned	graphics.lua:581
+			0.05%	0.00%	method draw	gameDetailView.lua:674
+				0.05%	0.00%	method update	controller.lua:811
+					0.05%	0.05%	function main.lua:39	main.lua:40
+		2.44%	0.00%	upvalue drawGame	main.lua:25487
+			2.44%	2.44%	function main.lua:25762	main.lua:25765
+0.90%	0.00%	function graphics.lua:247	graphics.lua:426
+	0.90%	0.00%	(...tail calls...)	
+		0.90%	0.00%	method draw	gameDetailView.lua:637
+			0.90%	0.00%	method update	controller.lua:811
+				0.90%	0.90%	function main.lua:39	main.lua:40
+0.23%	0.23%	(C)	
+0.05%	0.00%	field setClipRect	[C]
+	0.05%	0.00%	method draw	gameDetailView.lua:688
+		0.05%	0.00%	method update	controller.lua:811
+			0.05%	0.05%	function main.lua:39	main.lua:40
+0.36%	0.00%	field setImageDrawMode	[C]
+	0.05%	0.00%	method draw	sidebarView.lua:125
+		0.05%	0.00%	method update	controller.lua:852
+			0.05%	0.05%	function main.lua:39	main.lua:40
+	0.32%	0.00%	upvalue drawGame	main.lua:25479
+		0.32%	0.32%	function main.lua:25762	main.lua:25765
+0.09%	0.00%	function graphics.lua:621	graphics.lua
+	0.09%	0.00%	(...tail calls...)	
+		0.09%	0.00%	function graphics.lua:247	graphics.lua:464
+			0.09%	0.00%	(...tail calls...)	
+				0.09%	0.00%	method draw	gameDetailView.lua:637
+					0.09%	0.00%	method update	controller.lua:811
+						0.09%	0.09%	function main.lua:39	main.lua:40
+0.05%	0.00%	method drawTextAligned	graphics.lua:606
+	0.05%	0.00%	upvalue drawLabelLine	gameDetailView.lua:550
+		0.05%	0.00%	method draw	gameDetailView.lua:631
+			0.05%	0.00%	method update	controller.lua:811
+				0.05%	0.05%	function main.lua:39	main.lua:40
+0.14%	0.00%	local getLineWidth	graphics.lua:318
+	0.14%	0.00%	function graphics.lua:247	graphics.lua:448
+		0.14%	0.00%	(...tail calls...)	
+			0.14%	0.00%	method draw	gameDetailView.lua:637
+				0.14%	0.00%	method update	controller.lua:811
+					0.14%	0.14%	function main.lua:39	main.lua:40
+0.45%	0.00%	upvalue originalGetTextWidth	[C]
+	0.05%	0.00%	method getTextWidth	graphics.lua:626
+		0.05%	0.00%	method draw	gameDetailView.lua:697
+			0.05%	0.00%	method update	controller.lua:811
+				0.05%	0.05%	function main.lua:39	main.lua:40
+	0.41%	0.00%	function graphics.lua:621	graphics.lua:626
+		0.41%	0.00%	(...tail calls...)	
+			0.36%	0.00%	function graphics.lua:247	graphics.lua:487
+				0.36%	0.00%	(...tail calls...)	
+					0.36%	0.00%	method draw	gameDetailView.lua:637
+						0.36%	0.00%	method update	controller.lua:811
+							0.36%	0.36%	function main.lua:39	main.lua:40
+			0.05%	0.00%	local drawLineAndMoveToNext	graphics.lua:406
+				0.05%	0.00%	function graphics.lua:247	graphics.lua:494
+					0.05%	0.00%	(...tail calls...)	
+						0.05%	0.00%	method draw	gameDetailView.lua:637
+							0.05%	0.00%	method update	controller.lua:811
+								0.05%	0.05%	function main.lua:39	main.lua:40
+0.05%	0.00%	method getStudio	[C]
+	0.05%	0.00%	method draw	gameDetailView.lua:635
+		0.05%	0.00%	method update	controller.lua:811
+			0.05%	0.05%	function main.lua:39	main.lua:40
+0.09%	0.00%	upvalue updateTimers	timer.lua:273
+	0.09%	0.09%	function main.lua:39	main.lua:41
+0.18%	0.00%	upvalue match	[C]
+	0.18%	0.00%	upvalue trimWhitespace	string.lua:14
+		0.18%	0.00%	function graphics.lua:247	graphics.lua:464
+			0.18%	0.00%	(...tail calls...)	
+				0.18%	0.00%	method draw	gameDetailView.lua:637
+					0.18%	0.00%	method update	controller.lua:811
+						0.18%	0.18%	function main.lua:39	main.lua:40
+0.14%	0.00%	metamethod __index	[C]
+	0.09%	0.00%	method draw	gameDetailView.lua:710
+		0.09%	0.00%	method update	controller.lua:811
+			0.09%	0.09%	function main.lua:39	main.lua:40
+	0.05%	0.00%	local updateActiveTimer	timer.lua:263
+		0.05%	0.00%	upvalue updateTimers	timer.lua:351
+			0.05%	0.05%	function main.lua:39	main.lua:41
+0.05%	0.00%	upvalue trimWhitespace	string.lua
+	0.05%	0.00%	function graphics.lua:247	graphics.lua:464
+		0.05%	0.00%	(...tail calls...)	
+			0.05%	0.00%	method draw	gameDetailView.lua:637
+				0.05%	0.00%	method update	controller.lua:811
+					0.05%	0.05%	function main.lua:39	main.lua:40
+0.05%	0.00%	field drawTextAligned	graphics.lua:578
+	0.05%	0.00%	method draw	gameDetailView.lua:674
+		0.05%	0.00%	method update	controller.lua:811
+			0.05%	0.05%	function main.lua:39	main.lua:40
+7.91%	0.00%	field for iterator	[C]
+	0.05%	0.00%	function graphics.lua:247	graphics.lua:413
+		0.05%	0.00%	(...tail calls...)	
+			0.05%	0.00%	method draw	gameDetailView.lua:716
+				0.05%	0.00%	method update	controller.lua:811
+					0.05%	0.05%	function main.lua:39	main.lua:40
+	0.09%	0.00%	upvalue initBuckets	main.lua:24733
+		0.09%	0.00%	method recalculateBoldMask	main.lua:24823
+			0.09%	0.00%	local module	main.lua:25760
+				0.09%	0.00%	function main.lua:12	main.lua:19
+					0.09%	0.09%	(...tail calls...)	
+	7.77%	0.00%	method recalculateBoldMask	main.lua:24862
+		1.04%	0.00%	local module	main.lua:25760
+			1.04%	0.00%	function main.lua:12	main.lua:19
+				1.04%	1.04%	(...tail calls...)	
+		1.22%	0.00%	method handleDown	main.lua:25260
+			1.22%	1.22%	function main.lua:25313	main.lua:25315
+		2.71%	0.00%	method checkNameMatch	main.lua:25119
+			2.71%	2.71%	function main.lua:25291	main.lua:25295
+		2.80%	0.00%	method handleUp	main.lua:25243
+			2.80%	2.80%	function main.lua:25308	main.lua:25310
+0.05%	0.00%	method nextImage	imageSequence.lua:129
+	0.05%	0.00%	method draw	gameDetailView.lua:710
+		0.05%	0.00%	method update	controller.lua:811
+			0.05%	0.05%	function main.lua:39	main.lua:40
+0.05%	0.00%	upvalue _styleCharacterForNewline	graphics.lua
+	0.05%	0.00%	local drawLineAndMoveToNext	graphics.lua:401
+		0.05%	0.00%	function graphics.lua:247	graphics.lua:494
+			0.05%	0.00%	(...tail calls...)	
+				0.05%	0.00%	method draw	gameDetailView.lua:637
+					0.05%	0.00%	method update	controller.lua:811
+						0.05%	0.05%	function main.lua:39	main.lua:40
+0.05%	0.00%	upvalue getLineWidth	graphics.lua
+	0.05%	0.00%	local drawLineAndMoveToNext	graphics.lua:406
+		0.05%	0.00%	function graphics.lua:247	graphics.lua:494
+			0.05%	0.00%	(...tail calls...)	
+				0.05%	0.00%	method draw	gameDetailView.lua:686
+					0.05%	0.00%	method update	controller.lua:811
+						0.05%	0.05%	function main.lua:39	main.lua:40
+0.05%	0.00%	field drawTextInRect	graphics.lua:508
+	0.05%	0.00%	method draw	gameDetailView.lua:716
+		0.05%	0.00%	method update	controller.lua:811
+			0.05%	0.05%	function main.lua:39	main.lua:40
+0.05%	0.00%	method getLeading	[C]
+	0.05%	0.00%	method drawTextAligned	graphics.lua:600
+		0.05%	0.00%	upvalue drawLabelLine	gameDetailView.lua:550
+			0.05%	0.00%	method draw	gameDetailView.lua:631
+				0.05%	0.00%	method update	controller.lua:811
+					0.05%	0.05%	function main.lua:39	main.lua:40
+0.05%	0.00%	upvalue drawButton	button.lua:101
+	0.05%	0.00%	method draw	gameDetailView.lua:849
+		0.05%	0.00%	method update	controller.lua:811
+			0.05%	0.05%	function main.lua:39	main.lua:40
+0.09%	0.00%	field fillRect	[C]
+	0.05%	0.00%	method draw	gameDetailView.lua:749
+		0.05%	0.00%	method update	controller.lua:811
+			0.05%	0.05%	function main.lua:39	main.lua:40
+	0.05%	0.00%	local callbackFn	main.lua:25501
+		0.05%	0.00%	upvalue __TS__ArrayForEach	main.lua:141
+			0.05%	0.00%	upvalue drawGame	main.lua:25499
+				0.05%	0.05%	function main.lua:25762	main.lua:25765
+0.05%	0.00%	field push	[C]
+	0.05%	0.00%	method launchGame	gameLaunchAnimationController.lua:58
+		0.05%	0.00%	upvalue performButtonAction	gameDetailView.lua:976
+			0.05%	0.05%	function gameDetailView.lua:1126	gameDetailView.lua:1131
+0.23%	0.00%	method updateLastLaunchedDate	[C]
+	0.23%	0.00%	method updateLaunchAnimation	gameLaunchAnimationController.lua:89
+		0.23%	0.00%	method draw	gameDetailView.lua:584
+			0.23%	0.00%	method update	controller.lua:811
+				0.23%	0.23%	function main.lua:39	main.lua:40
+4.07%	4.07%	?? (missing)	[C]
+0.63%	0.00%	GC step	
+	0.63%	0.63%	?? (missing)	[C]
+0.05%	0.00%	local createErrorClass	main.lua:1184
+	0.05%	0.00%	local module	main.lua:1190
+		0.05%	0.00%	upvalue require	main.lua:19
+			0.05%	0.00%	local module	main.lua:24630
+				0.05%	0.00%	upvalue require	main.lua:19
+					0.05%	0.00%	local module	main.lua:25749
+						0.05%	0.00%	function main.lua:12	main.lua:19
+							0.05%	0.05%	(...tail calls...)	
+0.14%	0.00%	local module	main.lua:2766
+	0.14%	0.00%	upvalue require	main.lua:19
+		0.14%	0.00%	local module	main.lua:24576
+			0.14%	0.00%	upvalue require	main.lua:19
+				0.14%	0.00%	local module	main.lua:24633
+					0.14%	0.00%	upvalue require	main.lua:19
+						0.14%	0.00%	local module	main.lua:25749
+							0.14%	0.00%	function main.lua:12	main.lua:19
+								0.14%	0.14%	(...tail calls...)	
+0.05%	0.00%	upvalue arrayLikeIterator	main.lua
+	0.05%	0.00%	local __TS__ArrayFrom	main.lua:228
+		0.05%	0.00%	local module	main.lua:24639
+			0.05%	0.00%	upvalue require	main.lua:19
+				0.05%	0.00%	local module	main.lua:25749
+					0.05%	0.00%	function main.lua:12	main.lua:19
+						0.05%	0.05%	(...tail calls...)	
+0.05%	0.05%	main chunk	keyboard.lua:402
+0.05%	0.00%	field modtime	[C]
+	0.05%	0.00%	local module	main.lua:25718
+		0.05%	0.00%	upvalue require	main.lua:19
+			0.05%	0.00%	local module	main.lua:25330
+				0.05%	0.00%	upvalue require	main.lua:19
+					0.05%	0.00%	local module	main.lua:25757
+						0.05%	0.00%	function main.lua:12	main.lua:19
+							0.05%	0.05%	(...tail calls...)	
+1.94%	0.00%	upvalue initBuckets	main.lua:24747
+	1.94%	0.00%	method recalculateBoldMask	main.lua:24823
+		1.94%	0.00%	local module	main.lua:25760
+			1.94%	0.00%	function main.lua:12	main.lua:19
+				1.94%	1.94%	(...tail calls...)	
+0.45%	0.00%	field byte	[C]
+	0.45%	0.00%	upvalue initBuckets	main.lua:24738
+		0.45%	0.00%	method recalculateBoldMask	main.lua:24823
+			0.45%	0.00%	local module	main.lua:25760
+				0.45%	0.00%	function main.lua:12	main.lua:19
+					0.45%	0.45%	(...tail calls...)	
+18.12%	0.00%	field find	[C]
+	18.12%	0.00%	method recalculateBoldMask	main.lua:24865
+		2.76%	0.00%	local module	main.lua:25760
+			2.76%	0.00%	function main.lua:12	main.lua:19
+				2.76%	2.76%	(...tail calls...)	
+		2.62%	0.00%	method handleDown	main.lua:25260
+			2.62%	2.62%	function main.lua:25313	main.lua:25315
+		5.69%	0.00%	method checkNameMatch	main.lua:25119
+			5.69%	5.69%	function main.lua:25291	main.lua:25295
+		7.05%	0.00%	method handleUp	main.lua:25243
+			7.05%	7.05%	function main.lua:25308	main.lua:25310
+6.78%	0.00%	field max	[C]
+	6.78%	0.00%	method recalculateBoldMask	main.lua:24868
+		0.81%	0.00%	local module	main.lua:25760
+			0.81%	0.00%	function main.lua:12	main.lua:19
+				0.81%	0.81%	(...tail calls...)	
+		0.99%	0.00%	method handleDown	main.lua:25260
+			0.99%	0.99%	function main.lua:25313	main.lua:25315
+		1.94%	0.00%	method checkNameMatch	main.lua:25119
+			1.94%	1.94%	function main.lua:25291	main.lua:25295
+		3.03%	0.00%	method handleUp	main.lua:25243
+			3.03%	3.03%	function main.lua:25308	main.lua:25310
+19.79%	0.00%	method recalculateBoldMask	main.lua:24862
+	2.80%	0.00%	local module	main.lua:25760
+		2.80%	0.00%	function main.lua:12	main.lua:19
+			2.80%	2.80%	(...tail calls...)	
+	2.80%	0.00%	method handleDown	main.lua:25260
+		2.80%	2.80%	function main.lua:25313	main.lua:25315
+	4.29%	0.00%	method checkNameMatch	main.lua:25119
+		4.29%	4.29%	function main.lua:25291	main.lua:25295
+	9.90%	0.00%	method handleUp	main.lua:25243
+		9.90%	9.90%	function main.lua:25308	main.lua:25310
+0.32%	0.00%	method add	main.lua:1984
+	0.32%	0.00%	method recalculateBoldMask	main.lua:24860
+		0.05%	0.00%	local module	main.lua:25760
+			0.05%	0.00%	function main.lua:12	main.lua:19
+				0.05%	0.05%	(...tail calls...)	
+		0.23%	0.00%	method checkNameMatch	main.lua:25119
+			0.23%	0.23%	function main.lua:25291	main.lua:25295
+		0.05%	0.00%	method handleUp	main.lua:25243
+			0.05%	0.05%	function main.lua:25308	main.lua:25310
+0.09%	0.00%	method ____constructor	main.lua:1951
+	0.09%	0.00%	upvalue __TS__New	main.lua:630
+		0.09%	0.00%	method recalculateBoldMask	main.lua:24934
+			0.05%	0.00%	local module	main.lua:25760
+				0.05%	0.00%	function main.lua:12	main.lua:19
+					0.05%	0.05%	(...tail calls...)	
+			0.05%	0.00%	method checkNameMatch	main.lua:25119
+				0.05%	0.05%	function main.lua:25291	main.lua:25295
+0.09%	0.00%	upvalue __TS__StringCharCodeAt	main.lua:2328
+	0.09%	0.00%	method recalculateBoldMask	main.lua:24938
+		0.05%	0.00%	local module	main.lua:25760
+			0.05%	0.00%	function main.lua:12	main.lua:19
+				0.05%	0.05%	(...tail calls...)	
+		0.05%	0.00%	method checkNameMatch	main.lua:25119
+			0.05%	0.05%	function main.lua:25291	main.lua:25295
+0.18%	0.00%	method has	main.lua
+	0.18%	0.00%	method recalculateBoldMask	main.lua:24943
+		0.09%	0.00%	local module	main.lua:25760
+			0.09%	0.00%	function main.lua:12	main.lua:19
+				0.09%	0.09%	(...tail calls...)	
+		0.05%	0.00%	method checkNameMatch	main.lua:25119
+			0.05%	0.05%	function main.lua:25291	main.lua:25295
+		0.05%	0.00%	method handleUp	main.lua:25243
+			0.05%	0.05%	function main.lua:25308	main.lua:25310
+8.68%	0.00%	field drawText	[C]
+	8.68%	0.00%	upvalue drawGame	main.lua:25421
+		8.68%	8.68%	function main.lua:25762	main.lua:25765
+1.72%	0.00%	field drawRoundRect	[C]
+	1.72%	0.00%	function main.lua:25345	main.lua:25370
+		1.72%	0.00%	(...tail calls...)	
+			1.72%	0.00%	upvalue __TS__ArrayForEach	main.lua:141
+				1.72%	0.00%	upvalue drawGame	main.lua:25444
+					1.72%	1.72%	function main.lua:25762	main.lua:25765
+1.81%	1.81%	function main.lua:25762	main.lua:25765
+5.38%	0.00%	upvalue drawGame	main.lua:25487
+	5.38%	5.38%	function main.lua:25762	main.lua:25765
+1.08%	0.00%	field setFont	[C]
+	1.08%	0.00%	upvalue drawGame	main.lua:25480
+		1.08%	1.08%	function main.lua:25762	main.lua:25765
+0.18%	0.00%	upvalue __TS__ArrayForEach	main.lua
+	0.18%	0.00%	upvalue drawGame	main.lua:25499
+		0.18%	0.18%	function main.lua:25762	main.lua:25765
+0.72%	0.00%	field getTextSize	graphics.lua
+	0.72%	0.00%	upvalue drawGame	main.lua:25487
+		0.72%	0.72%	function main.lua:25762	main.lua:25765
+0.09%	0.00%	local callbackFn	main.lua
+	0.09%	0.00%	upvalue __TS__ArrayForEach	main.lua:141
+		0.09%	0.00%	upvalue drawGame	main.lua:25444
+			0.09%	0.09%	function main.lua:25762	main.lua:25765
+0.63%	0.00%	field getSystemFont	[C]
+	0.63%	0.00%	upvalue drawGame	main.lua:25480
+		0.63%	0.63%	function main.lua:25762	main.lua:25765
+0.23%	0.00%	field setColor	[C]
+	0.23%	0.00%	upvalue drawGame	main.lua:25478
+		0.23%	0.23%	function main.lua:25762	main.lua:25765
+0.14%	0.00%	function main.lua:25345	main.lua
+	0.14%	0.00%	(...tail calls...)	
+		0.14%	0.00%	upvalue __TS__ArrayForEach	main.lua:141
+			0.14%	0.00%	upvalue drawGame	main.lua:25444
+				0.14%	0.14%	function main.lua:25762	main.lua:25765
+0.09%	0.00%	field clear	[C]
+	0.09%	0.00%	upvalue drawGame	main.lua:25408
+		0.09%	0.09%	function main.lua:25762	main.lua:25765
+0.41%	0.00%	field drawLine	[C]
+	0.41%	0.00%	upvalue drawAnimatedCaret	main.lua:25401
+		0.41%	0.00%	upvalue drawGame	main.lua:25456
+			0.41%	0.41%	function main.lua:25762	main.lua:25765
+0.05%	0.00%	method updateFreeze	main.lua
+	0.05%	0.05%	function main.lua:25762	main.lua:25763
+0.09%	0.00%	field setLineWidth	[C]
+	0.05%	0.00%	upvalue drawGame	main.lua:25485
+		0.05%	0.05%	function main.lua:25762	main.lua:25765
+	0.05%	0.00%	upvalue drawAnimatedCaret	main.lua:25404
+		0.05%	0.00%	upvalue drawGame	main.lua:25455
+			0.05%	0.05%	function main.lua:25762	main.lua:25765
+0.05%	0.00%	method next	main.lua
+	0.05%	0.00%	field for iterator	main.lua:178
+		0.05%	0.00%	method forEach	main.lua:2022
+			0.05%	0.00%	method checkNameMatch	main.lua:25105
+				0.05%	0.05%	function main.lua:25291	main.lua:25295
+0.05%	0.00%	upvalue clearBuffer	main.lua:24715
+	0.05%	0.00%	method recalculateBoldMask	main.lua:24829
+		0.05%	0.00%	method checkNameMatch	main.lua:25119
+			0.05%	0.05%	function main.lua:25291	main.lua:25295
+0.32%	0.00%	field drawRect	[C]
+	0.32%	0.00%	upvalue drawGame	main.lua:25438
+		0.32%	0.32%	function main.lua:25762	main.lua:25765
+0.18%	0.00%	method updateParticles	main.lua:24805
+	0.18%	0.18%	function main.lua:25762	main.lua:25764
+0.45%	0.00%	upvalue drawAnimatedCaret	main.lua:25392
+	0.45%	0.00%	upvalue drawGame	main.lua:25450
+		0.45%	0.45%	function main.lua:25762	main.lua:25765
+0.05%	0.00%	upvalue find	[C]
+	0.05%	0.00%	upvalue __TS__StringSplit	main.lua:2434
+		0.05%	0.00%	local callback	main.lua:25107
+			0.05%	0.00%	method forEach	main.lua:2023
+				0.05%	0.00%	method checkNameMatch	main.lua:25105
+					0.05%	0.05%	function main.lua:25291	main.lua:25295
+0.05%	0.00%	field sin	[C]
+	0.05%	0.00%	upvalue drawAnimatedCaret	main.lua:25381
+		0.05%	0.00%	upvalue drawGame	main.lua:25456
+			0.05%	0.05%	function main.lua:25762	main.lua:25765
+0.05%	0.00%	method handleUp	main.lua
+	0.05%	0.05%	function main.lua:25308	main.lua:25310
+0.05%	0.00%	upvalue __TS__New	main.lua:628
+	0.05%	0.00%	method recalculateBoldMask	main.lua:24934
+		0.05%	0.00%	method handleUp	main.lua:25243
+			0.05%	0.05%	function main.lua:25308	main.lua:25310

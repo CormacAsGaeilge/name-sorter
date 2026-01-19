@@ -11,7 +11,8 @@
     "dev:web": "vite",
     "build:web": "vite build",
     "predeploy": "npm run build:web",
-    "deploy": "gh-pages -d dist-web"
+    "deploy": "gh-pages -d dist-web",
+    "device": "npm run transpile && pdc Source NameSorter.pdx && pdutil $(ls /dev/cu.usbmodem* | head -n 1) install NameSorter.pdx && pdutil $(ls /dev/cu.usbmodem* | head -n 1) run NameSorter.pdx"
   },
   "dependencies": {
     "@crankscript/core": "0.3.1",

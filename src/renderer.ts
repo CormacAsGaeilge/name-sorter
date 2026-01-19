@@ -16,8 +16,6 @@ import {
 
 let animationTick = 0;
 
-// Optimized: Uses pre-calculated rects from logic.ts
-// No math, no allocations.
 const drawCapsule = (drawX: number, drawY: number, w: number, h: number) => {
   playdate.graphics.setColor(PlaydateColor.Black);
   playdate.graphics.setLineWidth(2);
@@ -57,9 +55,15 @@ const drawAnimatedCaret = (
 export const drawGame = () => {
   animationTick++;
   playdate.graphics.clear(PlaydateColor.White);
+
+  // Setup globals once (Safe Optimization)
   playdate.graphics.setColor(PlaydateColor.Black);
   playdate.graphics.setImageDrawMode(PlaydateDrawMode.FillBlack);
+  playdate.graphics.setFont(
+    playdate.graphics.getSystemFont(PlaydateFontVariant.Normal),
+  );
 
+  // --- HUD ---
   if (gameState.gameOver) {
     playdate.graphics.drawText(`GAME OVER`, 150, 100);
     playdate.graphics.drawText(`Final Score: ${gameState.score}`, 140, 130);
@@ -70,7 +74,6 @@ export const drawGame = () => {
   playdate.graphics.drawText(`Score: ${gameState.score}`, 10, 10);
   playdate.graphics.drawText(`Mode: ${gameState.mode.toUpperCase()}`, 10, 30);
 
-  // Legend
   const legendX = 260;
   playdate.graphics.drawText(`CONTROLS:`, legendX, 10);
   playdate.graphics.drawText(`A: Match`, legendX, 30);
@@ -88,9 +91,7 @@ export const drawGame = () => {
   if (fillWidth > 0)
     playdate.graphics.fillRect(barX, barY, fillWidth, barHeight);
 
-  // --- CAPSULES (Optimized Loop) ---
-  // Using for-of avoids closure allocation (fixes GC spike)
-  // Using pre-calc values avoids math (fixes frametime spike)
+  // Capsules
   for (const name of gameState.detectedNames) {
     drawCapsule(name.drawX, name.drawY, name.drawW, name.drawH);
   }
@@ -108,23 +109,27 @@ export const drawGame = () => {
     drawAnimatedCaret(cx, GRID_OFFSET_Y + ROWS * CELL_HEIGHT + 8, "up");
   }
 
-  // Grid
+  // --- GRID RENDER ---
+  const textOffsetX = Math.floor((CELL_WIDTH - 12) / 2);
+  const textOffsetY = Math.floor((CELL_HEIGHT - 14) / 2);
+
   for (let r = 0; r < ROWS; r++) {
+    const cellY = GRID_OFFSET_Y + r * CELL_HEIGHT;
+    const drawY = cellY + textOffsetY;
+    const rowData = gameState.grid[r];
+
     for (let c = 0; c < COLS; c++) {
-      const char = gameState.grid[r][c];
+      const char = rowData[c];
       const cellX = GRID_OFFSET_X + c * CELL_WIDTH;
-      const cellY = GRID_OFFSET_Y + r * CELL_HEIGHT;
-      const isCursor = c === gameState.cursor.x && r === gameState.cursor.y;
 
       if (char === FROZEN_CELL) {
-        playdate.graphics.setColor(PlaydateColor.Black);
         playdate.graphics.fillRect(
           cellX + 2,
           cellY + 2,
           CELL_WIDTH - 4,
           CELL_HEIGHT - 4,
         );
-        if (isCursor) {
+        if (c === gameState.cursor.x && r === gameState.cursor.y) {
           playdate.graphics.setColor(PlaydateColor.White);
           playdate.graphics.setLineWidth(2);
           playdate.graphics.drawRect(
@@ -134,17 +139,11 @@ export const drawGame = () => {
             CELL_HEIGHT - 8,
           );
           playdate.graphics.setLineWidth(1);
+          playdate.graphics.setColor(PlaydateColor.Black);
         }
       } else {
-        playdate.graphics.setColor(PlaydateColor.Black);
-        playdate.graphics.setImageDrawMode(PlaydateDrawMode.FillBlack);
-        playdate.graphics.setFont(
-          playdate.graphics.getSystemFont(PlaydateFontVariant.Normal),
-        );
-
-        if (isCursor) {
+        if (c === gameState.cursor.x && r === gameState.cursor.y) {
           playdate.graphics.setLineWidth(2);
-          playdate.graphics.setColor(PlaydateColor.Black);
           playdate.graphics.drawRect(
             cellX + 1,
             cellY + 1,
@@ -154,15 +153,13 @@ export const drawGame = () => {
           playdate.graphics.setLineWidth(1);
         }
 
-        const [textW, textH] = playdate.graphics.getTextSize(char);
-        const textX = cellX + (CELL_WIDTH - textW) / 2;
-        const textY = cellY + (CELL_HEIGHT - textH) / 2;
-        playdate.graphics.drawText(char, textX, textY);
+        // REVERTED: Using standard drawText
+        playdate.graphics.drawText(char, cellX + textOffsetX, drawY);
       }
     }
   }
 
-  // --- PARTICLES (Optimized Loop) ---
+  // Particles
   playdate.graphics.setColor(PlaydateColor.Black);
   for (const p of gameState.particles) {
     playdate.graphics.fillRect(p.x, p.y, p.size, p.size);

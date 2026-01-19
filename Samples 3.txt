@@ -1,0 +1,30 @@
+98.35%	98.35%	(C)	
+0.09%	0.00%	upvalue drawGame	main.lua:25480
+	0.09%	0.09%	function main.lua:25751	main.lua:25754
+0.17%	0.00%	field for iterator	[C]
+	0.17%	0.00%	method recalculateBoldMask	main.lua:24863
+		0.17%	0.00%	method handleDown	main.lua:25269
+			0.17%	0.17%	function main.lua:25322	main.lua:25324
+0.70%	0.00%	field find	[C]
+	0.70%	0.00%	method recalculateBoldMask	main.lua:24866
+		0.35%	0.00%	method handleDown	main.lua:25269
+			0.35%	0.35%	function main.lua:25322	main.lua:25324
+		0.17%	0.00%	method handleLeft	main.lua:25221
+			0.17%	0.17%	function main.lua:25307	main.lua:25309
+		0.09%	0.00%	method handleRight	main.lua:25235
+			0.09%	0.09%	function main.lua:25312	main.lua:25314
+		0.09%	0.00%	method checkNameMatch	main.lua:25128
+			0.09%	0.09%	function main.lua:25300	main.lua:25304
+0.61%	0.00%	method recalculateBoldMask	main.lua:24866
+	0.17%	0.00%	method handleLeft	main.lua:25221
+		0.17%	0.17%	function main.lua:25307	main.lua:25309
+	0.09%	0.00%	method handleRight	main.lua:25235
+		0.09%	0.09%	function main.lua:25312	main.lua:25314
+	0.35%	0.00%	method checkNameMatch	main.lua:25128
+		0.35%	0.35%	function main.lua:25300	main.lua:25304
+0.09%	0.00%	field random	[C]
+	0.09%	0.00%	method spawnExplosion	main.lua:24797
+		0.09%	0.00%	local callback	main.lua:25123
+			0.09%	0.00%	method forEach	main.lua:2023
+				0.09%	0.00%	method checkNameMatch	main.lua:25114
+					0.09%	0.09%	function main.lua:25300	main.lua:25304

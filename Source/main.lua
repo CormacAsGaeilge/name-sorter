@@ -24659,16 +24659,17 @@ ____exports.gameState = {
     freezeTimer = 0,
     freezeThreshold = INITIAL_FREEZE_THRESHOLD,
     gameOver = false,
-    gridDirty = true
+    gridDirty = true,
+    lastInteractionTime = 0
 }
 return ____exports
  end,
 ["src.logic"] = function(...) 
 local ____lualib = require("lualib_bundle")
+local __TS__StringCharCodeAt = ____lualib.__TS__StringCharCodeAt
 local __TS__ArraySplice = ____lualib.__TS__ArraySplice
 local Set = ____lualib.Set
 local __TS__New = ____lualib.__TS__New
-local __TS__StringCharCodeAt = ____lualib.__TS__StringCharCodeAt
 local __TS__ArraySort = ____lualib.__TS__ArraySort
 local __TS__ArrayFind = ____lualib.__TS__ArrayFind
 local __TS__StringSplit = ____lualib.__TS__StringSplit
@@ -24694,10 +24695,12 @@ local ____grid = require("src.grid")
 local randomChar = ____grid.randomChar
 local shuffleArray = ____grid.shuffleArray
 local createInitialGrid = ____grid.createInitialGrid
+local DEBOUNCE_DELAY = 150
 local INTERSECTION_COUNTS = nil
 local ROW_USAGE = nil
 local COL_USAGE = nil
 local NAME_BUCKETS = nil
+local NAME_MASKS = nil
 local function createZeroArray(____, len)
     local arr = {}
     do
@@ -24718,7 +24721,27 @@ local function clearBuffer(____, buf)
         end
     end
 end
-local function initBuckets()
+local function getCharMask(____, str)
+    local mask = 0
+    do
+        local i = 0
+        while i < #str do
+            local code = __TS__StringCharCodeAt(str, i)
+            local ____bit = -1
+            if code >= 65 and code <= 90 then
+                ____bit = code - 65
+            elseif code >= 97 and code <= 122 then
+                ____bit = code - 97
+            end
+            if ____bit >= 0 then
+                mask = mask | 1 << ____bit
+            end
+            i = i + 1
+        end
+    end
+    return mask
+end
+local function initBuffers()
     if NAME_BUCKETS then
         return
     end
@@ -24730,24 +24753,32 @@ local function initBuckets()
             i = i + 1
         end
     end
-    for ____, name in ipairs(NAMES_TO_FIND) do
-        do
-            if not name or #name == 0 then
-                goto __continue12
+    NAME_MASKS = {}
+    do
+        local i = 0
+        while i < #NAMES_TO_FIND do
+            do
+                local name = NAMES_TO_FIND[i + 1]
+                if not name or #name == 0 then
+                    NAME_MASKS[#NAME_MASKS + 1] = 0
+                    goto __continue19
+                end
+                local code = string.byte(name, 1) or 0 / 0
+                local index = -1
+                if code >= 65 and code <= 90 then
+                    index = code - 65
+                elseif code >= 97 and code <= 122 then
+                    index = code - 97
+                end
+                if index >= 0 then
+                    local ____NAME_BUCKETS_index_0 = NAME_BUCKETS[index + 1]
+                    ____NAME_BUCKETS_index_0[#____NAME_BUCKETS_index_0 + 1] = name
+                end
+                NAME_MASKS[#NAME_MASKS + 1] = getCharMask(nil, name)
             end
-            local code = string.byte(name, 1) or 0 / 0
-            local index = -1
-            if code >= 65 and code <= 90 then
-                index = code - 65
-            elseif code >= 97 and code <= 122 then
-                index = code - 97
-            end
-            if index >= 0 then
-                local ____NAME_BUCKETS_index_0 = NAME_BUCKETS[index + 1]
-                ____NAME_BUCKETS_index_0[#____NAME_BUCKETS_index_0 + 1] = name
-            end
+            ::__continue19::
+            i = i + 1
         end
-        ::__continue12::
     end
     if not INTERSECTION_COUNTS then
         INTERSECTION_COUNTS = createZeroArray(nil, ROWS * COLS)
@@ -24780,6 +24811,15 @@ local function doNamesIntersect(____, a, b)
     return colX >= row.c and colX < row.c + row.len and rowY >= col.r and rowY < col.r + col.len
 end
 ____exports.GameLogic = {
+    tick = function()
+        ____exports.GameLogic:updateParticles()
+        if gameState.gridDirty then
+            local now = playdate.getCurrentTimeMilliseconds()
+            if now - gameState.lastInteractionTime > DEBOUNCE_DELAY then
+                ____exports.GameLogic:recalculateBoldMask()
+            end
+        end
+    end,
     spawnExplosion = function(____, c, r)
         local centerX = GRID_OFFSET_X + c * CELL_WIDTH + CELL_WIDTH / 2
         local centerY = GRID_OFFSET_Y + r * CELL_HEIGHT + CELL_HEIGHT / 2
@@ -24816,17 +24856,10 @@ ____exports.GameLogic = {
             end
         end
     end,
-    recalculateBoldMask = function()
-        if not gameState.gridDirty then
-            return
-        end
-        initBuckets(nil)
-        local buckets = NAME_BUCKETS
-        local intersectionCounts = INTERSECTION_COUNTS
-        local rowUsage = ROW_USAGE
-        local colUsage = COL_USAGE
+    markDirty = function()
+        gameState.gridDirty = true
+        gameState.lastInteractionTime = playdate.getCurrentTimeMilliseconds()
         gameState.detectedNames = {}
-        clearBuffer(nil, intersectionCounts)
         do
             local r = 0
             while r < ROWS do
@@ -24841,12 +24874,23 @@ ____exports.GameLogic = {
                 r = r + 1
             end
         end
+    end,
+    recalculateBoldMask = function()
+        initBuffers(nil)
+        local buckets = NAME_BUCKETS
+        local nameMasks = NAME_MASKS
+        local intersectionCounts = INTERSECTION_COUNTS
+        local rowUsage = ROW_USAGE
+        local colUsage = COL_USAGE
+        gameState.detectedNames = {}
+        clearBuffer(nil, intersectionCounts)
         local allMatches = {}
         local padding = 2
         do
             local r = 0
             while r < ROWS do
                 local rowStr = table.concat(gameState.grid[r + 1], "")
+                local rowMask = getCharMask(nil, rowStr)
                 local rowMatches = {}
                 local checkedBuckets = __TS__New(Set)
                 do
@@ -24861,30 +24905,38 @@ ____exports.GameLogic = {
                             checkedBuckets:add(idx)
                             local bucket = buckets[idx + 1]
                             for ____, name in ipairs(bucket) do
-                                local startIndex = 0
-                                while true do
-                                    startIndex = (string.find(
-                                        rowStr,
-                                        name,
-                                        math.max(startIndex + 1, 1),
-                                        true
-                                    ) or 0) - 1
-                                    if not (startIndex > -1) then
-                                        break
+                                do
+                                    local nMask = getCharMask(nil, name)
+                                    if rowMask & nMask ~= nMask then
+                                        goto __continue55
                                     end
-                                    rowMatches[#rowMatches + 1] = {
-                                        text = name,
-                                        r = r,
-                                        c = startIndex,
-                                        isRow = true,
-                                        len = #name,
-                                        drawX = GRID_OFFSET_X + startIndex * CELL_WIDTH + padding,
-                                        drawY = GRID_OFFSET_Y + r * CELL_HEIGHT + padding,
-                                        drawW = #name * CELL_WIDTH - padding * 2,
-                                        drawH = CELL_HEIGHT - padding * 2
-                                    }
-                                    startIndex = startIndex + 1
+                                    local startIndex = 0
+                                    while true do
+                                        startIndex = (string.find(
+                                            rowStr,
+                                            name,
+                                            math.max(startIndex + 1, 1),
+                                            true
+                                        ) or 0) - 1
+                                        if not (startIndex > -1) then
+                                            break
+                                        end
+                                        rowMatches[#rowMatches + 1] = {
+                                            text = name,
+                                            r = r,
+                                            c = startIndex,
+                                            isRow = true,
+                                            len = #name,
+                                            drawX = GRID_OFFSET_X + startIndex * CELL_WIDTH + padding,
+                                            drawY = GRID_OFFSET_Y + r * CELL_HEIGHT + padding,
+                                            drawW = #name * CELL_WIDTH - padding * 2,
+                                            drawH = CELL_HEIGHT - padding * 2,
+                                            mask = nMask
+                                        }
+                                        startIndex = startIndex + 1
+                                    end
                                 end
+                                ::__continue55::
                             end
                         end
                         i = i + 1
@@ -24935,6 +24987,7 @@ ____exports.GameLogic = {
                         r = r + 1
                     end
                 end
+                local colMask = getCharMask(nil, colStr)
                 local colMatches = {}
                 local checkedBuckets = __TS__New(Set)
                 do
@@ -24949,30 +25002,38 @@ ____exports.GameLogic = {
                             checkedBuckets:add(idx)
                             local bucket = buckets[idx + 1]
                             for ____, name in ipairs(bucket) do
-                                local startIndex = 0
-                                while true do
-                                    startIndex = (string.find(
-                                        colStr,
-                                        name,
-                                        math.max(startIndex + 1, 1),
-                                        true
-                                    ) or 0) - 1
-                                    if not (startIndex > -1) then
-                                        break
+                                do
+                                    local nMask = getCharMask(nil, name)
+                                    if colMask & nMask ~= nMask then
+                                        goto __continue77
                                     end
-                                    colMatches[#colMatches + 1] = {
-                                        text = name,
-                                        r = startIndex,
-                                        c = c,
-                                        isRow = false,
-                                        len = #name,
-                                        drawX = GRID_OFFSET_X + c * CELL_WIDTH + padding,
-                                        drawY = GRID_OFFSET_Y + startIndex * CELL_HEIGHT + padding,
-                                        drawW = CELL_WIDTH - padding * 2,
-                                        drawH = #name * CELL_HEIGHT - padding * 2
-                                    }
-                                    startIndex = startIndex + 1
+                                    local startIndex = 0
+                                    while true do
+                                        startIndex = (string.find(
+                                            colStr,
+                                            name,
+                                            math.max(startIndex + 1, 1),
+                                            true
+                                        ) or 0) - 1
+                                        if not (startIndex > -1) then
+                                            break
+                                        end
+                                        colMatches[#colMatches + 1] = {
+                                            text = name,
+                                            r = startIndex,
+                                            c = c,
+                                            isRow = false,
+                                            len = #name,
+                                            drawX = GRID_OFFSET_X + c * CELL_WIDTH + padding,
+                                            drawY = GRID_OFFSET_Y + startIndex * CELL_HEIGHT + padding,
+                                            drawW = CELL_WIDTH - padding * 2,
+                                            drawH = #name * CELL_HEIGHT - padding * 2,
+                                            mask = nMask
+                                        }
+                                        startIndex = startIndex + 1
+                                    end
                                 end
+                                ::__continue77::
                             end
                         end
                         i = i + 1
@@ -25050,6 +25111,9 @@ ____exports.GameLogic = {
         gameState.gridDirty = false
     end,
     checkNameMatch = function()
+        if gameState.gridDirty then
+            ____exports.GameLogic:recalculateBoldMask()
+        end
         local ____gameState_10 = gameState
         local mode = ____gameState_10.mode
         local cursor = ____gameState_10.cursor
@@ -25124,7 +25188,7 @@ ____exports.GameLogic = {
                 gameState.grid[r + 1][c + 1] = randomChar(nil)
             end
         end)
-        gameState.gridDirty = true
+        ____exports.GameLogic:markDirty()
         ____exports.GameLogic:recalculateBoldMask()
     end,
     resetGame = function()
@@ -25135,8 +25199,7 @@ ____exports.GameLogic = {
         gameState.freezeThreshold = INITIAL_FREEZE_THRESHOLD
         gameState.cursor = {x = 0, y = 0}
         gameState.particles = {}
-        gameState.gridDirty = true
-        ____exports.GameLogic:recalculateBoldMask()
+        ____exports.GameLogic:markDirty()
     end,
     updateFreeze = function()
         if gameState.gameOver then
@@ -25166,8 +25229,7 @@ ____exports.GameLogic = {
                 local randomSpot = validSpots[math.floor(math.random() * #validSpots) + 1]
                 gameState.grid[randomSpot.r + 1][randomSpot.c + 1] = FROZEN_CELL
                 ____exports.GameLogic:spawnExplosion(randomSpot.c, randomSpot.r)
-                gameState.gridDirty = true
-                ____exports.GameLogic:recalculateBoldMask()
+                ____exports.GameLogic:markDirty()
                 if #validSpots == 1 then
                     gameState.gameOver = true
                 end
@@ -25204,8 +25266,7 @@ ____exports.GameLogic = {
                     end
                 end
             end
-            gameState.gridDirty = true
-            ____exports.GameLogic:recalculateBoldMask()
+            ____exports.GameLogic:markDirty()
         end
     end,
     handleLeft = function()
@@ -25217,8 +25278,7 @@ ____exports.GameLogic = {
                 local ____gameState_grid_index_12 = gameState.grid[gameState.cursor.y + 1]
                 ____gameState_grid_index_12[#____gameState_grid_index_12 + 1] = first
             end
-            gameState.gridDirty = true
-            ____exports.GameLogic:recalculateBoldMask()
+            ____exports.GameLogic:markDirty()
         else
             gameState.cursor.x = (gameState.cursor.x - 1 + COLS) % COLS
         end
@@ -25231,8 +25291,7 @@ ____exports.GameLogic = {
             if last then
                 __TS__ArrayUnshift(gameState.grid[gameState.cursor.y + 1], last)
             end
-            gameState.gridDirty = true
-            ____exports.GameLogic:recalculateBoldMask()
+            ____exports.GameLogic:markDirty()
         else
             gameState.cursor.x = (gameState.cursor.x + 1) % COLS
         end
@@ -25248,8 +25307,7 @@ ____exports.GameLogic = {
                 end
             end
             gameState.grid[ROWS][gameState.cursor.x + 1] = topChar
-            gameState.gridDirty = true
-            ____exports.GameLogic:recalculateBoldMask()
+            ____exports.GameLogic:markDirty()
         else
             gameState.cursor.y = (gameState.cursor.y - 1 + ROWS) % ROWS
         end
@@ -25265,8 +25323,7 @@ ____exports.GameLogic = {
                 end
             end
             gameState.grid[1][gameState.cursor.x + 1] = bottomChar
-            gameState.gridDirty = true
-            ____exports.GameLogic:recalculateBoldMask()
+            ____exports.GameLogic:markDirty()
         else
             gameState.cursor.y = (gameState.cursor.y + 1) % ROWS
         end
@@ -25394,6 +25451,7 @@ ____exports.drawGame = function()
     playdate.graphics.clear(PlaydateColor.White)
     playdate.graphics.setColor(PlaydateColor.Black)
     playdate.graphics.setImageDrawMode(PlaydateDrawMode.FillBlack)
+    playdate.graphics.setFont(playdate.graphics.getSystemFont(PlaydateFontVariant.Normal))
     if gameState.gameOver then
         playdate.graphics.drawText("GAME OVER", 150, 100)
         playdate.graphics.drawText(
@@ -25448,39 +25506,35 @@ ____exports.drawGame = function()
         drawAnimatedCaret(nil, cx, GRID_OFFSET_Y - 8, "down")
         drawAnimatedCaret(nil, cx, GRID_OFFSET_Y + ROWS * CELL_HEIGHT + 8, "up")
     end
+    local textOffsetX = math.floor((CELL_WIDTH - 12) / 2)
+    local textOffsetY = math.floor((CELL_HEIGHT - 14) / 2)
     do
         local r = 0
         while r < ROWS do
+            local cellY = GRID_OFFSET_Y + r * CELL_HEIGHT
+            local drawY = cellY + textOffsetY
+            local rowData = gameState.grid[r + 1]
             do
                 local c = 0
                 while c < COLS do
-                    local char = gameState.grid[r + 1][c + 1]
+                    local char = rowData[c + 1]
                     local cellX = GRID_OFFSET_X + c * CELL_WIDTH
-                    local cellY = GRID_OFFSET_Y + r * CELL_HEIGHT
-                    local isCursor = c == gameState.cursor.x and r == gameState.cursor.y
                     if char == FROZEN_CELL then
-                        playdate.graphics.setColor(PlaydateColor.Black)
                         playdate.graphics.fillRect(cellX + 2, cellY + 2, CELL_WIDTH - 4, CELL_HEIGHT - 4)
-                        if isCursor then
+                        if c == gameState.cursor.x and r == gameState.cursor.y then
                             playdate.graphics.setColor(PlaydateColor.White)
                             playdate.graphics.setLineWidth(2)
                             playdate.graphics.drawRect(cellX + 4, cellY + 4, CELL_WIDTH - 8, CELL_HEIGHT - 8)
                             playdate.graphics.setLineWidth(1)
+                            playdate.graphics.setColor(PlaydateColor.Black)
                         end
                     else
-                        playdate.graphics.setColor(PlaydateColor.Black)
-                        playdate.graphics.setImageDrawMode(PlaydateDrawMode.FillBlack)
-                        playdate.graphics.setFont(playdate.graphics.getSystemFont(PlaydateFontVariant.Normal))
-                        if isCursor then
+                        if c == gameState.cursor.x and r == gameState.cursor.y then
                             playdate.graphics.setLineWidth(2)
-                            playdate.graphics.setColor(PlaydateColor.Black)
                             playdate.graphics.drawRect(cellX + 1, cellY + 1, CELL_WIDTH - 2, CELL_HEIGHT - 2)
                             playdate.graphics.setLineWidth(1)
                         end
-                        local textW, textH = playdate.graphics.getTextSize(char)
-                        local textX = cellX + (CELL_WIDTH - textW) / 2
-                        local textY = cellY + (CELL_HEIGHT - textH) / 2
-                        playdate.graphics.drawText(char, textX, textY)
+                        playdate.graphics.drawText(char, cellX + textOffsetX, drawY)
                     end
                     c = c + 1
                 end
@@ -25754,6 +25808,7 @@ playdate.inputHandlers.push(inputHandler)
 playdate.update = function()
     GameLogic:updateFreeze()
     GameLogic:updateParticles()
+    GameLogic:tick()
     drawGame(nil)
 end
 return ____exports

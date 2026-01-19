@@ -26,6 +26,8 @@ export interface NameInstance {
   drawY: number;
   drawW: number;
   drawH: number;
+  // Logic Cache (Bloom Filter)
+  mask: number;
 }
 
 export interface GameState {
@@ -41,5 +43,7 @@ export interface GameState {
   freezeTimer: number;
   freezeThreshold: number;
   gameOver: boolean;
+  // Optimizations
   gridDirty: boolean;
+  lastInteractionTime: number; // For debouncing
 }

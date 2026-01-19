@@ -13,6 +13,7 @@ canvas.style.imageRendering = "pixelated";
 canvas.style.width = "100%";
 canvas.style.height = "100%";
 
+// Find wrapper or fallback to body
 const wrapper = document.getElementById("game-wrapper") || document.body;
 wrapper.appendChild(canvas);
 
@@ -42,10 +43,10 @@ const KEY_MAP: Record<string, string> = {
 };
 
 window.addEventListener("keydown", (e) => {
-  constYZ = KEY_MAP[e.key];
-  if (constYZ) {
-    if (!inputState.current[constYZ]) inputState.pressed[constYZ] = true;
-    inputState.current[constYZ] = true;
+  const btn = KEY_MAP[e.key];
+  if (btn) {
+    if (!inputState.current[btn]) inputState.pressed[btn] = true;
+    inputState.current[btn] = true;
   }
   // Crank Keys (< and >)
   if (e.key === "," || e.key === "<") pendingCrankDelta -= 15;
@@ -58,6 +59,7 @@ window.addEventListener("keyup", (e) => {
 });
 
 // --- TOUCH/MOUSE HANDLERS ---
+// Helper to bind a UI button to a game input
 const bindButton = (id: string, btnName: string) => {
   const el = document.getElementById(id);
   if (!el) return;
@@ -80,6 +82,7 @@ const bindButton = (id: string, btnName: string) => {
   el.addEventListener("mouseleave", release);
 };
 
+// Helper to bind a UI button to the Crank
 const bindCrank = (id: string, amount: number) => {
   const el = document.getElementById(id);
   if (!el) return;
@@ -112,7 +115,7 @@ const bindCrank = (id: string, amount: number) => {
   el.addEventListener("mouseleave", stop);
 };
 
-// Bind Controls
+// Bind HTML UI Buttons (Ensure these IDs exist in index.html)
 bindButton("btn-up", "up");
 bindButton("btn-down", "down");
 bindButton("btn-left", "left");
@@ -120,12 +123,14 @@ bindButton("btn-right", "right");
 bindButton("btn-a", "A");
 bindButton("btn-b", "B");
 
-// Using larger increments for touch buttons to make it feel responsive
 bindCrank("btn-crank-left", -30);
 bindCrank("btn-crank-right", 30);
 
-// --- THE SHIM ---
+// --- THE SHIM API ---
 export const playdateShim = {
+  // API: System
+  getCurrentTimeMilliseconds: () => Date.now(),
+
   // API: Input
   isCrankDocked: () => false,
   getCrankChange: () => frameCrankDelta,
@@ -195,6 +200,7 @@ function loop() {
   if (window.playdate._activeHandler) {
     const h = window.playdate._activeHandler;
 
+    // Button Presses (One-shot)
     if (inputState.pressed["A"] && h.AButtonDown) h.AButtonDown();
     if (inputState.pressed["B"] && h.BButtonDown) h.BButtonDown();
     if (inputState.pressed["up"] && h.upButtonDown) h.upButtonDown();
@@ -202,7 +208,7 @@ function loop() {
     if (inputState.pressed["left"] && h.leftButtonDown) h.leftButtonDown();
     if (inputState.pressed["right"] && h.rightButtonDown) h.rightButtonDown();
 
-    // Callback: Cranked (Only if moved)
+    // Crank Movement
     if (frameCrankDelta !== 0 && h.cranked) {
       h.cranked(frameCrankDelta, frameCrankDelta);
     }
@@ -211,7 +217,7 @@ function loop() {
   // Clear "Pressed" state (One-shot)
   inputState.pressed = {};
 
-  // 3. Run Game Update (Game might poll getCrankChange() here)
+  // 3. Run Game Update
   if (window.playdate.update) {
     window.playdate.update();
   }
@@ -219,4 +225,5 @@ function loop() {
   requestAnimationFrame(loop);
 }
 
+// Start the loop
 requestAnimationFrame(loop);

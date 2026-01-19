@@ -18,6 +18,7 @@ playdate.update = () => {
   GameLogic.updateFreeze();
   GameLogic.updateParticles();
 
+  GameLogic.tick();
   // Render the Frame
   drawGame();
 };
