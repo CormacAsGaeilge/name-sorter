@@ -1,6 +1,6 @@
 name=Name Sorter
 bundleID=com.cormacasgaeilge.namesorter
-version=0.1.0
+version=0.1.1
 buildNumber=1
 author=Cormac White
 imagePath=system/launcher

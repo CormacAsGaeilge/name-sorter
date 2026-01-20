@@ -6064,8 +6064,6 @@ ____exports.UIRenderer = {
         playdate.graphics.drawText("Crank: Shuffle Line", leftX, instructionsY + lineHeight * 4)
     end,
     drawHUD = function()
-        local debugStr = ((("FPS: " .. tostring(math.floor(gameState.fps))) .. "  dt: ") .. tostring(gameState.dt)) .. "ms"
-        playdate.graphics.drawText(debugStr, 240, 220)
         if gameState.gameOver then
             playdate.graphics.drawText("GAME OVER", 150, 100)
             playdate.graphics.drawText(
