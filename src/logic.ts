@@ -454,14 +454,20 @@ export const GameLogic = {
 
       const { mode, cursor, grid } = gameState;
       if (mode === "row") {
-        grid[cursor.y] = shuffleArray(grid[cursor.y]);
+        for (let c = 0; c < COLS; c++) {
+          if (grid[cursor.y][c] !== FROZEN_CELL) {
+            grid[cursor.y][c] = randomChar();
+          }
+        }
       } else if (mode === "column") {
-        const col = grid.map((row) => row[cursor.x]);
-        const shuffledCol = shuffleArray(col);
         for (let r = 0; r < ROWS; r++) {
-          grid[r][cursor.x] = shuffledCol[r];
+          if (grid[r][cursor.x] !== FROZEN_CELL) {
+            grid[r][cursor.x] = randomChar();
+          }
         }
       }
+      // --------------------------
+
       GameLogic.markDirty();
     }
   },
