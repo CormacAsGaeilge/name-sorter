@@ -54,6 +54,7 @@ const drawAnimatedCaret = (
 
 const drawStartScreen = () => {
   playdate.graphics.drawText(`*NAME SORTER*`, 145, 60);
+  playdate.graphics.drawText(`1GAM - Jan 2026`, 138, 80);
 
   playdate.graphics.drawText(`Press A to Start`, 135, 100);
 
