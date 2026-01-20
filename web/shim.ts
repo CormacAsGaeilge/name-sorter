@@ -176,6 +176,14 @@ export const playdateShim = {
     },
     getSystemFont: (variant: string) => variant,
     setLineWidth: (w: number) => (ctx.lineWidth = w),
+    setLineStyle: (style: number) => {
+      // 0 = Solid, 1 = Dashed (Playdate constants)
+      if (style === 1) {
+        ctx.setLineDash([4, 4]);
+      } else {
+        ctx.setLineDash([]);
+      }
+    },
   },
   // API: Handlers
   inputHandlers: {

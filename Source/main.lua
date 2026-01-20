@@ -4784,6 +4784,9 @@ ____exports.MIN_FREEZE_THRESHOLD = 30 * 5
 ____exports.FREEZE_DECREMENT = 30 * 2
 ____exports.TICK_RATE_MS = 33
 ____exports.MAX_ACCUMULATOR_MS = 250
+____exports.CARET_SPEED_DIVISOR = 200
+____exports.CARET_BOUNCE_AMPLITUDE = 3
+____exports.CARET_SIZE = 6
 return ____exports
  end,
 ["src.grid"] = function(...) 
@@ -5671,6 +5674,10 @@ return ____exports
 local ____exports = {}
 local ____core = require("lua_modules.@crankscript.core.src.index")
 local PlaydateColor = ____core.PlaydateColor
+local ____constants = require("src.constants")
+local CARET_SPEED_DIVISOR = ____constants.CARET_SPEED_DIVISOR
+local CARET_BOUNCE_AMPLITUDE = ____constants.CARET_BOUNCE_AMPLITUDE
+local CARET_SIZE = ____constants.CARET_SIZE
 ____exports.ElementsRenderer = {
     drawCapsule = function(____, drawX, drawY, w, h)
         playdate.graphics.setColor(PlaydateColor.Black)
@@ -5685,9 +5692,9 @@ ____exports.ElementsRenderer = {
         playdate.graphics.setLineWidth(1)
     end,
     drawAnimatedCaret = function(____, cx, cy, direction)
-        local tick = playdate.getCurrentTimeMilliseconds() / 100
-        local size = 6
-        local bounce = math.sin(tick) * 3
+        local tick = playdate.getCurrentTimeMilliseconds() / CARET_SPEED_DIVISOR
+        local bounce = math.sin(tick) * CARET_BOUNCE_AMPLITUDE
+        local size = CARET_SIZE
         playdate.graphics.setColor(PlaydateColor.Black)
         playdate.graphics.setLineWidth(2)
         local bx = cx
@@ -6035,6 +6042,31 @@ local CELL_HEIGHT = ____constants.CELL_HEIGHT
 local GRID_OFFSET_X = ____constants.GRID_OFFSET_X
 local GRID_OFFSET_Y = ____constants.GRID_OFFSET_Y
 local FROZEN_CELL = ____constants.FROZEN_CELL
+local function drawDashedRect(____, x, y, w, h)
+    playdate.graphics.setLineWidth(3)
+    local dashLen = 5
+    local gapLen = 3
+    local step = dashLen + gapLen
+    do
+        local i = 0
+        while i < w do
+            local segW = math.min(dashLen, w - i)
+            playdate.graphics.drawLine(x + i, y, x + i + segW, y)
+            playdate.graphics.drawLine(x + i, y + h, x + i + segW, y + h)
+            i = i + step
+        end
+    end
+    do
+        local i = 0
+        while i < h do
+            local segH = math.min(dashLen, h - i)
+            playdate.graphics.drawLine(x, y + i, x, y + i + segH)
+            playdate.graphics.drawLine(x + w, y + i, x + w, y + i + segH)
+            i = i + step
+        end
+    end
+    playdate.graphics.setLineWidth(1)
+end
 ____exports.GridRenderer = {drawGrid = function()
     local textOffsetX = math.floor((CELL_WIDTH - 12) / 2)
     local textOffsetY = math.floor((CELL_HEIGHT - 14) / 2)
@@ -6051,19 +6083,7 @@ ____exports.GridRenderer = {drawGrid = function()
                     local cellX = GRID_OFFSET_X + c * CELL_WIDTH
                     if char == FROZEN_CELL then
                         playdate.graphics.fillRect(cellX + 2, cellY + 2, CELL_WIDTH - 4, CELL_HEIGHT - 4)
-                        if c == gameState.cursor.x and r == gameState.cursor.y then
-                            playdate.graphics.setColor(PlaydateColor.White)
-                            playdate.graphics.setLineWidth(2)
-                            playdate.graphics.drawRect(cellX + 4, cellY + 4, CELL_WIDTH - 8, CELL_HEIGHT - 8)
-                            playdate.graphics.setLineWidth(1)
-                            playdate.graphics.setColor(PlaydateColor.Black)
-                        end
                     else
-                        if c == gameState.cursor.x and r == gameState.cursor.y then
-                            playdate.graphics.setLineWidth(2)
-                            playdate.graphics.drawRect(cellX + 1, cellY + 1, CELL_WIDTH - 2, CELL_HEIGHT - 2)
-                            playdate.graphics.setLineWidth(1)
-                        end
                         playdate.graphics.drawText(char, cellX + textOffsetX, drawY)
                     end
                     c = c + 1
@@ -6071,6 +6091,37 @@ ____exports.GridRenderer = {drawGrid = function()
             end
             r = r + 1
         end
+    end
+    local ____gameState_0 = gameState
+    local mode = ____gameState_0.mode
+    local cursor = ____gameState_0.cursor
+    if mode == "row" then
+        drawDashedRect(
+            nil,
+            GRID_OFFSET_X,
+            GRID_OFFSET_Y + cursor.y * CELL_HEIGHT,
+            COLS * CELL_WIDTH,
+            CELL_HEIGHT
+        )
+    elseif mode == "column" then
+        drawDashedRect(
+            nil,
+            GRID_OFFSET_X + cursor.x * CELL_WIDTH,
+            GRID_OFFSET_Y,
+            CELL_WIDTH,
+            ROWS * CELL_HEIGHT
+        )
+    elseif mode == "name" then
+        local char = gameState.grid[cursor.y + 1][cursor.x + 1]
+        playdate.graphics.setLineWidth(3)
+        if char == FROZEN_CELL then
+            playdate.graphics.setColor(PlaydateColor.White)
+        end
+        playdate.graphics.drawRect(GRID_OFFSET_X + cursor.x * CELL_WIDTH, GRID_OFFSET_Y + cursor.y * CELL_HEIGHT, CELL_WIDTH, CELL_HEIGHT)
+        if char == FROZEN_CELL then
+            playdate.graphics.setColor(PlaydateColor.Black)
+        end
+        playdate.graphics.setLineWidth(1)
     end
 end}
 return ____exports
