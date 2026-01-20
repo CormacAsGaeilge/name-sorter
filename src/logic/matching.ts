@@ -17,8 +17,16 @@ let COL_USAGE: number[] | null = null;
 let NAME_BUCKETS: string[][] | null = null;
 let NAME_MASKS: number[] | null = null;
 
-const createZeroArray = (len: number) => Array(len).fill(0);
-const clearBuffer = (buf: number[]) => buf.fill(0);
+// FIX: Use a loop instead of Array(len).fill(0) to avoid 'Array' global call
+const createZeroArray = (len: number) => {
+  const arr: number[] = [];
+  for (let i = 0; i < len; i++) arr.push(0);
+  return arr;
+};
+
+const clearBuffer = (buf: number[]) => {
+  for (let i = 0; i < buf.length; i++) buf[i] = 0;
+};
 
 const getCharMask = (str: string) => {
   let mask = 0;
@@ -34,7 +42,13 @@ const getCharMask = (str: string) => {
 
 const initBuffers = () => {
   if (NAME_BUCKETS) return;
-  NAME_BUCKETS = Array.from({ length: 26 }, () => []);
+
+  // FIX: Use loop instead of Array.from
+  NAME_BUCKETS = [];
+  for (let i = 0; i < 26; i++) {
+    NAME_BUCKETS.push([]);
+  }
+
   NAME_MASKS = [];
 
   for (const name of NAMES_TO_FIND) {

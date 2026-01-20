@@ -11,3 +11,7 @@ export const FROZEN_CELL = "#";
 export const INITIAL_FREEZE_THRESHOLD = 100 * 30;
 export const MIN_FREEZE_THRESHOLD = 30 * 5;
 export const FREEZE_DECREMENT = 30 * 2;
+
+// --- NEW CONSTANTS ---
+export const TICK_RATE_MS = 33; // ~30 Updates per second (1000ms / 30)
+export const MAX_ACCUMULATOR_MS = 250; // Prevent "spiral of death" if lag is huge
