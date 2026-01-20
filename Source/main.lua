@@ -4779,9 +4779,15 @@ ____exports.CELL_HEIGHT = 30
 ____exports.GRID_OFFSET_X = 50
 ____exports.GRID_OFFSET_Y = 60
 ____exports.FROZEN_CELL = "#"
-____exports.INITIAL_FREEZE_THRESHOLD = 300 * 30
+____exports.INITIAL_FREEZE_THRESHOLD = 100 * 30
 ____exports.MIN_FREEZE_THRESHOLD = 30 * 5
 ____exports.FREEZE_DECREMENT = 30 * 2
+____exports.TICK_RATE_MS = 33
+____exports.MAX_ACCUMULATOR_MS = 250
+____exports.CARET_SPEED_DIVISOR = 200
+____exports.CARET_BOUNCE_AMPLITUDE = 3
+____exports.CARET_SIZE = 6
+____exports.CURSOR_LERP_SPEED = 0.025
 return ____exports
  end,
 ["src.grid"] = function(...) 
@@ -4830,6 +4836,17 @@ local ____constants = require("src.constants")
 local INITIAL_FREEZE_THRESHOLD = ____constants.INITIAL_FREEZE_THRESHOLD
 local ROWS = ____constants.ROWS
 local COLS = ____constants.COLS
+local function createZeroArray(____, len)
+    local arr = {}
+    do
+        local i = 0
+        while i < len do
+            arr[#arr + 1] = 0
+            i = i + 1
+        end
+    end
+    return arr
+end
 ____exports.gameState = {
     grid = {},
     boldMask = __TS__ArrayFrom(
@@ -4850,28 +4867,28 @@ ____exports.gameState = {
     particles = {},
     mode = "column",
     cursor = {x = 0, y = 0},
+    visualCursor = {x = 0, y = 0},
+    rowOffsets = createZeroArray(nil, ROWS),
+    colOffsets = createZeroArray(nil, COLS),
     score = 0,
     crankAccumulator = 0,
     freezeTimer = 0,
     freezeThreshold = INITIAL_FREEZE_THRESHOLD,
     gameOver = false,
+    started = false,
     gridDirty = true,
-    lastInteractionTime = 0
+    lastInteractionTime = 0,
+    fps = 0,
+    dt = 0
 }
 return ____exports
  end,
-["src.logic"] = function(...) 
+["src.logic.matching"] = function(...) 
 local ____lualib = require("lualib_bundle")
 local __TS__StringCharCodeAt = ____lualib.__TS__StringCharCodeAt
-local __TS__ArraySplice = ____lualib.__TS__ArraySplice
 local Set = ____lualib.Set
 local __TS__New = ____lualib.__TS__New
 local __TS__ArraySort = ____lualib.__TS__ArraySort
-local __TS__ArrayFind = ____lualib.__TS__ArrayFind
-local __TS__StringSplit = ____lualib.__TS__StringSplit
-local __TS__ParseInt = ____lualib.__TS__ParseInt
-local __TS__ArrayMap = ____lualib.__TS__ArrayMap
-local __TS__ArrayUnshift = ____lualib.__TS__ArrayUnshift
 local ____exports = {}
 local ____state = require("src.state")
 local gameState = ____state.gameState
@@ -4879,19 +4896,10 @@ local ____constants = require("src.constants")
 local ROWS = ____constants.ROWS
 local COLS = ____constants.COLS
 local NAMES_TO_FIND = ____constants.NAMES_TO_FIND
-local FROZEN_CELL = ____constants.FROZEN_CELL
-local INITIAL_FREEZE_THRESHOLD = ____constants.INITIAL_FREEZE_THRESHOLD
-local MIN_FREEZE_THRESHOLD = ____constants.MIN_FREEZE_THRESHOLD
-local FREEZE_DECREMENT = ____constants.FREEZE_DECREMENT
 local GRID_OFFSET_X = ____constants.GRID_OFFSET_X
 local GRID_OFFSET_Y = ____constants.GRID_OFFSET_Y
 local CELL_WIDTH = ____constants.CELL_WIDTH
 local CELL_HEIGHT = ____constants.CELL_HEIGHT
-local ____grid = require("src.grid")
-local randomChar = ____grid.randomChar
-local shuffleArray = ____grid.shuffleArray
-local createInitialGrid = ____grid.createInitialGrid
-local DEBOUNCE_DELAY = 150
 local INTERSECTION_COUNTS = nil
 local ROW_USAGE = nil
 local COL_USAGE = nil
@@ -4950,31 +4958,26 @@ local function initBuffers()
         end
     end
     NAME_MASKS = {}
-    do
-        local i = 0
-        while i < #NAMES_TO_FIND do
-            do
-                local name = NAMES_TO_FIND[i + 1]
-                if not name or #name == 0 then
-                    NAME_MASKS[#NAME_MASKS + 1] = 0
-                    goto __continue19
-                end
-                local code = string.byte(name, 1) or 0 / 0
-                local index = -1
-                if code >= 65 and code <= 90 then
-                    index = code - 65
-                elseif code >= 97 and code <= 122 then
-                    index = code - 97
-                end
-                if index >= 0 then
-                    local ____NAME_BUCKETS_index_0 = NAME_BUCKETS[index + 1]
-                    ____NAME_BUCKETS_index_0[#____NAME_BUCKETS_index_0 + 1] = name
-                end
-                NAME_MASKS[#NAME_MASKS + 1] = getCharMask(nil, name)
+    for ____, name in ipairs(NAMES_TO_FIND) do
+        do
+            if not name then
+                NAME_MASKS[#NAME_MASKS + 1] = 0
+                goto __continue18
             end
-            ::__continue19::
-            i = i + 1
+            local code = string.byte(name, 1) or 0 / 0
+            local index = -1
+            if code >= 65 and code <= 90 then
+                index = code - 65
+            elseif code >= 97 and code <= 122 then
+                index = code - 97
+            end
+            if index >= 0 then
+                local ____NAME_BUCKETS_index_0 = NAME_BUCKETS[index + 1]
+                ____NAME_BUCKETS_index_0[#____NAME_BUCKETS_index_0 + 1] = name
+            end
+            NAME_MASKS[#NAME_MASKS + 1] = getCharMask(nil, name)
         end
+        ::__continue18::
     end
     if not INTERSECTION_COUNTS then
         INTERSECTION_COUNTS = createZeroArray(nil, ROWS * COLS)
@@ -4986,72 +4989,7 @@ local function initBuffers()
         COL_USAGE = createZeroArray(nil, ROWS)
     end
 end
-local function doNamesIntersect(____, a, b)
-    if a.isRow == b.isRow then
-        if a.isRow then
-            if a.r ~= b.r then
-                return false
-            end
-            return a.c < b.c + b.len and a.c + a.len > b.c
-        else
-            if a.c ~= b.c then
-                return false
-            end
-            return a.r < b.r + b.len and a.r + a.len > b.r
-        end
-    end
-    local row = a.isRow and a or b
-    local col = a.isRow and b or a
-    local colX = col.c
-    local rowY = row.r
-    return colX >= row.c and colX < row.c + row.len and rowY >= col.r and rowY < col.r + col.len
-end
-____exports.GameLogic = {
-    tick = function()
-        ____exports.GameLogic:updateParticles()
-        if gameState.gridDirty then
-            local now = playdate.getCurrentTimeMilliseconds()
-            if now - gameState.lastInteractionTime > DEBOUNCE_DELAY then
-                ____exports.GameLogic:recalculateBoldMask()
-            end
-        end
-    end,
-    spawnExplosion = function(____, c, r)
-        local centerX = GRID_OFFSET_X + c * CELL_WIDTH + CELL_WIDTH / 2
-        local centerY = GRID_OFFSET_Y + r * CELL_HEIGHT + CELL_HEIGHT / 2
-        local count = 5 + math.floor(math.random() * 3)
-        do
-            local i = 0
-            while i < count do
-                local ____gameState_particles_1 = gameState.particles
-                ____gameState_particles_1[#____gameState_particles_1 + 1] = {
-                    x = centerX,
-                    y = centerY,
-                    vx = (math.random() - 0.5) * 4,
-                    vy = (math.random() - 0.5) * 4,
-                    size = 1 + math.floor(math.random() * 2),
-                    life = 10 + math.floor(math.random() * 10)
-                }
-                i = i + 1
-            end
-        end
-    end,
-    updateParticles = function()
-        do
-            local i = #gameState.particles - 1
-            while i >= 0 do
-                local p = gameState.particles[i + 1]
-                p.x = p.x + p.vx
-                p.y = p.y + p.vy
-                p.life = p.life - 1
-                p.vy = p.vy + 0.2
-                if p.life <= 0 then
-                    __TS__ArraySplice(gameState.particles, i, 1)
-                end
-                i = i - 1
-            end
-        end
-    end,
+____exports.MatchingLogic = {
     markDirty = function()
         gameState.gridDirty = true
         gameState.lastInteractionTime = playdate.getCurrentTimeMilliseconds()
@@ -5074,7 +5012,6 @@ ____exports.GameLogic = {
     recalculateBoldMask = function()
         initBuffers(nil)
         local buckets = NAME_BUCKETS
-        local nameMasks = NAME_MASKS
         local intersectionCounts = INTERSECTION_COUNTS
         local rowUsage = ROW_USAGE
         local colUsage = COL_USAGE
@@ -5104,7 +5041,7 @@ ____exports.GameLogic = {
                                 do
                                     local nMask = getCharMask(nil, name)
                                     if rowMask & nMask ~= nMask then
-                                        goto __continue55
+                                        goto __continue39
                                     end
                                     local startIndex = 0
                                     while true do
@@ -5132,7 +5069,7 @@ ____exports.GameLogic = {
                                         startIndex = startIndex + 1
                                     end
                                 end
-                                ::__continue55::
+                                ::__continue39::
                             end
                         end
                         i = i + 1
@@ -5160,8 +5097,8 @@ ____exports.GameLogic = {
                             do
                                 local i = 0
                                 while i < m.len do
-                                    local ____rowUsage_2, ____temp_3 = rowUsage, m.c + i + 1
-                                    ____rowUsage_2[____temp_3] = ____rowUsage_2[____temp_3] + 1
+                                    local ____rowUsage_1, ____temp_2 = rowUsage, m.c + i + 1
+                                    ____rowUsage_1[____temp_2] = ____rowUsage_1[____temp_2] + 1
                                     i = i + 1
                                 end
                             end
@@ -5201,7 +5138,7 @@ ____exports.GameLogic = {
                                 do
                                     local nMask = getCharMask(nil, name)
                                     if colMask & nMask ~= nMask then
-                                        goto __continue77
+                                        goto __continue61
                                     end
                                     local startIndex = 0
                                     while true do
@@ -5229,7 +5166,7 @@ ____exports.GameLogic = {
                                         startIndex = startIndex + 1
                                     end
                                 end
-                                ::__continue77::
+                                ::__continue61::
                             end
                         end
                         i = i + 1
@@ -5257,8 +5194,8 @@ ____exports.GameLogic = {
                             do
                                 local i = 0
                                 while i < m.len do
-                                    local ____colUsage_4, ____temp_5 = colUsage, m.r + i + 1
-                                    ____colUsage_4[____temp_5] = ____colUsage_4[____temp_5] + 1
+                                    local ____colUsage_3, ____temp_4 = colUsage, m.r + i + 1
+                                    ____colUsage_3[____temp_4] = ____colUsage_3[____temp_4] + 1
                                     i = i + 1
                                 end
                             end
@@ -5276,8 +5213,8 @@ ____exports.GameLogic = {
                     local i = 0
                     while i < name.len do
                         gameState.boldMask[name.r + 1][name.c + i + 1] = true
-                        local ____intersectionCounts_6, ____temp_7 = intersectionCounts, name.r * COLS + (name.c + i) + 1
-                        ____intersectionCounts_6[____temp_7] = ____intersectionCounts_6[____temp_7] + 1
+                        local ____intersectionCounts_5, ____temp_6 = intersectionCounts, name.r * COLS + (name.c + i) + 1
+                        ____intersectionCounts_5[____temp_6] = ____intersectionCounts_5[____temp_6] + 1
                         i = i + 1
                     end
                 end
@@ -5286,8 +5223,8 @@ ____exports.GameLogic = {
                     local i = 0
                     while i < name.len do
                         gameState.boldMask[name.r + i + 1][name.c + 1] = true
-                        local ____intersectionCounts_8, ____temp_9 = intersectionCounts, (name.r + i) * COLS + name.c + 1
-                        ____intersectionCounts_8[____temp_9] = ____intersectionCounts_8[____temp_9] + 1
+                        local ____intersectionCounts_7, ____temp_8 = intersectionCounts, (name.r + i) * COLS + name.c + 1
+                        ____intersectionCounts_7[____temp_8] = ____intersectionCounts_7[____temp_8] + 1
                         i = i + 1
                     end
                 end
@@ -5306,13 +5243,164 @@ ____exports.GameLogic = {
         end
         gameState.gridDirty = false
     end,
+    doNamesIntersect = function(____, a, b)
+        if a.isRow == b.isRow then
+            if a.isRow then
+                if a.r ~= b.r then
+                    return false
+                end
+                return a.c < b.c + b.len and a.c + a.len > b.c
+            else
+                if a.c ~= b.c then
+                    return false
+                end
+                return a.r < b.r + b.len and a.r + a.len > b.r
+            end
+        end
+        local row = a.isRow and a or b
+        local col = a.isRow and b or a
+        local colX = col.c
+        local rowY = row.r
+        return colX >= row.c and colX < row.c + row.len and rowY >= col.r and rowY < col.r + col.len
+    end
+}
+return ____exports
+ end,
+["src.logic.particles"] = function(...) 
+local ____lualib = require("lualib_bundle")
+local __TS__ArraySplice = ____lualib.__TS__ArraySplice
+local ____exports = {}
+local ____state = require("src.state")
+local gameState = ____state.gameState
+local ____constants = require("src.constants")
+local GRID_OFFSET_X = ____constants.GRID_OFFSET_X
+local GRID_OFFSET_Y = ____constants.GRID_OFFSET_Y
+local CELL_WIDTH = ____constants.CELL_WIDTH
+local CELL_HEIGHT = ____constants.CELL_HEIGHT
+____exports.ParticleSystem = {
+    spawnExplosion = function(____, c, r)
+        local centerX = GRID_OFFSET_X + c * CELL_WIDTH + CELL_WIDTH / 2
+        local centerY = GRID_OFFSET_Y + r * CELL_HEIGHT + CELL_HEIGHT / 2
+        local count = 5 + math.floor(math.random() * 3)
+        do
+            local i = 0
+            while i < count do
+                local ____gameState_particles_0 = gameState.particles
+                ____gameState_particles_0[#____gameState_particles_0 + 1] = {
+                    x = centerX,
+                    y = centerY,
+                    vx = (math.random() - 0.5) * 4,
+                    vy = (math.random() - 0.5) * 4,
+                    size = 1 + math.floor(math.random() * 2),
+                    life = 10 + math.floor(math.random() * 10)
+                }
+                i = i + 1
+            end
+        end
+    end,
+    updateParticles = function()
+        do
+            local i = #gameState.particles - 1
+            while i >= 0 do
+                local p = gameState.particles[i + 1]
+                p.x = p.x + p.vx
+                p.y = p.y + p.vy
+                p.life = p.life - 1
+                p.vy = p.vy + 0.2
+                if p.life <= 0 then
+                    __TS__ArraySplice(gameState.particles, i, 1)
+                end
+                i = i - 1
+            end
+        end
+    end
+}
+return ____exports
+ end,
+["src.logic.game"] = function(...) 
+local ____lualib = require("lualib_bundle")
+local __TS__ArrayFind = ____lualib.__TS__ArrayFind
+local Set = ____lualib.Set
+local __TS__New = ____lualib.__TS__New
+local __TS__StringSplit = ____lualib.__TS__StringSplit
+local __TS__ParseInt = ____lualib.__TS__ParseInt
+local ____exports = {}
+local ____state = require("src.state")
+local gameState = ____state.gameState
+local ____constants = require("src.constants")
+local INITIAL_FREEZE_THRESHOLD = ____constants.INITIAL_FREEZE_THRESHOLD
+local MIN_FREEZE_THRESHOLD = ____constants.MIN_FREEZE_THRESHOLD
+local FREEZE_DECREMENT = ____constants.FREEZE_DECREMENT
+local FROZEN_CELL = ____constants.FROZEN_CELL
+local ROWS = ____constants.ROWS
+local COLS = ____constants.COLS
+local ____grid = require("src.grid")
+local createInitialGrid = ____grid.createInitialGrid
+local randomChar = ____grid.randomChar
+local ____matching = require("src.logic.matching")
+local MatchingLogic = ____matching.MatchingLogic
+local ____particles = require("src.logic.particles")
+local ParticleSystem = ____particles.ParticleSystem
+____exports.GameLifecycle = {
+    startGame = function()
+        gameState.started = true
+        ____exports.GameLifecycle:resetGame()
+    end,
+    resetGame = function()
+        gameState.grid = createInitialGrid(nil)
+        gameState.score = 0
+        gameState.gameOver = false
+        gameState.started = true
+        gameState.freezeTimer = 0
+        gameState.freezeThreshold = INITIAL_FREEZE_THRESHOLD
+        gameState.cursor = {x = 0, y = 0}
+        gameState.particles = {}
+        MatchingLogic:markDirty()
+    end,
+    updateFreeze = function()
+        if gameState.gameOver then
+            return
+        end
+        gameState.freezeTimer = gameState.freezeTimer + 1
+        if gameState.freezeTimer >= gameState.freezeThreshold then
+            gameState.freezeTimer = 0
+            gameState.freezeThreshold = math.max(MIN_FREEZE_THRESHOLD, gameState.freezeThreshold - FREEZE_DECREMENT)
+            local validSpots = {}
+            do
+                local r = 0
+                while r < ROWS do
+                    do
+                        local c = 0
+                        while c < COLS do
+                            if gameState.grid[r + 1][c + 1] ~= FROZEN_CELL then
+                                validSpots[#validSpots + 1] = {r = r, c = c}
+                            end
+                            c = c + 1
+                        end
+                    end
+                    r = r + 1
+                end
+            end
+            if #validSpots > 0 then
+                local randomSpot = validSpots[math.floor(math.random() * #validSpots) + 1]
+                gameState.grid[randomSpot.r + 1][randomSpot.c + 1] = FROZEN_CELL
+                ParticleSystem:spawnExplosion(randomSpot.c, randomSpot.r)
+                MatchingLogic:markDirty()
+                if #validSpots == 1 then
+                    gameState.gameOver = true
+                end
+            else
+                gameState.gameOver = true
+            end
+        end
+    end,
     checkNameMatch = function()
         if gameState.gridDirty then
-            ____exports.GameLogic:recalculateBoldMask()
+            MatchingLogic:recalculateBoldMask()
         end
-        local ____gameState_10 = gameState
-        local mode = ____gameState_10.mode
-        local cursor = ____gameState_10.cursor
+        local ____gameState_0 = gameState
+        local mode = ____gameState_0.mode
+        local cursor = ____gameState_0.cursor
         if mode ~= "name" then
             gameState.mode = "name"
             return
@@ -5337,7 +5425,7 @@ ____exports.GameLogic = {
             local current = table.remove(queue)
             for ____, candidate in ipairs(gameState.detectedNames) do
                 if not chain:has(candidate) then
-                    if doNamesIntersect(nil, current, candidate) then
+                    if MatchingLogic:doNamesIntersect(current, candidate) then
                         chain:add(candidate)
                         queue[#queue + 1] = candidate
                     end
@@ -5380,101 +5468,55 @@ ____exports.GameLogic = {
             local r = __TS__ParseInt(rStr)
             local c = __TS__ParseInt(cStr)
             if gameState.grid[r + 1][c + 1] ~= FROZEN_CELL then
-                ____exports.GameLogic:spawnExplosion(c, r)
+                ParticleSystem:spawnExplosion(c, r)
                 gameState.grid[r + 1][c + 1] = randomChar(nil)
             end
         end)
-        ____exports.GameLogic:markDirty()
-        ____exports.GameLogic:recalculateBoldMask()
+        MatchingLogic:markDirty()
+        MatchingLogic:recalculateBoldMask()
     end,
-    resetGame = function()
-        gameState.grid = createInitialGrid(nil)
-        gameState.score = 0
-        gameState.gameOver = false
-        gameState.freezeTimer = 0
-        gameState.freezeThreshold = INITIAL_FREEZE_THRESHOLD
-        gameState.cursor = {x = 0, y = 0}
-        gameState.particles = {}
-        ____exports.GameLogic:markDirty()
-    end,
-    updateFreeze = function()
-        if gameState.gameOver then
-            return
-        end
-        gameState.freezeTimer = gameState.freezeTimer + 1
-        if gameState.freezeTimer >= gameState.freezeThreshold then
-            gameState.freezeTimer = 0
-            gameState.freezeThreshold = math.max(MIN_FREEZE_THRESHOLD, gameState.freezeThreshold - FREEZE_DECREMENT)
-            local validSpots = {}
-            do
-                local r = 0
-                while r < ROWS do
-                    do
-                        local c = 0
-                        while c < COLS do
-                            if gameState.grid[r + 1][c + 1] ~= FROZEN_CELL then
-                                validSpots[#validSpots + 1] = {r = r, c = c}
-                            end
-                            c = c + 1
-                        end
-                    end
-                    r = r + 1
-                end
-            end
-            if #validSpots > 0 then
-                local randomSpot = validSpots[math.floor(math.random() * #validSpots) + 1]
-                gameState.grid[randomSpot.r + 1][randomSpot.c + 1] = FROZEN_CELL
-                ____exports.GameLogic:spawnExplosion(randomSpot.c, randomSpot.r)
-                ____exports.GameLogic:markDirty()
-                if #validSpots == 1 then
-                    gameState.gameOver = true
-                end
-            else
-                gameState.gameOver = true
+    tick = function()
+        ParticleSystem:updateParticles()
+        local DEBOUNCE_DELAY = 150
+        if gameState.gridDirty then
+            local now = playdate.getCurrentTimeMilliseconds()
+            if now - gameState.lastInteractionTime > DEBOUNCE_DELAY then
+                MatchingLogic:recalculateBoldMask()
             end
         end
-    end,
-    processCrank = function(____, change)
-        gameState.crankAccumulator = gameState.crankAccumulator + change
-        if math.abs(gameState.crankAccumulator) >= 360 then
-            if gameState.crankAccumulator > 0 then
-                gameState.crankAccumulator = gameState.crankAccumulator - 360
-            else
-                gameState.crankAccumulator = gameState.crankAccumulator + 360
-            end
-            local ____gameState_11 = gameState
-            local mode = ____gameState_11.mode
-            local cursor = ____gameState_11.cursor
-            local grid = ____gameState_11.grid
-            if mode == "row" then
-                grid[cursor.y + 1] = shuffleArray(nil, grid[cursor.y + 1])
-            elseif mode == "column" then
-                local col = __TS__ArrayMap(
-                    grid,
-                    function(____, row) return row[cursor.x + 1] end
-                )
-                local shuffledCol = shuffleArray(nil, col)
-                do
-                    local r = 0
-                    while r < ROWS do
-                        grid[r + 1][cursor.x + 1] = shuffledCol[r + 1]
-                        r = r + 1
-                    end
-                end
-            end
-            ____exports.GameLogic:markDirty()
-        end
-    end,
+    end
+}
+return ____exports
+ end,
+["src.logic.controls"] = function(...) 
+local ____lualib = require("lualib_bundle")
+local __TS__ArrayUnshift = ____lualib.__TS__ArrayUnshift
+local ____exports = {}
+local ____state = require("src.state")
+local gameState = ____state.gameState
+local ____matching = require("src.logic.matching")
+local MatchingLogic = ____matching.MatchingLogic
+local ____constants = require("src.constants")
+local ROWS = ____constants.ROWS
+local COLS = ____constants.COLS
+local FROZEN_CELL = ____constants.FROZEN_CELL
+local CELL_WIDTH = ____constants.CELL_WIDTH
+local CELL_HEIGHT = ____constants.CELL_HEIGHT
+local ____grid = require("src.grid")
+local randomChar = ____grid.randomChar
+____exports.Controls = {
     handleLeft = function()
         if gameState.mode == "column" then
             gameState.cursor.x = (gameState.cursor.x - 1 + COLS) % COLS
         elseif gameState.mode == "row" then
-            local first = table.remove(gameState.grid[gameState.cursor.y + 1], 1)
+            local row = gameState.cursor.y
+            local first = table.remove(gameState.grid[row + 1], 1)
             if first then
-                local ____gameState_grid_index_12 = gameState.grid[gameState.cursor.y + 1]
-                ____gameState_grid_index_12[#____gameState_grid_index_12 + 1] = first
+                local ____gameState_grid_index_0 = gameState.grid[row + 1]
+                ____gameState_grid_index_0[#____gameState_grid_index_0 + 1] = first
             end
-            ____exports.GameLogic:markDirty()
+            gameState.rowOffsets[row + 1] = CELL_WIDTH
+            MatchingLogic:markDirty()
         else
             gameState.cursor.x = (gameState.cursor.x - 1 + COLS) % COLS
         end
@@ -5483,43 +5525,49 @@ ____exports.GameLogic = {
         if gameState.mode == "column" then
             gameState.cursor.x = (gameState.cursor.x + 1) % COLS
         elseif gameState.mode == "row" then
-            local last = table.remove(gameState.grid[gameState.cursor.y + 1])
+            local row = gameState.cursor.y
+            local last = table.remove(gameState.grid[row + 1])
             if last then
-                __TS__ArrayUnshift(gameState.grid[gameState.cursor.y + 1], last)
+                __TS__ArrayUnshift(gameState.grid[row + 1], last)
             end
-            ____exports.GameLogic:markDirty()
+            gameState.rowOffsets[row + 1] = -CELL_WIDTH
+            MatchingLogic:markDirty()
         else
             gameState.cursor.x = (gameState.cursor.x + 1) % COLS
         end
     end,
     handleUp = function()
         if gameState.mode == "column" then
-            local topChar = gameState.grid[1][gameState.cursor.x + 1]
+            local col = gameState.cursor.x
+            local topChar = gameState.grid[1][col + 1]
             do
                 local r = 0
                 while r < ROWS - 1 do
-                    gameState.grid[r + 1][gameState.cursor.x + 1] = gameState.grid[r + 1 + 1][gameState.cursor.x + 1]
+                    gameState.grid[r + 1][col + 1] = gameState.grid[r + 1 + 1][col + 1]
                     r = r + 1
                 end
             end
-            gameState.grid[ROWS][gameState.cursor.x + 1] = topChar
-            ____exports.GameLogic:markDirty()
+            gameState.grid[ROWS][col + 1] = topChar
+            gameState.colOffsets[col + 1] = CELL_HEIGHT
+            MatchingLogic:markDirty()
         else
             gameState.cursor.y = (gameState.cursor.y - 1 + ROWS) % ROWS
         end
     end,
     handleDown = function()
         if gameState.mode == "column" then
-            local bottomChar = gameState.grid[ROWS][gameState.cursor.x + 1]
+            local col = gameState.cursor.x
+            local bottomChar = gameState.grid[ROWS][col + 1]
             do
                 local r = ROWS - 1
                 while r > 0 do
-                    gameState.grid[r + 1][gameState.cursor.x + 1] = gameState.grid[r][gameState.cursor.x + 1]
+                    gameState.grid[r + 1][col + 1] = gameState.grid[r][col + 1]
                     r = r - 1
                 end
             end
-            gameState.grid[1][gameState.cursor.x + 1] = bottomChar
-            ____exports.GameLogic:markDirty()
+            gameState.grid[1][col + 1] = bottomChar
+            gameState.colOffsets[col + 1] = -CELL_HEIGHT
+            MatchingLogic:markDirty()
         else
             gameState.cursor.y = (gameState.cursor.y + 1) % ROWS
         end
@@ -5532,14 +5580,71 @@ ____exports.GameLogic = {
         else
             gameState.mode = "column"
         end
+    end,
+    processCrank = function(____, change)
+        gameState.crankAccumulator = gameState.crankAccumulator + change
+        if math.abs(gameState.crankAccumulator) >= 360 then
+            if gameState.crankAccumulator > 0 then
+                gameState.crankAccumulator = gameState.crankAccumulator - 360
+            else
+                gameState.crankAccumulator = gameState.crankAccumulator + 360
+            end
+            local ____gameState_1 = gameState
+            local mode = ____gameState_1.mode
+            local cursor = ____gameState_1.cursor
+            local grid = ____gameState_1.grid
+            if mode == "row" then
+                do
+                    local c = 0
+                    while c < COLS do
+                        if grid[cursor.y + 1][c + 1] ~= FROZEN_CELL then
+                            grid[cursor.y + 1][c + 1] = randomChar(nil)
+                        end
+                        c = c + 1
+                    end
+                end
+            elseif mode == "column" then
+                do
+                    local r = 0
+                    while r < ROWS do
+                        if grid[r + 1][cursor.x + 1] ~= FROZEN_CELL then
+                            grid[r + 1][cursor.x + 1] = randomChar(nil)
+                        end
+                        r = r + 1
+                    end
+                end
+            end
+            MatchingLogic:markDirty()
+        end
     end
 }
+return ____exports
+ end,
+["src.logic.index"] = function(...) 
+local ____lualib = require("lualib_bundle")
+local __TS__ObjectAssign = ____lualib.__TS__ObjectAssign
+local ____exports = {}
+local ____game = require("src.logic.game")
+local GameLifecycle = ____game.GameLifecycle
+local ____matching = require("src.logic.matching")
+local MatchingLogic = ____matching.MatchingLogic
+local ____controls = require("src.logic.controls")
+local Controls = ____controls.Controls
+local ____particles = require("src.logic.particles")
+local ParticleSystem = ____particles.ParticleSystem
+____exports.GameLogic = __TS__ObjectAssign(
+    {},
+    GameLifecycle,
+    MatchingLogic,
+    Controls,
+    ParticleSystem
+)
 return ____exports
  end,
 ["src.input"] = function(...) 
 --[[ Generated with https://github.com/TypeScriptToLua/TypeScriptToLua ]]
 local ____exports = {}
-local ____logic = require("src.logic")
+local ____logic = require("src.logic.index")
 local GameLogic = ____logic.GameLogic
 local ____state = require("src.state")
 local gameState = ____state.gameState
@@ -5551,6 +5656,10 @@ ____exports.inputHandler = {
         GameLogic:toggleMode()
     end,
     AButtonDown = function()
+        if not gameState.started then
+            GameLogic:startGame()
+            return
+        end
         if gameState.gameOver then
             GameLogic:resetGame()
         else
@@ -5585,162 +5694,57 @@ ____exports.inputHandler = {
 }
 return ____exports
  end,
-["src.renderer"] = function(...) 
+["src.renderer.elements"] = function(...) 
 --[[ Generated with https://github.com/TypeScriptToLua/TypeScriptToLua ]]
 local ____exports = {}
 local ____core = require("lua_modules.@crankscript.core.src.index")
 local PlaydateColor = ____core.PlaydateColor
-local PlaydateDrawMode = ____core.PlaydateDrawMode
-local PlaydateFontVariant = ____core.PlaydateFontVariant
-local ____state = require("src.state")
-local gameState = ____state.gameState
 local ____constants = require("src.constants")
-local ROWS = ____constants.ROWS
-local COLS = ____constants.COLS
-local CELL_WIDTH = ____constants.CELL_WIDTH
-local CELL_HEIGHT = ____constants.CELL_HEIGHT
-local GRID_OFFSET_X = ____constants.GRID_OFFSET_X
-local GRID_OFFSET_Y = ____constants.GRID_OFFSET_Y
-local FROZEN_CELL = ____constants.FROZEN_CELL
-local animationTick = 0
-local function drawCapsule(____, drawX, drawY, w, h)
-    playdate.graphics.setColor(PlaydateColor.Black)
-    playdate.graphics.setLineWidth(2)
-    playdate.graphics.drawRoundRect(
-        drawX,
-        drawY,
-        w,
-        h,
-        10
-    )
-    playdate.graphics.setLineWidth(1)
-end
-local function drawAnimatedCaret(____, cx, cy, direction)
-    local size = 6
-    local bounce = math.sin(animationTick * 0.15) * 3
-    playdate.graphics.setColor(PlaydateColor.Black)
-    playdate.graphics.setLineWidth(2)
-    local bx = cx
-    local by = cy
-    if direction == "left" or direction == "right" then
-        bx = bx + bounce
-    else
-        by = by + bounce
-    end
-    if direction == "right" then
-        playdate.graphics.drawLine(bx, by - size, bx + size, by)
-        playdate.graphics.drawLine(bx + size, by, bx, by + size)
-    elseif direction == "left" then
-        playdate.graphics.drawLine(bx, by - size, bx - size, by)
-        playdate.graphics.drawLine(bx - size, by, bx, by + size)
-    elseif direction == "down" then
-        playdate.graphics.drawLine(bx - size, by, bx, by + size)
-        playdate.graphics.drawLine(bx, by + size, bx + size, by)
-    elseif direction == "up" then
-        playdate.graphics.drawLine(bx - size, by, bx, by - size)
-        playdate.graphics.drawLine(bx, by - size, bx + size, by)
-    end
-    playdate.graphics.setLineWidth(1)
-end
-____exports.drawGame = function()
-    animationTick = animationTick + 1
-    playdate.graphics.clear(PlaydateColor.White)
-    playdate.graphics.setColor(PlaydateColor.Black)
-    playdate.graphics.setImageDrawMode(PlaydateDrawMode.FillBlack)
-    playdate.graphics.setFont(playdate.graphics.getSystemFont(PlaydateFontVariant.Normal))
-    if gameState.gameOver then
-        playdate.graphics.drawText("GAME OVER", 150, 100)
-        playdate.graphics.drawText(
-            "Final Score: " .. tostring(gameState.score),
-            140,
-            130
+local CARET_SPEED_DIVISOR = ____constants.CARET_SPEED_DIVISOR
+local CARET_BOUNCE_AMPLITUDE = ____constants.CARET_BOUNCE_AMPLITUDE
+local CARET_SIZE = ____constants.CARET_SIZE
+____exports.ElementsRenderer = {
+    drawCapsule = function(____, drawX, drawY, w, h)
+        playdate.graphics.setColor(PlaydateColor.Black)
+        playdate.graphics.setLineWidth(2)
+        playdate.graphics.drawRoundRect(
+            drawX,
+            drawY,
+            w,
+            h,
+            10
         )
-        playdate.graphics.drawText("Press A to Restart", 130, 160)
-        return
-    end
-    playdate.graphics.drawText(
-        "Score: " .. tostring(gameState.score),
-        10,
-        10
-    )
-    playdate.graphics.drawText(
-        "Mode: " .. string.upper(gameState.mode),
-        10,
-        30
-    )
-    local legendX = 260
-    playdate.graphics.drawText("A: Claim Name", legendX, 10)
-    playdate.graphics.drawText("B: Switch Mode", legendX, 30)
-    local barX = GRID_OFFSET_X
-    local barY = GRID_OFFSET_Y + ROWS * CELL_HEIGHT + 25
-    local barWidth = COLS * CELL_WIDTH
-    local barHeight = 4
-    playdate.graphics.drawRect(barX, barY, barWidth, barHeight)
-    local fillPercent = gameState.freezeTimer / gameState.freezeThreshold
-    local fillWidth = math.floor(barWidth * fillPercent)
-    if fillWidth > 0 then
-        playdate.graphics.fillRect(barX, barY, fillWidth, barHeight)
-    end
-    for ____, name in ipairs(gameState.detectedNames) do
-        drawCapsule(
-            nil,
-            name.drawX,
-            name.drawY,
-            name.drawW,
-            name.drawH
-        )
-    end
-    if gameState.mode == "row" or gameState.mode == "name" then
-        local cy = GRID_OFFSET_Y + gameState.cursor.y * CELL_HEIGHT + CELL_HEIGHT / 2
-        drawAnimatedCaret(nil, GRID_OFFSET_X - 15, cy, "right")
-        drawAnimatedCaret(nil, GRID_OFFSET_X + COLS * CELL_WIDTH + 15, cy, "left")
-    end
-    if gameState.mode == "column" or gameState.mode == "name" then
-        local cx = GRID_OFFSET_X + gameState.cursor.x * CELL_WIDTH + CELL_WIDTH / 2
-        drawAnimatedCaret(nil, cx, GRID_OFFSET_Y - 8, "down")
-        drawAnimatedCaret(nil, cx, GRID_OFFSET_Y + ROWS * CELL_HEIGHT + 8, "up")
-    end
-    local textOffsetX = math.floor((CELL_WIDTH - 12) / 2)
-    local textOffsetY = math.floor((CELL_HEIGHT - 14) / 2)
-    do
-        local r = 0
-        while r < ROWS do
-            local cellY = GRID_OFFSET_Y + r * CELL_HEIGHT
-            local drawY = cellY + textOffsetY
-            local rowData = gameState.grid[r + 1]
-            do
-                local c = 0
-                while c < COLS do
-                    local char = rowData[c + 1]
-                    local cellX = GRID_OFFSET_X + c * CELL_WIDTH
-                    if char == FROZEN_CELL then
-                        playdate.graphics.fillRect(cellX + 2, cellY + 2, CELL_WIDTH - 4, CELL_HEIGHT - 4)
-                        if c == gameState.cursor.x and r == gameState.cursor.y then
-                            playdate.graphics.setColor(PlaydateColor.White)
-                            playdate.graphics.setLineWidth(2)
-                            playdate.graphics.drawRect(cellX + 4, cellY + 4, CELL_WIDTH - 8, CELL_HEIGHT - 8)
-                            playdate.graphics.setLineWidth(1)
-                            playdate.graphics.setColor(PlaydateColor.Black)
-                        end
-                    else
-                        if c == gameState.cursor.x and r == gameState.cursor.y then
-                            playdate.graphics.setLineWidth(2)
-                            playdate.graphics.drawRect(cellX + 1, cellY + 1, CELL_WIDTH - 2, CELL_HEIGHT - 2)
-                            playdate.graphics.setLineWidth(1)
-                        end
-                        playdate.graphics.drawText(char, cellX + textOffsetX, drawY)
-                    end
-                    c = c + 1
-                end
-            end
-            r = r + 1
+        playdate.graphics.setLineWidth(1)
+    end,
+    drawAnimatedCaret = function(____, cx, cy, direction)
+        local tick = playdate.getCurrentTimeMilliseconds() / CARET_SPEED_DIVISOR
+        local bounce = math.sin(tick) * CARET_BOUNCE_AMPLITUDE
+        local size = CARET_SIZE
+        playdate.graphics.setColor(PlaydateColor.Black)
+        playdate.graphics.setLineWidth(2)
+        local bx = cx
+        local by = cy
+        if direction == "left" or direction == "right" then
+            bx = bx + bounce
+        else
+            by = by + bounce
         end
+        if direction == "right" then
+            playdate.graphics.drawLine(bx, by - size, bx + size, by)
+            playdate.graphics.drawLine(bx + size, by, bx, by + size)
+        elseif direction == "left" then
+            playdate.graphics.drawLine(bx, by - size, bx - size, by)
+            playdate.graphics.drawLine(bx - size, by, bx, by + size)
+        elseif direction == "down" then
+            playdate.graphics.drawLine(bx - size, by, bx, by + size)
+            playdate.graphics.drawLine(bx, by + size, bx + size, by)
+        elseif direction == "up" then
+            playdate.graphics.drawLine(bx - size, by, bx, by - size)
+            playdate.graphics.drawLine(bx, by - size, bx + size, by)
+        end
+        playdate.graphics.setLineWidth(1)
     end
-    playdate.graphics.setColor(PlaydateColor.Black)
-    for ____, p in ipairs(gameState.particles) do
-        playdate.graphics.fillRect(p.x, p.y, p.size, p.size)
-    end
-end
+}
 return ____exports
  end,
 ["lua_modules.@crankscript.core.src.index"] = function(...) 
@@ -5983,6 +5987,247 @@ ____exports.withReload = function(____, update, options)
 end
 return ____exports
  end,
+["src.renderer.ui"] = function(...) 
+--[[ Generated with https://github.com/TypeScriptToLua/TypeScriptToLua ]]
+local ____exports = {}
+local ____state = require("src.state")
+local gameState = ____state.gameState
+local ____constants = require("src.constants")
+local ROWS = ____constants.ROWS
+local COLS = ____constants.COLS
+local CELL_WIDTH = ____constants.CELL_WIDTH
+local CELL_HEIGHT = ____constants.CELL_HEIGHT
+local GRID_OFFSET_X = ____constants.GRID_OFFSET_X
+local GRID_OFFSET_Y = ____constants.GRID_OFFSET_Y
+____exports.UIRenderer = {
+    drawStartScreen = function()
+        playdate.graphics.drawText("*NAME SORTER*", 145, 60)
+        playdate.graphics.drawText("Press A to Start", 135, 100)
+        local instructionsY = 140
+        local lineHeight = 20
+        local leftX = 50
+        playdate.graphics.drawText("Controls:", leftX, instructionsY)
+        playdate.graphics.drawText("D-Pad: Move Cursor / Shift Row", leftX, instructionsY + lineHeight)
+        playdate.graphics.drawText("A: Claim Name", leftX, instructionsY + lineHeight * 2)
+        playdate.graphics.drawText("B: Switch Mode (Row/Column)", leftX, instructionsY + lineHeight * 3)
+        playdate.graphics.drawText("Crank: Shuffle Line", leftX, instructionsY + lineHeight * 4)
+    end,
+    drawHUD = function()
+        local debugStr = ((("FPS: " .. tostring(math.floor(gameState.fps))) .. "  dt: ") .. tostring(gameState.dt)) .. "ms"
+        playdate.graphics.drawText(debugStr, 240, 220)
+        if gameState.gameOver then
+            playdate.graphics.drawText("GAME OVER", 150, 100)
+            playdate.graphics.drawText(
+                "Final Score: " .. tostring(gameState.score),
+                140,
+                130
+            )
+            playdate.graphics.drawText("Press A to Restart", 130, 160)
+            return
+        end
+        playdate.graphics.drawText(
+            "Score: " .. tostring(gameState.score),
+            10,
+            10
+        )
+        playdate.graphics.drawText(
+            "Mode: " .. string.upper(gameState.mode),
+            10,
+            30
+        )
+        local legendX = 260
+        playdate.graphics.drawText("A: Claim Name", legendX, 10)
+        playdate.graphics.drawText("B: Switch Mode", legendX, 30)
+        local barX = GRID_OFFSET_X
+        local barY = GRID_OFFSET_Y + ROWS * CELL_HEIGHT + 25
+        local barWidth = COLS * CELL_WIDTH
+        local barHeight = 4
+        playdate.graphics.drawRect(barX, barY, barWidth, barHeight)
+        local fillPercent = gameState.freezeTimer / gameState.freezeThreshold
+        local fillWidth = math.floor(barWidth * fillPercent)
+        if fillWidth > 0 then
+            playdate.graphics.fillRect(barX, barY, fillWidth, barHeight)
+        end
+    end
+}
+return ____exports
+ end,
+["src.renderer.grid"] = function(...) 
+--[[ Generated with https://github.com/TypeScriptToLua/TypeScriptToLua ]]
+local ____exports = {}
+local ____core = require("lua_modules.@crankscript.core.src.index")
+local PlaydateColor = ____core.PlaydateColor
+local ____state = require("src.state")
+local gameState = ____state.gameState
+local ____constants = require("src.constants")
+local ROWS = ____constants.ROWS
+local COLS = ____constants.COLS
+local CELL_WIDTH = ____constants.CELL_WIDTH
+local CELL_HEIGHT = ____constants.CELL_HEIGHT
+local GRID_OFFSET_X = ____constants.GRID_OFFSET_X
+local GRID_OFFSET_Y = ____constants.GRID_OFFSET_Y
+local FROZEN_CELL = ____constants.FROZEN_CELL
+local function drawDashedRect(____, x, y, w, h)
+    playdate.graphics.setLineWidth(3)
+    local dashLen = 5
+    local gapLen = 3
+    local step = dashLen + gapLen
+    do
+        local i = 0
+        while i < w do
+            local segW = math.min(dashLen, w - i)
+            playdate.graphics.drawLine(x + i, y, x + i + segW, y)
+            playdate.graphics.drawLine(x + i, y + h, x + i + segW, y + h)
+            i = i + step
+        end
+    end
+    do
+        local i = 0
+        while i < h do
+            local segH = math.min(dashLen, h - i)
+            playdate.graphics.drawLine(x, y + i, x, y + i + segH)
+            playdate.graphics.drawLine(x + w, y + i, x + w, y + i + segH)
+            i = i + step
+        end
+    end
+    playdate.graphics.setLineWidth(1)
+end
+____exports.GridRenderer = {drawGrid = function()
+    local textOffsetX = math.floor((CELL_WIDTH - 12) / 2)
+    local textOffsetY = math.floor((CELL_HEIGHT - 14) / 2)
+    local gridW = COLS * CELL_WIDTH
+    local gridH = ROWS * CELL_HEIGHT
+    playdate.graphics.setClipRect(GRID_OFFSET_X, GRID_OFFSET_Y, gridW, gridH)
+    do
+        local r = 0
+        while r < ROWS do
+            local rowOffset = gameState.rowOffsets[r + 1]
+            local cellY = GRID_OFFSET_Y + r * CELL_HEIGHT
+            local rowData = gameState.grid[r + 1]
+            do
+                local c = 0
+                while c < COLS do
+                    local char = rowData[c + 1]
+                    local colOffset = gameState.colOffsets[c + 1]
+                    local cellX = GRID_OFFSET_X + c * CELL_WIDTH + rowOffset
+                    local finalY = cellY + colOffset
+                    local function drawCell(____, dx, dy)
+                        if char == FROZEN_CELL then
+                            playdate.graphics.fillRect(dx + 2, dy + 2, CELL_WIDTH - 4, CELL_HEIGHT - 4)
+                        else
+                            playdate.graphics.drawText(char, dx + textOffsetX, dy + textOffsetY)
+                        end
+                    end
+                    drawCell(nil, cellX, finalY)
+                    if rowOffset < 0 and c == 0 then
+                        drawCell(nil, cellX + COLS * CELL_WIDTH, finalY)
+                    end
+                    if rowOffset > 0 and c == COLS - 1 then
+                        drawCell(nil, cellX - COLS * CELL_WIDTH, finalY)
+                    end
+                    if colOffset < 0 and r == 0 then
+                        drawCell(nil, cellX, finalY + ROWS * CELL_HEIGHT)
+                    end
+                    if colOffset > 0 and r == ROWS - 1 then
+                        drawCell(nil, cellX, finalY - ROWS * CELL_HEIGHT)
+                    end
+                    c = c + 1
+                end
+            end
+            r = r + 1
+        end
+    end
+    playdate.graphics:clearClipRect()
+    local ____gameState_0 = gameState
+    local mode = ____gameState_0.mode
+    local visualCursor = ____gameState_0.visualCursor
+    local cursor = ____gameState_0.cursor
+    if mode == "row" then
+        drawDashedRect(
+            nil,
+            GRID_OFFSET_X,
+            GRID_OFFSET_Y + visualCursor.y * CELL_HEIGHT,
+            COLS * CELL_WIDTH,
+            CELL_HEIGHT
+        )
+    elseif mode == "column" then
+        drawDashedRect(
+            nil,
+            GRID_OFFSET_X + visualCursor.x * CELL_WIDTH,
+            GRID_OFFSET_Y,
+            CELL_WIDTH,
+            ROWS * CELL_HEIGHT
+        )
+    elseif mode == "name" then
+        local char = gameState.grid[cursor.y + 1][cursor.x + 1]
+        playdate.graphics.setLineWidth(3)
+        if char == FROZEN_CELL then
+            playdate.graphics.setColor(PlaydateColor.White)
+        end
+        playdate.graphics.drawRect(GRID_OFFSET_X + visualCursor.x * CELL_WIDTH, GRID_OFFSET_Y + visualCursor.y * CELL_HEIGHT, CELL_WIDTH, CELL_HEIGHT)
+        if char == FROZEN_CELL then
+            playdate.graphics.setColor(PlaydateColor.Black)
+        end
+        playdate.graphics.setLineWidth(1)
+    end
+end}
+return ____exports
+ end,
+["src.renderer.index"] = function(...) 
+--[[ Generated with https://github.com/TypeScriptToLua/TypeScriptToLua ]]
+local ____exports = {}
+local ____core = require("lua_modules.@crankscript.core.src.index")
+local PlaydateColor = ____core.PlaydateColor
+local PlaydateDrawMode = ____core.PlaydateDrawMode
+local PlaydateFontVariant = ____core.PlaydateFontVariant
+local ____state = require("src.state")
+local gameState = ____state.gameState
+local ____elements = require("src.renderer.elements")
+local ElementsRenderer = ____elements.ElementsRenderer
+local ____ui = require("src.renderer.ui")
+local UIRenderer = ____ui.UIRenderer
+local ____grid = require("src.renderer.grid")
+local GridRenderer = ____grid.GridRenderer
+local ____constants = require("src.constants")
+local GRID_OFFSET_X = ____constants.GRID_OFFSET_X
+local GRID_OFFSET_Y = ____constants.GRID_OFFSET_Y
+local COLS = ____constants.COLS
+local ROWS = ____constants.ROWS
+local CELL_WIDTH = ____constants.CELL_WIDTH
+local CELL_HEIGHT = ____constants.CELL_HEIGHT
+____exports.drawGame = function()
+    playdate.graphics.clear(PlaydateColor.White)
+    playdate.graphics.setColor(PlaydateColor.Black)
+    playdate.graphics.setImageDrawMode(PlaydateDrawMode.FillBlack)
+    playdate.graphics.setFont(playdate.graphics.getSystemFont(PlaydateFontVariant.Normal))
+    if not gameState.started then
+        UIRenderer:drawStartScreen()
+        return
+    end
+    UIRenderer:drawHUD()
+    for ____, name in ipairs(gameState.detectedNames) do
+        ElementsRenderer:drawCapsule(name.drawX, name.drawY, name.drawW, name.drawH)
+    end
+    local ____gameState_0 = gameState
+    local visualCursor = ____gameState_0.visualCursor
+    if gameState.mode == "row" or gameState.mode == "name" then
+        local cy = GRID_OFFSET_Y + visualCursor.y * CELL_HEIGHT + CELL_HEIGHT / 2
+        ElementsRenderer:drawAnimatedCaret(GRID_OFFSET_X - 15, cy, "right")
+        ElementsRenderer:drawAnimatedCaret(GRID_OFFSET_X + COLS * CELL_WIDTH + 15, cy, "left")
+    end
+    if gameState.mode == "column" or gameState.mode == "name" then
+        local cx = GRID_OFFSET_X + visualCursor.x * CELL_WIDTH + CELL_WIDTH / 2
+        ElementsRenderer:drawAnimatedCaret(cx, GRID_OFFSET_Y - 8, "down")
+        ElementsRenderer:drawAnimatedCaret(cx, GRID_OFFSET_Y + ROWS * CELL_HEIGHT + 8, "up")
+    end
+    GridRenderer:drawGrid()
+    playdate.graphics.setColor(PlaydateColor.Black)
+    for ____, p in ipairs(gameState.particles) do
+        playdate.graphics.fillRect(p.x, p.y, p.size, p.size)
+    end
+end
+return ____exports
+ end,
 ["src.index"] = function(...) 
 --[[ Generated with https://github.com/TypeScriptToLua/TypeScriptToLua ]]
 local ____exports = {}
@@ -5992,17 +6237,83 @@ local ____grid = require("src.grid")
 local createInitialGrid = ____grid.createInitialGrid
 local ____input = require("src.input")
 local inputHandler = ____input.inputHandler
-local ____logic = require("src.logic")
-local GameLogic = ____logic.GameLogic
-local ____renderer = require("src.renderer")
-local drawGame = ____renderer.drawGame
+local ____index = require("src.logic.index")
+local GameLogic = ____index.GameLogic
+local ____index = require("src.renderer.index")
+local drawGame = ____index.drawGame
+local ____constants = require("src.constants")
+local TICK_RATE_MS = ____constants.TICK_RATE_MS
+local MAX_ACCUMULATOR_MS = ____constants.MAX_ACCUMULATOR_MS
+local CURSOR_LERP_SPEED = ____constants.CURSOR_LERP_SPEED
+local ROWS = ____constants.ROWS
+local COLS = ____constants.COLS
 gameState.grid = createInitialGrid(nil)
 GameLogic:recalculateBoldMask()
 playdate.inputHandlers.push(inputHandler)
+local lastTime = playdate.getCurrentTimeMilliseconds()
+local accumulator = 0
+local framesThisSecond = 0
+local lastFpsTime = lastTime
 playdate.update = function()
-    GameLogic:updateFreeze()
-    GameLogic:updateParticles()
-    GameLogic:tick()
+    local currentTime = playdate.getCurrentTimeMilliseconds()
+    local dt = currentTime - lastTime
+    lastTime = currentTime
+    framesThisSecond = framesThisSecond + 1
+    if currentTime - lastFpsTime >= 1000 then
+        gameState.fps = framesThisSecond
+        framesThisSecond = 0
+        lastFpsTime = currentTime
+    end
+    if dt > 0 then
+        gameState.dt = dt
+    end
+    local lerpFactor = math.min(1, CURSOR_LERP_SPEED * dt)
+    local ____gameState_visualCursor_0, ____x_1 = gameState.visualCursor, "x"
+    ____gameState_visualCursor_0[____x_1] = ____gameState_visualCursor_0[____x_1] + (gameState.cursor.x - gameState.visualCursor.x) * lerpFactor
+    local ____gameState_visualCursor_2, ____y_3 = gameState.visualCursor, "y"
+    ____gameState_visualCursor_2[____y_3] = ____gameState_visualCursor_2[____y_3] + (gameState.cursor.y - gameState.visualCursor.y) * lerpFactor
+    if math.abs(gameState.cursor.x - gameState.visualCursor.x) < 0.01 then
+        gameState.visualCursor.x = gameState.cursor.x
+    end
+    if math.abs(gameState.cursor.y - gameState.visualCursor.y) < 0.01 then
+        gameState.visualCursor.y = gameState.cursor.y
+    end
+    local slideFactor = math.min(1, lerpFactor * 1.5)
+    do
+        local r = 0
+        while r < ROWS do
+            if math.abs(gameState.rowOffsets[r + 1]) > 0.5 then
+                local ____gameState_rowOffsets_4, ____temp_5 = gameState.rowOffsets, r + 1
+                ____gameState_rowOffsets_4[____temp_5] = ____gameState_rowOffsets_4[____temp_5] + (0 - gameState.rowOffsets[r + 1]) * slideFactor
+            else
+                gameState.rowOffsets[r + 1] = 0
+            end
+            r = r + 1
+        end
+    end
+    do
+        local c = 0
+        while c < COLS do
+            if math.abs(gameState.colOffsets[c + 1]) > 0.5 then
+                local ____gameState_colOffsets_6, ____temp_7 = gameState.colOffsets, c + 1
+                ____gameState_colOffsets_6[____temp_7] = ____gameState_colOffsets_6[____temp_7] + (0 - gameState.colOffsets[c + 1]) * slideFactor
+            else
+                gameState.colOffsets[c + 1] = 0
+            end
+            c = c + 1
+        end
+    end
+    accumulator = accumulator + dt
+    if accumulator > MAX_ACCUMULATOR_MS then
+        accumulator = MAX_ACCUMULATOR_MS
+    end
+    while accumulator >= TICK_RATE_MS do
+        if gameState.started then
+            GameLogic:updateFreeze()
+            GameLogic:tick()
+        end
+        accumulator = accumulator - TICK_RATE_MS
+    end
     drawGame(nil)
 end
 return ____exports
