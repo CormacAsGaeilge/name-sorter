@@ -5320,27 +5320,36 @@ return ____exports
 ["src.sound"] = function(...) 
 --[[ Generated with https://github.com/TypeScriptToLua/TypeScriptToLua ]]
 local ____exports = {}
+local moveSynth = nil
+local explosionSynth = nil
+local modeSynth = nil
 ____exports.SoundManager = {
     playMove = function()
-        local synthNew = playdate.sound.synth.new
-        local synth = synthNew(playdate.sound.kWaveSquare)
-        synth:setADSR(0, 0.1, 0, 0)
-        synth:setVolume(0.3)
-        synth:playNote(523.25, 0.1)
+        if not moveSynth then
+            local synthNew = playdate.sound.synth.new
+            moveSynth = synthNew(playdate.sound.kWaveSquare)
+            moveSynth:setADSR(0, 0.1, 0, 0)
+            moveSynth:setVolume(0.3)
+        end
+        moveSynth:playNote(523.25)
     end,
     playExplosion = function()
-        local synthNew = playdate.sound.synth.new
-        local synth = synthNew(playdate.sound.kWaveNoise)
-        synth:setADSR(0, 0.3, 0, 0)
-        synth:setVolume(0.4)
-        synth:playNote(60, 0.3)
+        if not explosionSynth then
+            local synthNew = playdate.sound.synth.new
+            explosionSynth = synthNew(playdate.sound.kWaveNoise)
+            explosionSynth:setADSR(0, 0.3, 0, 0)
+            explosionSynth:setVolume(0.4)
+        end
+        explosionSynth:playNote(60)
     end,
     playModeSwitch = function()
-        local synthNew = playdate.sound.synth.new
-        local synth = synthNew(playdate.sound.kWaveTriangle)
-        synth:setADSR(0, 0.15, 0, 0)
-        synth:setVolume(0.3)
-        synth:playNote(440, 0.15)
+        if not modeSynth then
+            local synthNew = playdate.sound.synth.new
+            modeSynth = synthNew(playdate.sound.kWaveTriangle)
+            modeSynth:setADSR(0, 0.15, 0, 0)
+            modeSynth:setVolume(0.3)
+        end
+        modeSynth:playNote(440)
     end
 }
 return ____exports
@@ -5533,8 +5542,11 @@ local MatchingLogic = ____matching.MatchingLogic
 local ____constants = require("src.constants")
 local ROWS = ____constants.ROWS
 local COLS = ____constants.COLS
+local FROZEN_CELL = ____constants.FROZEN_CELL
 local CELL_WIDTH = ____constants.CELL_WIDTH
 local CELL_HEIGHT = ____constants.CELL_HEIGHT
+local ____grid = require("src.grid")
+local randomChar = ____grid.randomChar
 local ____sound = require("src.sound")
 local SoundManager = ____sound.SoundManager
 ____exports.Controls = {
@@ -5632,7 +5644,25 @@ ____exports.Controls = {
             local cursor = ____gameState_1.cursor
             local grid = ____gameState_1.grid
             if mode == "row" then
+                do
+                    local c = 0
+                    while c < COLS do
+                        if grid[cursor.y + 1][c + 1] ~= FROZEN_CELL then
+                            grid[cursor.y + 1][c + 1] = randomChar(nil)
+                        end
+                        c = c + 1
+                    end
+                end
             elseif mode == "column" then
+                do
+                    local r = 0
+                    while r < ROWS do
+                        if grid[r + 1][cursor.x + 1] ~= FROZEN_CELL then
+                            grid[r + 1][cursor.x + 1] = randomChar(nil)
+                        end
+                        r = r + 1
+                    end
+                end
             end
             MatchingLogic:markDirty()
             SoundManager:playMove()

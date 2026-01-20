@@ -1,46 +1,45 @@
-// src/sound.ts
+let moveSynth: any = null;
+let explosionSynth: any = null;
+let modeSynth: any = null;
 
 export const SoundManager = {
-  // 1. Movement Blip (Square Wave)
   playMove: () => {
-    const synthNew = (playdate.sound.synth as any).new as (
-      this: void,
-      type: any,
-    ) => any;
-    const synth = synthNew(playdate.sound.kWaveSquare);
-    synth.setADSR(0, 0.1, 0, 0);
-    synth.setVolume(0.3);
-    synth.playNote(523.25, 0.1);
+    if (!moveSynth) {
+      const synthNew = (playdate.sound.synth as any).new as (
+        this: void,
+        type: any,
+      ) => any;
+      moveSynth = synthNew(playdate.sound.kWaveSquare);
+      moveSynth.setADSR(0, 0.1, 0, 0);
+      moveSynth.setVolume(0.3);
+    }
+
+    moveSynth.playNote(523.25);
   },
 
-  // 2. Explosion/Match (Noise)
   playExplosion: () => {
-    // Noise wave creates a "static" crash sound
-
-    const synthNew = (playdate.sound.synth as any).new as (
-      this: void,
-      type: any,
-    ) => any;
-    const synth = synthNew(playdate.sound.kWaveNoise);
-
-    // Envelope: Attack(0s), Decay(0.3s), Sustain(0), Release(0)
-    // Longer tail for the explosion
-    synth.setADSR(0, 0.3, 0, 0);
-    synth.setVolume(0.4);
-
-    // Pitch doesn't matter much for noise, but lower 'notes' sound heavier
-    synth.playNote(60, 0.3);
+    if (!explosionSynth) {
+      const synthNew = (playdate.sound.synth as any).new as (
+        this: void,
+        type: any,
+      ) => any;
+      explosionSynth = synthNew(playdate.sound.kWaveNoise);
+      explosionSynth.setADSR(0, 0.3, 0, 0);
+      explosionSynth.setVolume(0.4);
+    }
+    explosionSynth.playNote(60);
   },
 
-  // 3. Mode Switch (Triangle Wave)
   playModeSwitch: () => {
-    const synthNew = (playdate.sound.synth as any).new as (
-      this: void,
-      type: any,
-    ) => any;
-    const synth = synthNew(playdate.sound.kWaveTriangle);
-    synth.setADSR(0, 0.15, 0, 0);
-    synth.setVolume(0.3);
-    synth.playNote(440, 0.15); // A4
+    if (!modeSynth) {
+      const synthNew = (playdate.sound.synth as any).new as (
+        this: void,
+        type: any,
+      ) => any;
+      modeSynth = synthNew(playdate.sound.kWaveTriangle);
+      modeSynth.setADSR(0, 0.15, 0, 0);
+      modeSynth.setVolume(0.3);
+    }
+    modeSynth.playNote(440);
   },
 };
