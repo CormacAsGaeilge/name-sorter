@@ -14,14 +14,12 @@ export interface Particle {
   life: number;
 }
 
-// OPTIMIZED: No 'cells' array, no 'id' string. Just raw data.
 export interface NameInstance {
   text: string;
-  r: number; // Start Row
-  c: number; // Start Col
+  r: number;
+  c: number;
   isRow: boolean; // true = Horizontal, false = Vertical
-  len: number; // Cached length
-  // (We calculate these once so the renderer doesn't have to)
+  len: number;
   drawX: number;
   drawY: number;
   drawW: number;
@@ -44,7 +42,6 @@ export interface GameState {
   freezeThreshold: number;
   gameOver: boolean;
   started: boolean;
-  // Optimizations
   gridDirty: boolean;
-  lastInteractionTime: number; // For debouncing
+  lastInteractionTime: number;
 }
