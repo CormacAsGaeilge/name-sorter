@@ -4859,7 +4859,9 @@ ____exports.gameState = {
     gameOver = false,
     started = false,
     gridDirty = true,
-    lastInteractionTime = 0
+    lastInteractionTime = 0,
+    fps = 0,
+    dt = 0
 }
 return ____exports
  end,
@@ -5669,11 +5671,7 @@ return ____exports
 local ____exports = {}
 local ____core = require("lua_modules.@crankscript.core.src.index")
 local PlaydateColor = ____core.PlaydateColor
-local animationTick = 0
 ____exports.ElementsRenderer = {
-    updateTick = function()
-        animationTick = animationTick + 1
-    end,
     drawCapsule = function(____, drawX, drawY, w, h)
         playdate.graphics.setColor(PlaydateColor.Black)
         playdate.graphics.setLineWidth(2)
@@ -5687,8 +5685,9 @@ ____exports.ElementsRenderer = {
         playdate.graphics.setLineWidth(1)
     end,
     drawAnimatedCaret = function(____, cx, cy, direction)
+        local tick = playdate.getCurrentTimeMilliseconds() / 100
         local size = 6
-        local bounce = math.sin(animationTick * 0.15) * 3
+        local bounce = math.sin(tick) * 3
         playdate.graphics.setColor(PlaydateColor.Black)
         playdate.graphics.setLineWidth(2)
         local bx = cx
@@ -5982,6 +5981,8 @@ ____exports.UIRenderer = {
         playdate.graphics.drawText("Crank: Shuffle Line", leftX, instructionsY + lineHeight * 4)
     end,
     drawHUD = function()
+        local debugStr = ((("FPS: " .. tostring(math.floor(gameState.fps))) .. "  dt: ") .. tostring(gameState.dt)) .. "ms"
+        playdate.graphics.drawText(debugStr, 240, 220)
         if gameState.gameOver then
             playdate.graphics.drawText("GAME OVER", 150, 100)
             playdate.graphics.drawText(
@@ -6097,7 +6098,6 @@ local ROWS = ____constants.ROWS
 local CELL_WIDTH = ____constants.CELL_WIDTH
 local CELL_HEIGHT = ____constants.CELL_HEIGHT
 ____exports.drawGame = function()
-    ElementsRenderer:updateTick()
     playdate.graphics.clear(PlaydateColor.White)
     playdate.graphics.setColor(PlaydateColor.Black)
     playdate.graphics.setImageDrawMode(PlaydateDrawMode.FillBlack)
@@ -6137,10 +6137,10 @@ local ____grid = require("src.grid")
 local createInitialGrid = ____grid.createInitialGrid
 local ____input = require("src.input")
 local inputHandler = ____input.inputHandler
-local ____logic = require("src.logic.index")
-local GameLogic = ____logic.GameLogic
-local ____renderer = require("src.renderer.index")
-local drawGame = ____renderer.drawGame
+local ____index = require("src.logic.index")
+local GameLogic = ____index.GameLogic
+local ____index = require("src.renderer.index")
+local drawGame = ____index.drawGame
 local ____constants = require("src.constants")
 local TICK_RATE_MS = ____constants.TICK_RATE_MS
 local MAX_ACCUMULATOR_MS = ____constants.MAX_ACCUMULATOR_MS
@@ -6149,10 +6149,21 @@ GameLogic:recalculateBoldMask()
 playdate.inputHandlers.push(inputHandler)
 local lastTime = playdate.getCurrentTimeMilliseconds()
 local accumulator = 0
+local framesThisSecond = 0
+local lastFpsTime = lastTime
 playdate.update = function()
     local currentTime = playdate.getCurrentTimeMilliseconds()
     local dt = currentTime - lastTime
     lastTime = currentTime
+    framesThisSecond = framesThisSecond + 1
+    if currentTime - lastFpsTime >= 1000 then
+        gameState.fps = framesThisSecond
+        framesThisSecond = 0
+        lastFpsTime = currentTime
+    end
+    if dt > 0 then
+        gameState.dt = dt
+    end
     accumulator = accumulator + dt
     if accumulator > MAX_ACCUMULATOR_MS then
         accumulator = MAX_ACCUMULATOR_MS

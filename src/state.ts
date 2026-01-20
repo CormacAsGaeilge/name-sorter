@@ -22,4 +22,6 @@ export const gameState: GameState = {
   // Optimizations
   gridDirty: true,
   lastInteractionTime: 0,
+  fps: 0,
+  dt: 0,
 };

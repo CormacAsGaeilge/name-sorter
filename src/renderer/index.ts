@@ -17,7 +17,6 @@ import {
 } from "../constants";
 
 export const drawGame = () => {
-  ElementsRenderer.updateTick();
   playdate.graphics.clear(PlaydateColor.White);
 
   playdate.graphics.setColor(PlaydateColor.Black);

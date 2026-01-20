@@ -44,4 +44,6 @@ export interface GameState {
   started: boolean;
   gridDirty: boolean;
   lastInteractionTime: number;
+  fps: number;
+  dt: number;
 }

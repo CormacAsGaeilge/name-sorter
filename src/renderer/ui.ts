@@ -41,6 +41,10 @@ export const UIRenderer = {
   },
 
   drawHUD: () => {
+    // --- DEBUG DISPLAY ---
+    const debugStr = `FPS: ${Math.floor(gameState.fps)}  dt: ${gameState.dt}ms`;
+    playdate.graphics.drawText(debugStr, 240, 220); // Bottom Right corner
+    // ---------------------
     if (gameState.gameOver) {
       playdate.graphics.drawText(`GAME OVER`, 150, 100);
       playdate.graphics.drawText(`Final Score: ${gameState.score}`, 140, 130);

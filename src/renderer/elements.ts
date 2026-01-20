@@ -1,12 +1,11 @@
 import { PlaydateColor } from "@crankscript/core";
-
-let animationTick = 0;
+import {
+  CARET_SPEED_DIVISOR,
+  CARET_BOUNCE_AMPLITUDE,
+  CARET_SIZE,
+} from "../constants";
 
 export const ElementsRenderer = {
-  updateTick: () => {
-    animationTick++;
-  },
-
   drawCapsule: (drawX: number, drawY: number, w: number, h: number) => {
     playdate.graphics.setColor(PlaydateColor.Black);
     playdate.graphics.setLineWidth(2);
@@ -19,10 +18,14 @@ export const ElementsRenderer = {
     cy: number,
     direction: "up" | "down" | "left" | "right",
   ) => {
-    const size = 6;
-    const bounce = Math.sin(animationTick * 0.15) * 3;
+    // Use constants for animation logic
+    const tick = playdate.getCurrentTimeMilliseconds() / CARET_SPEED_DIVISOR;
+    const bounce = Math.sin(tick) * CARET_BOUNCE_AMPLITUDE;
+    const size = CARET_SIZE;
+
     playdate.graphics.setColor(PlaydateColor.Black);
     playdate.graphics.setLineWidth(2);
+
     let bx = cx,
       by = cy;
     if (direction === "left" || direction === "right") bx += bounce;
