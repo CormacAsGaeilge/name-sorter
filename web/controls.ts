@@ -8,10 +8,10 @@ const KEY_MAP = {
   left: "ArrowLeft",
   right: "ArrowRight",
 
-  // ACTION BUTTONS (Map these to whatever your shim.ts expects)
-  // Common defaults: A='a', B='b' or 's'
-  a: "a",
-  b: "b",
+  // ACTION BUTTONS (MAPPED TO SHIM DEFAULTS)
+  // Shim expects 'z' for A and 'x' for B
+  a: "z",
+  b: "x",
 
   // MENU
   menu: "m",

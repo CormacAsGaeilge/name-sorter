@@ -57,7 +57,7 @@ canvas {
 
 /* --- Controls Area --- */
 .controls-area {
-  width: 80%;
+  width: 100%; /* CHANGED: Full width to position elements at edges */
   flex-grow: 1;
   position: relative;
   margin-top: calc(20px * var(--scale));
@@ -66,7 +66,7 @@ canvas {
 /* D-Pad (Visual Only) */
 .d-pad {
   position: absolute;
-  left: 20px;
+  left: 30px; /* Adjusted for full width */
   top: 40px;
   width: 90px;
   height: 90px;
@@ -105,9 +105,10 @@ canvas {
   color: #888;
   font-weight: bold;
   font-size: 14px;
+  cursor: pointer; /* Add cursor pointer */
 }
-.btn-b { right: 70px; top: 60px; }
-.btn-a { right: 30px; top: 40px; }
+.btn-b { right: 80px; top: 60px; } /* Adjusted spacing */
+.btn-a { right: 40px; top: 40px; }
 
 /* Menu Button */
 .btn-menu {
@@ -120,7 +121,7 @@ canvas {
 }
 
 /* Crank Handle (Visual hint on the side) */
-.crank-handle {
+.crank-handle-visual {
   position: absolute;
   right: -15px;
   top: 150px;
@@ -129,6 +130,39 @@ canvas {
   background-color: #ccc;
   border-radius: 0 10px 10px 0;
   border-left: 1px solid #999;
+}
+
+/* 2. The On-Screen Controls (Bottom Center) */
+.crank-controls {
+  position: absolute;
+  bottom: 40px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: #6a5a00;
+  font-weight: bold;
+}
+
+.crank-btn {
+  width: 30px; height: 30px;
+  background: rgba(0,0,0,0.1);
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  font-size: 18px;
+  user-select: none;
+}
+.crank-btn:active {
+  background: rgba(0,0,0,0.2);
+}
+
+.crank-label {
+  font-size: 12px;
+  letter-spacing: 1px;
 }
 
 /* Instructions */
