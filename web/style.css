@@ -4,7 +4,7 @@
   --pd-shadow: rgba(0, 0, 0, 0.2);
   --screen-width: 400px;
   --screen-height: 240px;
-  --scale: 1; /* Adjust to 2 for larger screens */
+  --scale: 1;
 }
 
 body {
@@ -20,13 +20,21 @@ body {
   margin: 0;
   font-family: monospace;
   overflow: hidden;
+
+  /* Prevent Zoom & Selection on Mobile */
+  touch-action: none;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
 }
 
 /* The Console Body */
 .playdate-console {
   background-color: var(--pd-yellow);
   width: calc(420px * var(--scale));
-  height: calc(440px * var(--scale));
+  /* INCREASED HEIGHT to fit larger controls */
+  height: calc(600px * var(--scale)); 
   border-radius: calc(15px * var(--scale));
   position: relative;
   box-shadow: 10px 10px 30px rgba(0,0,0,0.5),
@@ -48,7 +56,7 @@ body {
 
 /* The actual Game Canvas */
 canvas {
-  background-color: #b0c5a7; /* LCD "Off" color */
+  background-color: #b0c5a7; 
   image-rendering: pixelated;
   width: calc(var(--screen-width) * var(--scale));
   height: calc(var(--screen-height) * var(--scale));
@@ -57,57 +65,59 @@ canvas {
 
 /* --- Controls Area --- */
 .controls-area {
-  width: 100%; /* Full width to allow buttons to sit near edges */
+  width: 100%;
   flex-grow: 1;
   position: relative;
-  margin-top: calc(20px * var(--scale));
+  margin-top: calc(30px * var(--scale)); /* More space from screen */
 }
 
-/* D-Pad (Visual Only) */
+/* --- GIANT D-PAD (150px) --- */
 .d-pad {
   position: absolute;
-  left: 35px; /* Moved slightly right */
-  top: 5px;  /* Moved UP (was 40px) */
-  width: 90px;
-  height: 90px;
+  left: 20px;
+  top: 0; 
+  width: 150px;
+  height: 150px;
 }
+
+/* Cross Arms (Thickness = 50px) */
 .d-pad::before, .d-pad::after {
   content: '';
   position: absolute;
   background-color: #dcdcdc;
   box-shadow: 1px 1px 2px rgba(0,0,0,0.3);
-  border-radius: 2px;
+  border-radius: 4px;
 }
-.d-pad::before { /* Horizontal */
-  width: 100%; height: 30px; top: 30px; left: 0;
-}
-.d-pad::after { /* Vertical */
-  width: 30px; height: 100%; top: 0; left: 30px;
-}
+/* Horizontal Arm */
+.d-pad::before { width: 100%; height: 50px; top: 50px; left: 0; }
+/* Vertical Arm */
+.d-pad::after { width: 50px; height: 100%; top: 0; left: 50px; }
+
+/* Center Cap */
 .d-pad-center {
   position: absolute;
-  width: 30px; height: 30px; top: 30px; left: 30px;
+  width: 50px; height: 50px; top: 50px; left: 50px;
   background: radial-gradient(circle, #ccc 0%, #aaa 100%);
   border-radius: 50%;
   z-index: 2;
 }
 
-/* Transparent clickable areas for D-Pad (Optional touch targets) */
+/* D-Pad Touch Targets (Matched to new size) */
 .d-touch {
   position: absolute;
   z-index: 10;
   cursor: pointer;
 }
-.d-touch.up { width: 30px; height: 30px; top: 0; left: 30px; }
-.d-touch.down { width: 30px; height: 30px; bottom: 0; left: 30px; }
-.d-touch.left { width: 30px; height: 30px; top: 30px; left: 0; }
-.d-touch.right { width: 30px; height: 30px; top: 30px; right: 0; }
+.d-touch.up { width: 50px; height: 50px; top: 0; left: 50px; }
+.d-touch.down { width: 50px; height: 50px; bottom: 0; left: 50px; }
+.d-touch.left { width: 50px; height: 50px; top: 50px; left: 0; }
+.d-touch.right { width: 50px; height: 50px; top: 50px; right: 0; }
 
 
-/* A/B Buttons */
+/* --- GIANT A/B BUTTONS (80px) --- */
 .action-btn {
   position: absolute;
-  width: 50px; height: 50px; /* BIGGER (was 30px) */
+  width: 80px; height: 80px;
   background-color: #dcdcdc;
   border-radius: 50%;
   box-shadow: 2px 2px 5px rgba(0,0,0,0.2);
@@ -116,35 +126,68 @@ canvas {
   align-items: center;
   color: #888;
   font-weight: bold;
-  font-size: 20px; /* Larger font */
+  font-size: 28px;
   cursor: pointer;
   user-select: none;
 }
-
-/* Adjusted positions for larger buttons */
-.btn-b { right: 85px; top: 35px; } 
-.btn-a { right: 25px; top: 15px; } 
-
 .action-btn.pressed {
   background-color: #bbb;
   box-shadow: inset 2px 2px 5px rgba(0,0,0,0.3);
-  transform: translateY(1px);
+  transform: translateY(2px);
+}
+
+/* Aligned horizontally with D-Pad */
+.btn-b { right: 110px; top: 40px; } /* Lower and further left */
+.btn-a { right: 20px; top: 10px; }  /* Higher and far right */
+
+
+/* --- GIANT CRANK CONTROLS --- */
+.crank-controls {
+  position: absolute;
+  bottom: 30px; /* Moved to bottom */
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 30px; /* Wide spacing to avoid miss-clicks */
+  color: #6a5a00;
+  font-weight: bold;
+}
+
+.crank-btn {
+  width: 70px; height: 70px; /* Big targets */
+  background: rgba(0,0,0,0.05);
+  border: 2px solid rgba(0,0,0,0.1);
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  font-size: 32px;
+  user-select: none;
+}
+.crank-btn:active {
+  background: rgba(0,0,0,0.2);
+  transform: scale(0.95);
+}
+
+.crank-label {
+  font-size: 16px;
+  letter-spacing: 2px;
+  opacity: 0.8;
 }
 
 /* Menu Button */
 .btn-menu {
   position: absolute;
   right: -20px;
-  top: 60px; 
+  top: 60px;
   width: 15px; height: 15px;
   background-color: #aaa;
   border-radius: 50%;
 }
 
-/* --- CRANK VISUALS --- */
-
-/* 1. The Physical Handle (Side of device) */
-/* RENAMED to match HTML class 'crank-handle-visual' */
+/* Crank Handle Visual */
 .crank-handle-visual {
   position: absolute;
   right: -15px;
@@ -154,42 +197,6 @@ canvas {
   background-color: #ccc;
   border-radius: 0 10px 10px 0;
   border-left: 1px solid #999;
-}
-
-/* 2. The On-Screen Controls (Bottom Center) */
-/* ADDED this class which was missing */
-.crank-controls {
-  position: absolute;
-  bottom: 25px; /* Positioned at bottom center */
-  left: 50%;
-  transform: translateX(-50%);
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  color: #6a5a00;
-  font-weight: bold;
-}
-
-.crank-btn {
-  width: 40px; height: 40px;
-  background: rgba(0,0,0,0.1);
-  border-radius: 50%;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  cursor: pointer;
-  font-size: 24px;
-  user-select: none;
-  border: 1px solid rgba(0,0,0,0.1);
-}
-.crank-btn:active {
-  background: rgba(0,0,0,0.2);
-  transform: scale(0.95);
-}
-
-.crank-label {
-  font-size: 14px;
-  letter-spacing: 1px;
 }
 
 /* Instructions */

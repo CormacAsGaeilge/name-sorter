@@ -21799,4 +21799,7 @@ export const names: string[] = [
   "ZWICK",
   "ZWIEBEL",
   "ZYSK",
+  "GOKU",
+  "GULLIVER",
+  "FRODO",
 ];
