@@ -13,6 +13,7 @@ export const gameState: GameState = {
   particles: [],
   mode: "column",
   cursor: { x: 0, y: 0 },
+  visualCursor: { x: 0, y: 0 },
   score: 0,
   crankAccumulator: 0,
   freezeTimer: 0,

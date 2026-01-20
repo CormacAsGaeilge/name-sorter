@@ -4787,6 +4787,7 @@ ____exports.MAX_ACCUMULATOR_MS = 250
 ____exports.CARET_SPEED_DIVISOR = 200
 ____exports.CARET_BOUNCE_AMPLITUDE = 3
 ____exports.CARET_SIZE = 6
+____exports.CURSOR_LERP_SPEED = 0.025
 return ____exports
  end,
 ["src.grid"] = function(...) 
@@ -4855,6 +4856,7 @@ ____exports.gameState = {
     particles = {},
     mode = "column",
     cursor = {x = 0, y = 0},
+    visualCursor = {x = 0, y = 0},
     score = 0,
     crankAccumulator = 0,
     freezeTimer = 0,
@@ -6094,19 +6096,20 @@ ____exports.GridRenderer = {drawGrid = function()
     end
     local ____gameState_0 = gameState
     local mode = ____gameState_0.mode
+    local visualCursor = ____gameState_0.visualCursor
     local cursor = ____gameState_0.cursor
     if mode == "row" then
         drawDashedRect(
             nil,
             GRID_OFFSET_X,
-            GRID_OFFSET_Y + cursor.y * CELL_HEIGHT,
+            GRID_OFFSET_Y + visualCursor.y * CELL_HEIGHT,
             COLS * CELL_WIDTH,
             CELL_HEIGHT
         )
     elseif mode == "column" then
         drawDashedRect(
             nil,
-            GRID_OFFSET_X + cursor.x * CELL_WIDTH,
+            GRID_OFFSET_X + visualCursor.x * CELL_WIDTH,
             GRID_OFFSET_Y,
             CELL_WIDTH,
             ROWS * CELL_HEIGHT
@@ -6117,7 +6120,7 @@ ____exports.GridRenderer = {drawGrid = function()
         if char == FROZEN_CELL then
             playdate.graphics.setColor(PlaydateColor.White)
         end
-        playdate.graphics.drawRect(GRID_OFFSET_X + cursor.x * CELL_WIDTH, GRID_OFFSET_Y + cursor.y * CELL_HEIGHT, CELL_WIDTH, CELL_HEIGHT)
+        playdate.graphics.drawRect(GRID_OFFSET_X + visualCursor.x * CELL_WIDTH, GRID_OFFSET_Y + visualCursor.y * CELL_HEIGHT, CELL_WIDTH, CELL_HEIGHT)
         if char == FROZEN_CELL then
             playdate.graphics.setColor(PlaydateColor.Black)
         end
@@ -6161,13 +6164,15 @@ ____exports.drawGame = function()
     for ____, name in ipairs(gameState.detectedNames) do
         ElementsRenderer:drawCapsule(name.drawX, name.drawY, name.drawW, name.drawH)
     end
+    local ____gameState_0 = gameState
+    local visualCursor = ____gameState_0.visualCursor
     if gameState.mode == "row" or gameState.mode == "name" then
-        local cy = GRID_OFFSET_Y + gameState.cursor.y * CELL_HEIGHT + CELL_HEIGHT / 2
+        local cy = GRID_OFFSET_Y + visualCursor.y * CELL_HEIGHT + CELL_HEIGHT / 2
         ElementsRenderer:drawAnimatedCaret(GRID_OFFSET_X - 15, cy, "right")
         ElementsRenderer:drawAnimatedCaret(GRID_OFFSET_X + COLS * CELL_WIDTH + 15, cy, "left")
     end
     if gameState.mode == "column" or gameState.mode == "name" then
-        local cx = GRID_OFFSET_X + gameState.cursor.x * CELL_WIDTH + CELL_WIDTH / 2
+        local cx = GRID_OFFSET_X + visualCursor.x * CELL_WIDTH + CELL_WIDTH / 2
         ElementsRenderer:drawAnimatedCaret(cx, GRID_OFFSET_Y - 8, "down")
         ElementsRenderer:drawAnimatedCaret(cx, GRID_OFFSET_Y + ROWS * CELL_HEIGHT + 8, "up")
     end
@@ -6195,6 +6200,7 @@ local drawGame = ____index.drawGame
 local ____constants = require("src.constants")
 local TICK_RATE_MS = ____constants.TICK_RATE_MS
 local MAX_ACCUMULATOR_MS = ____constants.MAX_ACCUMULATOR_MS
+local CURSOR_LERP_SPEED = ____constants.CURSOR_LERP_SPEED
 gameState.grid = createInitialGrid(nil)
 GameLogic:recalculateBoldMask()
 playdate.inputHandlers.push(inputHandler)
@@ -6214,6 +6220,17 @@ playdate.update = function()
     end
     if dt > 0 then
         gameState.dt = dt
+    end
+    local lerpFactor = math.min(1, CURSOR_LERP_SPEED * dt)
+    local ____gameState_visualCursor_0, ____x_1 = gameState.visualCursor, "x"
+    ____gameState_visualCursor_0[____x_1] = ____gameState_visualCursor_0[____x_1] + (gameState.cursor.x - gameState.visualCursor.x) * lerpFactor
+    local ____gameState_visualCursor_2, ____y_3 = gameState.visualCursor, "y"
+    ____gameState_visualCursor_2[____y_3] = ____gameState_visualCursor_2[____y_3] + (gameState.cursor.y - gameState.visualCursor.y) * lerpFactor
+    if math.abs(gameState.cursor.x - gameState.visualCursor.x) < 0.01 then
+        gameState.visualCursor.x = gameState.cursor.x
+    end
+    if math.abs(gameState.cursor.y - gameState.visualCursor.y) < 0.01 then
+        gameState.visualCursor.y = gameState.cursor.y
     end
     accumulator = accumulator + dt
     if accumulator > MAX_ACCUMULATOR_MS then

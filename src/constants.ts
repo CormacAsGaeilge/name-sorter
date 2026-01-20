@@ -20,3 +20,4 @@ export const MAX_ACCUMULATOR_MS = 250;
 export const CARET_SPEED_DIVISOR = 200; // Higher = Slower
 export const CARET_BOUNCE_AMPLITUDE = 3; // Pixels to move back and forth
 export const CARET_SIZE = 6; // Size of the arrow head in pixels
+export const CURSOR_LERP_SPEED = 0.025; // Speed of the slide (0.001 - 0.1)

@@ -3,7 +3,11 @@ import { createInitialGrid } from "./grid";
 import { inputHandler } from "./input";
 import { GameLogic } from "./logic/index";
 import { drawGame } from "./renderer/index";
-import { TICK_RATE_MS, MAX_ACCUMULATOR_MS } from "./constants";
+import {
+  TICK_RATE_MS,
+  MAX_ACCUMULATOR_MS,
+  CURSOR_LERP_SPEED,
+} from "./constants";
 
 // 1. Initialize Game State
 gameState.grid = createInitialGrid();
@@ -15,8 +19,6 @@ playdate.inputHandlers.push(inputHandler as any);
 // Time tracking variables
 let lastTime = playdate.getCurrentTimeMilliseconds();
 let accumulator = 0;
-
-// FPS Counting variables
 let framesThisSecond = 0;
 let lastFpsTime = lastTime;
 
@@ -26,28 +28,35 @@ playdate.update = () => {
   const dt = currentTime - lastTime;
   lastTime = currentTime;
 
-  // --- IMPROVED DEBUG LOGIC ---
   framesThisSecond++;
   if (currentTime - lastFpsTime >= 1000) {
     gameState.fps = framesThisSecond;
     framesThisSecond = 0;
     lastFpsTime = currentTime;
   }
-  // Only update displayed dt if we actually had a frame step > 0
-  if (dt > 0) {
-    gameState.dt = dt;
-  }
-  // ---------------------------
+  if (dt > 0) gameState.dt = dt;
 
-  // Add elapsed time to the "tank"
+  // --- NEW: Smooth Cursor Animation (Time-based LERP) ---
+  // Formula: current = current + (target - current) * (1 - exp(-speed * dt))
+  // Simplified for short dt: current += (target - current) * (speed * dt)
+
+  const lerpFactor = Math.min(1, CURSOR_LERP_SPEED * dt);
+
+  gameState.visualCursor.x +=
+    (gameState.cursor.x - gameState.visualCursor.x) * lerpFactor;
+  gameState.visualCursor.y +=
+    (gameState.cursor.y - gameState.visualCursor.y) * lerpFactor;
+
+  // Snap if very close (prevents micro-jitter)
+  if (Math.abs(gameState.cursor.x - gameState.visualCursor.x) < 0.01)
+    gameState.visualCursor.x = gameState.cursor.x;
+  if (Math.abs(gameState.cursor.y - gameState.visualCursor.y) < 0.01)
+    gameState.visualCursor.y = gameState.cursor.y;
+  // -----------------------------------------------------
+
   accumulator += dt;
+  if (accumulator > MAX_ACCUMULATOR_MS) accumulator = MAX_ACCUMULATOR_MS;
 
-  // Cap the accumulator
-  if (accumulator > MAX_ACCUMULATOR_MS) {
-    accumulator = MAX_ACCUMULATOR_MS;
-  }
-
-  // Consume time in fixed chunks
   while (accumulator >= TICK_RATE_MS) {
     if (gameState.started) {
       GameLogic.updateFreeze();
@@ -56,6 +65,5 @@ playdate.update = () => {
     accumulator -= TICK_RATE_MS;
   }
 
-  // Render the Frame
   drawGame();
 };

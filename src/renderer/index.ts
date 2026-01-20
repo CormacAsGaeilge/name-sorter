@@ -18,7 +18,6 @@ import {
 
 export const drawGame = () => {
   playdate.graphics.clear(PlaydateColor.White);
-
   playdate.graphics.setColor(PlaydateColor.Black);
   playdate.graphics.setImageDrawMode(PlaydateDrawMode.FillBlack);
   playdate.graphics.setFont(
@@ -32,7 +31,6 @@ export const drawGame = () => {
 
   UIRenderer.drawHUD();
 
-  // Capsules
   for (const name of gameState.detectedNames) {
     ElementsRenderer.drawCapsule(
       name.drawX,
@@ -42,10 +40,12 @@ export const drawGame = () => {
     );
   }
 
-  // Carets
+  // --- CHANGED: Use visualCursor for smooth caret movement ---
+  const { visualCursor } = gameState;
+
   if (gameState.mode === "row" || gameState.mode === "name") {
-    const cy =
-      GRID_OFFSET_Y + gameState.cursor.y * CELL_HEIGHT + CELL_HEIGHT / 2;
+    // Carets follow Y smoothly
+    const cy = GRID_OFFSET_Y + visualCursor.y * CELL_HEIGHT + CELL_HEIGHT / 2;
     ElementsRenderer.drawAnimatedCaret(GRID_OFFSET_X - 15, cy, "right");
     ElementsRenderer.drawAnimatedCaret(
       GRID_OFFSET_X + COLS * CELL_WIDTH + 15,
@@ -54,7 +54,8 @@ export const drawGame = () => {
     );
   }
   if (gameState.mode === "column" || gameState.mode === "name") {
-    const cx = GRID_OFFSET_X + gameState.cursor.x * CELL_WIDTH + CELL_WIDTH / 2;
+    // Carets follow X smoothly
+    const cx = GRID_OFFSET_X + visualCursor.x * CELL_WIDTH + CELL_WIDTH / 2;
     ElementsRenderer.drawAnimatedCaret(cx, GRID_OFFSET_Y - 8, "down");
     ElementsRenderer.drawAnimatedCaret(
       cx,
@@ -62,10 +63,10 @@ export const drawGame = () => {
       "up",
     );
   }
+  // -----------------------------------------------------------
 
   GridRenderer.drawGrid();
 
-  // Particles
   playdate.graphics.setColor(PlaydateColor.Black);
   for (const p of gameState.particles) {
     playdate.graphics.fillRect(p.x, p.y, p.size, p.size);

@@ -36,6 +36,7 @@ export interface GameState {
   particles: Particle[];
   mode: Mode;
   cursor: Point;
+  visualCursor: Point;
   score: number;
   crankAccumulator: number;
   freezeTimer: number;
