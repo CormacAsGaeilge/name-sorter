@@ -126,10 +126,95 @@ bindButton("btn-b", "B");
 bindCrank("btn-crank-left", -30);
 bindCrank("btn-crank-right", 30);
 
+// --- AUDIO CONTEXT ---
+const AudioContext = window.AudioContext || (window as any).webkitAudioContext;
+const audioCtx = new AudioContext();
+
 // --- THE SHIM API ---
 export const playdateShim = {
   // API: System
   getCurrentTimeMilliseconds: () => Date.now(),
+
+  // API: Sound (New!)
+  sound: {
+    kWaveSquare: "square",
+    kWaveSawtooth: "sawtooth",
+    kWaveSine: "sine",
+    kWaveTriangle: "triangle",
+    kWaveNoise: "noise", // Custom handling for noise
+
+    synth: {
+      new: (waveform: string) => {
+        return {
+          waveform,
+          attack: 0,
+          decay: 0.1,
+          sustain: 0,
+          release: 0,
+          volume: 0.5,
+
+          setADSR: function (a: number, d: number, s: number, r: number) {
+            this.attack = a;
+            this.decay = d;
+            this.sustain = s;
+            this.release = r;
+          },
+          setVolume: function (v: number) {
+            this.volume = v;
+          },
+          playNote: function (freq: number, duration: number) {
+            if (audioCtx.state === "suspended") audioCtx.resume();
+
+            const osc = audioCtx.createOscillator();
+            const gainNode = audioCtx.createGain();
+
+            osc.connect(gainNode);
+            gainNode.connect(audioCtx.destination);
+
+            const now = audioCtx.currentTime;
+
+            // Handle Noise vs Oscillator
+            if (this.waveform === "noise") {
+              // Noise Buffer Logic
+              const bufferSize = audioCtx.sampleRate * 2; // 2 seconds buffer
+              const buffer = audioCtx.createBuffer(
+                1,
+                bufferSize,
+                audioCtx.sampleRate,
+              );
+              const data = buffer.getChannelData(0);
+              for (let i = 0; i < bufferSize; i++) {
+                data[i] = Math.random() * 2 - 1;
+              }
+              const noise = audioCtx.createBufferSource();
+              noise.buffer = buffer;
+              noise.connect(gainNode);
+              noise.start(now);
+              noise.stop(now + this.attack + this.decay + this.release + 0.1);
+              // Disconnect OSC since we use noise source
+              osc.disconnect();
+            } else {
+              osc.type = this.waveform as any;
+              osc.frequency.setValueAtTime(freq, now);
+              osc.start(now);
+              osc.stop(now + this.attack + this.decay + this.release + 0.1);
+            }
+
+            // Simple ADSR Envelope on Gain
+            gainNode.gain.setValueAtTime(0, now);
+            gainNode.gain.linearRampToValueAtTime(
+              this.volume,
+              now + this.attack,
+            );
+            gainNode.gain.exponentialRampToValueAtTime(
+              0.01,
+              now + this.attack + this.decay,
+            );
+          },
+        };
+      },
+    },
+  },
 
   // API: Input
   isCrankDocked: () => false,

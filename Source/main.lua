@@ -5317,6 +5317,34 @@ ____exports.ParticleSystem = {
 }
 return ____exports
  end,
+["src.sound"] = function(...) 
+--[[ Generated with https://github.com/TypeScriptToLua/TypeScriptToLua ]]
+local ____exports = {}
+____exports.SoundManager = {
+    playMove = function()
+        local synthNew = playdate.sound.synth.new
+        local synth = synthNew(playdate.sound.kWaveSquare)
+        synth:setADSR(0, 0.1, 0, 0)
+        synth:setVolume(0.3)
+        synth:playNote(523.25, 0.1)
+    end,
+    playExplosion = function()
+        local synthNew = playdate.sound.synth.new
+        local synth = synthNew(playdate.sound.kWaveNoise)
+        synth:setADSR(0, 0.3, 0, 0)
+        synth:setVolume(0.4)
+        synth:playNote(60, 0.3)
+    end,
+    playModeSwitch = function()
+        local synthNew = playdate.sound.synth.new
+        local synth = synthNew(playdate.sound.kWaveTriangle)
+        synth:setADSR(0, 0.15, 0, 0)
+        synth:setVolume(0.3)
+        synth:playNote(440, 0.15)
+    end
+}
+return ____exports
+ end,
 ["src.logic.game"] = function(...) 
 local ____lualib = require("lualib_bundle")
 local __TS__ArrayFind = ____lualib.__TS__ArrayFind
@@ -5341,6 +5369,8 @@ local ____matching = require("src.logic.matching")
 local MatchingLogic = ____matching.MatchingLogic
 local ____particles = require("src.logic.particles")
 local ParticleSystem = ____particles.ParticleSystem
+local ____sound = require("src.sound")
+local SoundManager = ____sound.SoundManager
 ____exports.GameLifecycle = {
     startGame = function()
         gameState.started = true
@@ -5385,6 +5415,7 @@ ____exports.GameLifecycle = {
                 local randomSpot = validSpots[math.floor(math.random() * #validSpots) + 1]
                 gameState.grid[randomSpot.r + 1][randomSpot.c + 1] = FROZEN_CELL
                 ParticleSystem:spawnExplosion(randomSpot.c, randomSpot.r)
+                SoundManager:playExplosion()
                 MatchingLogic:markDirty()
                 if #validSpots == 1 then
                     gameState.gameOver = true
@@ -5472,6 +5503,9 @@ ____exports.GameLifecycle = {
                 gameState.grid[r + 1][c + 1] = randomChar(nil)
             end
         end)
+        if cellsToClear.size > 0 then
+            SoundManager:playExplosion()
+        end
         MatchingLogic:markDirty()
         MatchingLogic:recalculateBoldMask()
     end,
@@ -5499,13 +5533,13 @@ local MatchingLogic = ____matching.MatchingLogic
 local ____constants = require("src.constants")
 local ROWS = ____constants.ROWS
 local COLS = ____constants.COLS
-local FROZEN_CELL = ____constants.FROZEN_CELL
 local CELL_WIDTH = ____constants.CELL_WIDTH
 local CELL_HEIGHT = ____constants.CELL_HEIGHT
-local ____grid = require("src.grid")
-local randomChar = ____grid.randomChar
+local ____sound = require("src.sound")
+local SoundManager = ____sound.SoundManager
 ____exports.Controls = {
     handleLeft = function()
+        SoundManager:playMove()
         if gameState.mode == "column" then
             gameState.cursor.x = (gameState.cursor.x - 1 + COLS) % COLS
         elseif gameState.mode == "row" then
@@ -5522,6 +5556,7 @@ ____exports.Controls = {
         end
     end,
     handleRight = function()
+        SoundManager:playMove()
         if gameState.mode == "column" then
             gameState.cursor.x = (gameState.cursor.x + 1) % COLS
         elseif gameState.mode == "row" then
@@ -5537,6 +5572,7 @@ ____exports.Controls = {
         end
     end,
     handleUp = function()
+        SoundManager:playMove()
         if gameState.mode == "column" then
             local col = gameState.cursor.x
             local topChar = gameState.grid[1][col + 1]
@@ -5555,6 +5591,7 @@ ____exports.Controls = {
         end
     end,
     handleDown = function()
+        SoundManager:playMove()
         if gameState.mode == "column" then
             local col = gameState.cursor.x
             local bottomChar = gameState.grid[ROWS][col + 1]
@@ -5573,6 +5610,7 @@ ____exports.Controls = {
         end
     end,
     toggleMode = function()
+        SoundManager:playModeSwitch()
         if gameState.mode == "column" then
             gameState.mode = "row"
         elseif gameState.mode == "row" then
@@ -5594,27 +5632,10 @@ ____exports.Controls = {
             local cursor = ____gameState_1.cursor
             local grid = ____gameState_1.grid
             if mode == "row" then
-                do
-                    local c = 0
-                    while c < COLS do
-                        if grid[cursor.y + 1][c + 1] ~= FROZEN_CELL then
-                            grid[cursor.y + 1][c + 1] = randomChar(nil)
-                        end
-                        c = c + 1
-                    end
-                end
             elseif mode == "column" then
-                do
-                    local r = 0
-                    while r < ROWS do
-                        if grid[r + 1][cursor.x + 1] ~= FROZEN_CELL then
-                            grid[r + 1][cursor.x + 1] = randomChar(nil)
-                        end
-                        r = r + 1
-                    end
-                end
             end
             MatchingLogic:markDirty()
+            SoundManager:playMove()
         end
     end
 }

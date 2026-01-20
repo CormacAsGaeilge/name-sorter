@@ -11,6 +11,7 @@ import { createInitialGrid, randomChar } from "../grid";
 import { MatchingLogic } from "./matching";
 import { ParticleSystem } from "./particles";
 import { NameInstance } from "../types";
+import { SoundManager } from "../sound";
 
 export const GameLifecycle = {
   startGame: () => {
@@ -52,6 +53,7 @@ export const GameLifecycle = {
           validSpots[Math.floor(Math.random() * validSpots.length)];
         gameState.grid[randomSpot.r][randomSpot.c] = FROZEN_CELL;
         ParticleSystem.spawnExplosion(randomSpot.c, randomSpot.r);
+        SoundManager.playExplosion();
         MatchingLogic.markDirty();
         if (validSpots.length === 1) gameState.gameOver = true;
       } else {
@@ -121,6 +123,10 @@ export const GameLifecycle = {
         gameState.grid[r][c] = randomChar();
       }
     });
+
+    if (cellsToClear.size > 0) {
+      SoundManager.playExplosion(); // <--- TRIGGER MATCH SOUND
+    }
 
     MatchingLogic.markDirty();
     MatchingLogic.recalculateBoldMask();
