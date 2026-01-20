@@ -4836,6 +4836,17 @@ local ____constants = require("src.constants")
 local INITIAL_FREEZE_THRESHOLD = ____constants.INITIAL_FREEZE_THRESHOLD
 local ROWS = ____constants.ROWS
 local COLS = ____constants.COLS
+local function createZeroArray(____, len)
+    local arr = {}
+    do
+        local i = 0
+        while i < len do
+            arr[#arr + 1] = 0
+            i = i + 1
+        end
+    end
+    return arr
+end
 ____exports.gameState = {
     grid = {},
     boldMask = __TS__ArrayFrom(
@@ -4857,6 +4868,8 @@ ____exports.gameState = {
     mode = "column",
     cursor = {x = 0, y = 0},
     visualCursor = {x = 0, y = 0},
+    rowOffsets = createZeroArray(nil, ROWS),
+    colOffsets = createZeroArray(nil, COLS),
     score = 0,
     crankAccumulator = 0,
     freezeTimer = 0,
@@ -5487,6 +5500,8 @@ local ____constants = require("src.constants")
 local ROWS = ____constants.ROWS
 local COLS = ____constants.COLS
 local FROZEN_CELL = ____constants.FROZEN_CELL
+local CELL_WIDTH = ____constants.CELL_WIDTH
+local CELL_HEIGHT = ____constants.CELL_HEIGHT
 local ____grid = require("src.grid")
 local randomChar = ____grid.randomChar
 ____exports.Controls = {
@@ -5494,11 +5509,13 @@ ____exports.Controls = {
         if gameState.mode == "column" then
             gameState.cursor.x = (gameState.cursor.x - 1 + COLS) % COLS
         elseif gameState.mode == "row" then
-            local first = table.remove(gameState.grid[gameState.cursor.y + 1], 1)
+            local row = gameState.cursor.y
+            local first = table.remove(gameState.grid[row + 1], 1)
             if first then
-                local ____gameState_grid_index_0 = gameState.grid[gameState.cursor.y + 1]
+                local ____gameState_grid_index_0 = gameState.grid[row + 1]
                 ____gameState_grid_index_0[#____gameState_grid_index_0 + 1] = first
             end
+            gameState.rowOffsets[row + 1] = CELL_WIDTH
             MatchingLogic:markDirty()
         else
             gameState.cursor.x = (gameState.cursor.x - 1 + COLS) % COLS
@@ -5508,10 +5525,12 @@ ____exports.Controls = {
         if gameState.mode == "column" then
             gameState.cursor.x = (gameState.cursor.x + 1) % COLS
         elseif gameState.mode == "row" then
-            local last = table.remove(gameState.grid[gameState.cursor.y + 1])
+            local row = gameState.cursor.y
+            local last = table.remove(gameState.grid[row + 1])
             if last then
-                __TS__ArrayUnshift(gameState.grid[gameState.cursor.y + 1], last)
+                __TS__ArrayUnshift(gameState.grid[row + 1], last)
             end
+            gameState.rowOffsets[row + 1] = -CELL_WIDTH
             MatchingLogic:markDirty()
         else
             gameState.cursor.x = (gameState.cursor.x + 1) % COLS
@@ -5519,15 +5538,17 @@ ____exports.Controls = {
     end,
     handleUp = function()
         if gameState.mode == "column" then
-            local topChar = gameState.grid[1][gameState.cursor.x + 1]
+            local col = gameState.cursor.x
+            local topChar = gameState.grid[1][col + 1]
             do
                 local r = 0
                 while r < ROWS - 1 do
-                    gameState.grid[r + 1][gameState.cursor.x + 1] = gameState.grid[r + 1 + 1][gameState.cursor.x + 1]
+                    gameState.grid[r + 1][col + 1] = gameState.grid[r + 1 + 1][col + 1]
                     r = r + 1
                 end
             end
-            gameState.grid[ROWS][gameState.cursor.x + 1] = topChar
+            gameState.grid[ROWS][col + 1] = topChar
+            gameState.colOffsets[col + 1] = CELL_HEIGHT
             MatchingLogic:markDirty()
         else
             gameState.cursor.y = (gameState.cursor.y - 1 + ROWS) % ROWS
@@ -5535,15 +5556,17 @@ ____exports.Controls = {
     end,
     handleDown = function()
         if gameState.mode == "column" then
-            local bottomChar = gameState.grid[ROWS][gameState.cursor.x + 1]
+            local col = gameState.cursor.x
+            local bottomChar = gameState.grid[ROWS][col + 1]
             do
                 local r = ROWS - 1
                 while r > 0 do
-                    gameState.grid[r + 1][gameState.cursor.x + 1] = gameState.grid[r][gameState.cursor.x + 1]
+                    gameState.grid[r + 1][col + 1] = gameState.grid[r][col + 1]
                     r = r - 1
                 end
             end
-            gameState.grid[1][gameState.cursor.x + 1] = bottomChar
+            gameState.grid[1][col + 1] = bottomChar
+            gameState.colOffsets[col + 1] = -CELL_HEIGHT
             MatchingLogic:markDirty()
         else
             gameState.cursor.y = (gameState.cursor.y + 1) % ROWS
@@ -6072,21 +6095,41 @@ end
 ____exports.GridRenderer = {drawGrid = function()
     local textOffsetX = math.floor((CELL_WIDTH - 12) / 2)
     local textOffsetY = math.floor((CELL_HEIGHT - 14) / 2)
+    local gridW = COLS * CELL_WIDTH
+    local gridH = ROWS * CELL_HEIGHT
+    playdate.graphics.setClipRect(GRID_OFFSET_X, GRID_OFFSET_Y, gridW, gridH)
     do
         local r = 0
         while r < ROWS do
+            local rowOffset = gameState.rowOffsets[r + 1]
             local cellY = GRID_OFFSET_Y + r * CELL_HEIGHT
-            local drawY = cellY + textOffsetY
             local rowData = gameState.grid[r + 1]
             do
                 local c = 0
                 while c < COLS do
                     local char = rowData[c + 1]
-                    local cellX = GRID_OFFSET_X + c * CELL_WIDTH
-                    if char == FROZEN_CELL then
-                        playdate.graphics.fillRect(cellX + 2, cellY + 2, CELL_WIDTH - 4, CELL_HEIGHT - 4)
-                    else
-                        playdate.graphics.drawText(char, cellX + textOffsetX, drawY)
+                    local colOffset = gameState.colOffsets[c + 1]
+                    local cellX = GRID_OFFSET_X + c * CELL_WIDTH + rowOffset
+                    local finalY = cellY + colOffset
+                    local function drawCell(____, dx, dy)
+                        if char == FROZEN_CELL then
+                            playdate.graphics.fillRect(dx + 2, dy + 2, CELL_WIDTH - 4, CELL_HEIGHT - 4)
+                        else
+                            playdate.graphics.drawText(char, dx + textOffsetX, dy + textOffsetY)
+                        end
+                    end
+                    drawCell(nil, cellX, finalY)
+                    if rowOffset < 0 and c == 0 then
+                        drawCell(nil, cellX + COLS * CELL_WIDTH, finalY)
+                    end
+                    if rowOffset > 0 and c == COLS - 1 then
+                        drawCell(nil, cellX - COLS * CELL_WIDTH, finalY)
+                    end
+                    if colOffset < 0 and r == 0 then
+                        drawCell(nil, cellX, finalY + ROWS * CELL_HEIGHT)
+                    end
+                    if colOffset > 0 and r == ROWS - 1 then
+                        drawCell(nil, cellX, finalY - ROWS * CELL_HEIGHT)
                     end
                     c = c + 1
                 end
@@ -6094,6 +6137,7 @@ ____exports.GridRenderer = {drawGrid = function()
             r = r + 1
         end
     end
+    playdate.graphics:clearClipRect()
     local ____gameState_0 = gameState
     local mode = ____gameState_0.mode
     local visualCursor = ____gameState_0.visualCursor
@@ -6201,6 +6245,8 @@ local ____constants = require("src.constants")
 local TICK_RATE_MS = ____constants.TICK_RATE_MS
 local MAX_ACCUMULATOR_MS = ____constants.MAX_ACCUMULATOR_MS
 local CURSOR_LERP_SPEED = ____constants.CURSOR_LERP_SPEED
+local ROWS = ____constants.ROWS
+local COLS = ____constants.COLS
 gameState.grid = createInitialGrid(nil)
 GameLogic:recalculateBoldMask()
 playdate.inputHandlers.push(inputHandler)
@@ -6231,6 +6277,31 @@ playdate.update = function()
     end
     if math.abs(gameState.cursor.y - gameState.visualCursor.y) < 0.01 then
         gameState.visualCursor.y = gameState.cursor.y
+    end
+    local slideFactor = math.min(1, lerpFactor * 1.5)
+    do
+        local r = 0
+        while r < ROWS do
+            if math.abs(gameState.rowOffsets[r + 1]) > 0.5 then
+                local ____gameState_rowOffsets_4, ____temp_5 = gameState.rowOffsets, r + 1
+                ____gameState_rowOffsets_4[____temp_5] = ____gameState_rowOffsets_4[____temp_5] + (0 - gameState.rowOffsets[r + 1]) * slideFactor
+            else
+                gameState.rowOffsets[r + 1] = 0
+            end
+            r = r + 1
+        end
+    end
+    do
+        local c = 0
+        while c < COLS do
+            if math.abs(gameState.colOffsets[c + 1]) > 0.5 then
+                local ____gameState_colOffsets_6, ____temp_7 = gameState.colOffsets, c + 1
+                ____gameState_colOffsets_6[____temp_7] = ____gameState_colOffsets_6[____temp_7] + (0 - gameState.colOffsets[c + 1]) * slideFactor
+            else
+                gameState.colOffsets[c + 1] = 0
+            end
+            c = c + 1
+        end
     end
     accumulator = accumulator + dt
     if accumulator > MAX_ACCUMULATOR_MS then

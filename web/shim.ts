@@ -146,6 +146,15 @@ export const playdateShim = {
       ctx.fillStyle = color === 0 ? "#000000" : "#FFFFFF";
       ctx.strokeStyle = color === 0 ? "#000000" : "#FFFFFF";
     },
+    setClipRect: (x: number, y: number, w: number, h: number) => {
+      ctx.save(); // Save the current state (no clip)
+      ctx.beginPath();
+      ctx.rect(x, y, w, h);
+      ctx.clip(); // Restrict drawing to this rect
+    },
+    clearClipRect: () => {
+      ctx.restore(); // Restore the state (remove clip)
+    },
     fillRect: (x: number, y: number, w: number, h: number) =>
       ctx.fillRect(x, y, w, h),
     drawRect: (x: number, y: number, w: number, h: number) =>

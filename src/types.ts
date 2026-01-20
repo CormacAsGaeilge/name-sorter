@@ -37,6 +37,8 @@ export interface GameState {
   mode: Mode;
   cursor: Point;
   visualCursor: Point;
+  rowOffsets: number[]; // X-offset per row
+  colOffsets: number[]; // Y-offset per column
   score: number;
   crankAccumulator: number;
   freezeTimer: number;

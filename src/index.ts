@@ -7,6 +7,8 @@ import {
   TICK_RATE_MS,
   MAX_ACCUMULATOR_MS,
   CURSOR_LERP_SPEED,
+  ROWS,
+  COLS,
 } from "./constants";
 
 // 1. Initialize Game State
@@ -35,24 +37,37 @@ playdate.update = () => {
     lastFpsTime = currentTime;
   }
   if (dt > 0) gameState.dt = dt;
-
-  // --- NEW: Smooth Cursor Animation (Time-based LERP) ---
-  // Formula: current = current + (target - current) * (1 - exp(-speed * dt))
-  // Simplified for short dt: current += (target - current) * (speed * dt)
-
   const lerpFactor = Math.min(1, CURSOR_LERP_SPEED * dt);
 
+  // 1. Cursor Animation
   gameState.visualCursor.x +=
     (gameState.cursor.x - gameState.visualCursor.x) * lerpFactor;
   gameState.visualCursor.y +=
     (gameState.cursor.y - gameState.visualCursor.y) * lerpFactor;
-
-  // Snap if very close (prevents micro-jitter)
   if (Math.abs(gameState.cursor.x - gameState.visualCursor.x) < 0.01)
     gameState.visualCursor.x = gameState.cursor.x;
   if (Math.abs(gameState.cursor.y - gameState.visualCursor.y) < 0.01)
     gameState.visualCursor.y = gameState.cursor.y;
-  // -----------------------------------------------------
+
+  // 2. Row/Column Slide Animation (Decay to 0)
+  // Using a slightly faster LERP for the letters (x1.5) so they feel snappy
+  const slideFactor = Math.min(1, lerpFactor * 1.5);
+
+  for (let r = 0; r < ROWS; r++) {
+    if (Math.abs(gameState.rowOffsets[r]) > 0.5) {
+      gameState.rowOffsets[r] += (0 - gameState.rowOffsets[r]) * slideFactor;
+    } else {
+      gameState.rowOffsets[r] = 0;
+    }
+  }
+
+  for (let c = 0; c < COLS; c++) {
+    if (Math.abs(gameState.colOffsets[c]) > 0.5) {
+      gameState.colOffsets[c] += (0 - gameState.colOffsets[c]) * slideFactor;
+    } else {
+      gameState.colOffsets[c] = 0;
+    }
+  }
 
   accumulator += dt;
   if (accumulator > MAX_ACCUMULATOR_MS) accumulator = MAX_ACCUMULATOR_MS;

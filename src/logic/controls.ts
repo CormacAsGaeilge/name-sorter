@@ -1,6 +1,6 @@
 import { gameState } from "../state";
 import { MatchingLogic } from "./matching";
-import { ROWS, COLS, FROZEN_CELL } from "../constants";
+import { ROWS, COLS, FROZEN_CELL, CELL_WIDTH, CELL_HEIGHT } from "../constants";
 import { randomChar } from "../grid";
 
 export const Controls = {
@@ -8,8 +8,17 @@ export const Controls = {
     if (gameState.mode === "column") {
       gameState.cursor.x = (gameState.cursor.x - 1 + COLS) % COLS;
     } else if (gameState.mode === "row") {
-      const first = gameState.grid[gameState.cursor.y].shift();
-      if (first) gameState.grid[gameState.cursor.y].push(first);
+      const row = gameState.cursor.y;
+      const first = gameState.grid[row].shift();
+      if (first) gameState.grid[row].push(first);
+      // Animation: We moved LEFT. Logical grid is new.
+      // Visual: Everything looks like it shifted left (offset 0 -> -30).
+      // But we want it to slide FROM right.
+      // Actually: The new grid at 0 is the OLD grid at 1.
+      // So at offset=0, it looks "shifted".
+      // We want it to visually match the OLD state (offset +30) and slide to 0.
+      gameState.rowOffsets[row] = CELL_WIDTH;
+
       MatchingLogic.markDirty();
     } else {
       gameState.cursor.x = (gameState.cursor.x - 1 + COLS) % COLS;
@@ -20,8 +29,13 @@ export const Controls = {
     if (gameState.mode === "column") {
       gameState.cursor.x = (gameState.cursor.x + 1) % COLS;
     } else if (gameState.mode === "row") {
-      const last = gameState.grid[gameState.cursor.y].pop();
-      if (last) gameState.grid[gameState.cursor.y].unshift(last);
+      const row = gameState.cursor.y;
+      const last = gameState.grid[row].pop();
+      if (last) gameState.grid[row].unshift(last);
+      // Animation: New grid at 1 is OLD grid at 0.
+      // To look like OLD state, we need to draw it at -30 (Left) and slide to 0.
+      gameState.rowOffsets[row] = -CELL_WIDTH;
+
       MatchingLogic.markDirty();
     } else {
       gameState.cursor.x = (gameState.cursor.x + 1) % COLS;
@@ -30,12 +44,15 @@ export const Controls = {
 
   handleUp: () => {
     if (gameState.mode === "column") {
-      const topChar = gameState.grid[0][gameState.cursor.x];
+      const col = gameState.cursor.x;
+      const topChar = gameState.grid[0][col];
       for (let r = 0; r < ROWS - 1; r++) {
-        gameState.grid[r][gameState.cursor.x] =
-          gameState.grid[r + 1][gameState.cursor.x];
+        gameState.grid[r][col] = gameState.grid[r + 1][col];
       }
-      gameState.grid[ROWS - 1][gameState.cursor.x] = topChar;
+      gameState.grid[ROWS - 1][col] = topChar;
+      // Animation: Moved UP.
+      gameState.colOffsets[col] = CELL_HEIGHT;
+
       MatchingLogic.markDirty();
     } else {
       gameState.cursor.y = (gameState.cursor.y - 1 + ROWS) % ROWS;
@@ -44,12 +61,15 @@ export const Controls = {
 
   handleDown: () => {
     if (gameState.mode === "column") {
-      const bottomChar = gameState.grid[ROWS - 1][gameState.cursor.x];
+      const col = gameState.cursor.x;
+      const bottomChar = gameState.grid[ROWS - 1][col];
       for (let r = ROWS - 1; r > 0; r--) {
-        gameState.grid[r][gameState.cursor.x] =
-          gameState.grid[r - 1][gameState.cursor.x];
+        gameState.grid[r][col] = gameState.grid[r - 1][col];
       }
-      gameState.grid[0][gameState.cursor.x] = bottomChar;
+      gameState.grid[0][col] = bottomChar;
+      // Animation: Moved DOWN.
+      gameState.colOffsets[col] = -CELL_HEIGHT;
+
       MatchingLogic.markDirty();
     } else {
       gameState.cursor.y = (gameState.cursor.y + 1) % ROWS;
