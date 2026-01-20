@@ -4779,7 +4779,7 @@ ____exports.CELL_HEIGHT = 30
 ____exports.GRID_OFFSET_X = 50
 ____exports.GRID_OFFSET_Y = 60
 ____exports.FROZEN_CELL = "#"
-____exports.INITIAL_FREEZE_THRESHOLD = 30 * 30
+____exports.INITIAL_FREEZE_THRESHOLD = 300 * 30
 ____exports.MIN_FREEZE_THRESHOLD = 30 * 5
 ____exports.FREEZE_DECREMENT = 30 * 2
 return ____exports

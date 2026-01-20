@@ -43,6 +43,7 @@ export interface GameState {
   freezeTimer: number;
   freezeThreshold: number;
   gameOver: boolean;
+  started: boolean;
   // Optimizations
   gridDirty: boolean;
   lastInteractionTime: number; // For debouncing

@@ -7,6 +7,11 @@ export const inputHandler = {
     GameLogic.toggleMode();
   },
   AButtonDown: () => {
+    if (!gameState.started) {
+      GameLogic.startGame();
+      return;
+    }
+
     if (gameState.gameOver) {
       GameLogic.resetGame();
     } else {

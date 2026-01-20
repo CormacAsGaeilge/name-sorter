@@ -52,6 +52,38 @@ const drawAnimatedCaret = (
   playdate.graphics.setLineWidth(1);
 };
 
+const drawStartScreen = () => {
+  playdate.graphics.drawText(`*NAME SORTER*`, 145, 60);
+
+  playdate.graphics.drawText(`Press A to Start`, 135, 100);
+
+  const instructionsY = 140;
+  const lineHeight = 20;
+  const leftX = 50;
+
+  playdate.graphics.drawText(`Controls:`, leftX, instructionsY);
+  playdate.graphics.drawText(
+    `D-Pad: Move Cursor / Shift Row`,
+    leftX,
+    instructionsY + lineHeight,
+  );
+  playdate.graphics.drawText(
+    `A: Claim Name`,
+    leftX,
+    instructionsY + lineHeight * 2,
+  );
+  playdate.graphics.drawText(
+    `B: Switch Mode (Row/Column)`,
+    leftX,
+    instructionsY + lineHeight * 3,
+  );
+  playdate.graphics.drawText(
+    `Crank: Shuffle Line`,
+    leftX,
+    instructionsY + lineHeight * 4,
+  );
+};
+
 export const drawGame = () => {
   animationTick++;
   playdate.graphics.clear(PlaydateColor.White);
@@ -62,6 +94,12 @@ export const drawGame = () => {
   playdate.graphics.setFont(
     playdate.graphics.getSystemFont(PlaydateFontVariant.Normal),
   );
+
+  // --- START SCREEN CHECK ---
+  if (!gameState.started) {
+    drawStartScreen();
+    return;
+  }
 
   // --- HUD ---
   if (gameState.gameOver) {

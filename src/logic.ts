@@ -397,10 +397,16 @@ export const GameLogic = {
     GameLogic.recalculateBoldMask();
   },
 
+  startGame: () => {
+    gameState.started = true;
+    GameLogic.resetGame();
+  },
+
   resetGame: () => {
     gameState.grid = createInitialGrid();
     gameState.score = 0;
     gameState.gameOver = false;
+    gameState.started = true; // <--- ENSURE GAME IS STARTED ON RESET
     gameState.freezeTimer = 0;
     gameState.freezeThreshold = INITIAL_FREEZE_THRESHOLD;
     gameState.cursor = { x: 0, y: 0 };

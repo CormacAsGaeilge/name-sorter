@@ -15,10 +15,11 @@ playdate.inputHandlers.push(inputHandler as any);
 // 3. Main Game Loop
 playdate.update = () => {
   // Update Logic (Time-based events)
-  GameLogic.updateFreeze();
-  GameLogic.updateParticles();
-
-  GameLogic.tick();
+  if (gameState.started) {
+    GameLogic.updateFreeze();
+    GameLogic.updateParticles();
+    GameLogic.tick();
+  }
   // Render the Frame
   drawGame();
 };
